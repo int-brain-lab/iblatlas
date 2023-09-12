@@ -13,7 +13,7 @@ from one.webclient import http_download_file
 import one.params
 import one.remote.aws as aws
 from iblutil.numerical import ismember
-from ibllib.atlas.regions import BrainRegions, FranklinPaxinosRegions
+from iblatlas.regions import BrainRegions, FranklinPaxinosRegions
 
 ALLEN_CCF_LANDMARKS_MLAPDV_UM = {'bregma': np.array([5739, 5400, 332])}
 """dict: The ML AP DV voxel coordinates of brain landmarks in the Allen atlas."""

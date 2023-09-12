@@ -194,6 +194,4 @@ References
    http://help.brain-map.org/download/attachments/8323525/Mouse_Common_Coordinate_Framework.pdf
 
 """
-from .atlas import *  # noqa
-from .regions import regions_from_allen_csv
-from .flatmaps import FlatMap
+__version__ = '0.1.0'

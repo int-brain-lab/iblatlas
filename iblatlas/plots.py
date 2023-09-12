@@ -12,13 +12,12 @@ from matplotlib import cm, colors
 from matplotlib.patches import Polygon, PathPatch
 import matplotlib.path as mpath
 from iblutil.io.hashfile import md5
+from iblutil.numerical import ismember
 import one.remote.aws as aws
 
-from ibllib.atlas import AllenAtlas
-from ibllib.atlas.flatmaps import FlatMap, _swanson_labels_positions, swanson, swanson_json
-from ibllib.atlas.regions import BrainRegions
-from iblutil.numerical import ismember
-from ibllib.atlas.atlas import BrainCoordinates, ALLEN_CCF_LANDMARKS_MLAPDV_UM
+from iblatlas.flatmaps import FlatMap, _swanson_labels_positions, swanson, swanson_json
+from iblatlas.regions import BrainRegions
+from iblatlas.atlas import AllenAtlas, BrainCoordinates, ALLEN_CCF_LANDMARKS_MLAPDV_UM
 
 _logger = logging.getLogger(__name__)
 

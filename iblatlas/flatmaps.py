@@ -12,7 +12,7 @@ from iblutil.util import Bunch
 from iblutil.io.hashfile import md5
 import one.remote.aws as aws
 
-from ibllib.atlas.atlas import AllenAtlas
+from iblatlas.atlas import AllenAtlas
 
 
 _logger = logging.getLogger(__name__)
