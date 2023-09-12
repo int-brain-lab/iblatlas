@@ -3,10 +3,10 @@ import unittest
 import numpy as np
 import matplotlib.pyplot as plt
 
-from ibllib.atlas import (BrainCoordinates, cart2sph, sph2cart, Trajectory,
-                          Insertion, ALLEN_CCF_LANDMARKS_MLAPDV_UM, AllenAtlas)
-from ibllib.atlas.regions import BrainRegions, FranklinPaxinosRegions
-from ibllib.atlas.plots import prepare_lr_data, reorder_data
+from iblatlas.atlas import (BrainCoordinates, cart2sph, sph2cart, Trajectory,
+                            Insertion, ALLEN_CCF_LANDMARKS_MLAPDV_UM, AllenAtlas)
+from iblatlas.regions import BrainRegions, FranklinPaxinosRegions
+from iblatlas.plots import prepare_lr_data, reorder_data
 from iblutil.numerical import ismember
 
 

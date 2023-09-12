@@ -1,0 +1,6 @@
+include iblatlas/allen_structure_tree.csv
+include iblatlas/franklin_paxinos_structure_tree.csv
+include iblatlas/beryl.npy
+include iblatlas/cosmos.npy
+include iblatlas/swanson.npy
+include iblatlas/mappings.pqt

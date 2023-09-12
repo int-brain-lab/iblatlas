@@ -1,0 +1,6 @@
+ONE-api
+iblutil
+pynrrd
+numpy
+matplotlib
+scipy
