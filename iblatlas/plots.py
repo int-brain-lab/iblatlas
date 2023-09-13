@@ -177,7 +177,7 @@ def reorder_data(acronyms, values, brain_regions=None):
         The acronyms to match the Allen ordering, whatever that means.
     values : array_like
         An array of some sort of values I guess...
-    brain_regions : ibllib.atlas.regions.BrainRegions
+    brain_regions : iblatlas.regions.BrainRegions
         A brain regions object.
 
     Returns
@@ -267,7 +267,7 @@ def _plot_slice_vector(coords, slice, values, mapping, empty_color='silver', cle
         Colormap to use.
     show_cbar: bool, default=False
         Whether to display a colorbar.
-    ba : ibllib.atlas.AllenAtlas
+    ba : iblatlas.atlas.AllenAtlas
         A brain atlas object.
     ax : matplotlib.pyplot.Axes
         An axis object to plot onto.
@@ -379,7 +379,7 @@ def plot_scalar_on_slice(regions, values, coord=-1000, slice='coronal', mapping=
     slice : {'coronal', 'sagittal', 'horizontal', 'top'}, default='coronal'
         Orientation of slice.
     mapping : str, optional
-        Atlas mapping to use, options are depend on atlas used (see `ibllib.atlas.BrainRegions`).
+        Atlas mapping to use, options are depend on atlas used (see `iblatlas.regions.BrainRegions`).
         If None, the atlas default mapping is used.
     hemisphere : {'left', 'right', 'both'}, default='left'
         The hemisphere to display.
@@ -394,7 +394,7 @@ def plot_scalar_on_slice(regions, values, coord=-1000, slice='coronal', mapping=
         Whether to display a colorbar.
     empty_color : str, default='silver'
         Color to use for regions without any values (only used when `vector` is true).
-    brain_atlas : ibllib.atlas.AllenAtlas
+    brain_atlas : iblatlas.atlas.AllenAtlas
         A brain atlas object.
     ax : matplotlib.pyplot.Axes
         An axis object to plot onto.
@@ -705,7 +705,7 @@ def _plot_slice(coord, slice, region_values, vol_type, background='boundary', ma
         Colormap to use.
     show_cbar: bool, default=False
         Whether to display a colorbar.
-    ba : ibllib.atlas.AllenAtlas
+    ba : iblatlas.atlas.AllenAtlas
         A brain atlas object.
     ax : matplotlib.pyplot.Axes
         An axis object to plot onto.
@@ -795,7 +795,7 @@ def plot_scalar_on_barplot(acronyms, values, errors=None, order=True, ax=None, b
         Whether to order the acronyms according to the order defined by the Allen structure tree
     ax : matplotlib.pyplot.Axes
         An axis object to plot onto.
-    brain_regions : ibllib.atlas.regions.BrainRegions
+    brain_regions : iblatlas.regions.BrainRegions
         A brain regions object
 
     Returns
@@ -841,7 +841,7 @@ def plot_swanson_vector(acronyms=None, values=None, ax=None, hemisphere=None, br
         An axis object to plot onto.
     hemisphere : {'left', 'right', 'both', 'mirror'}
         The hemisphere to display.
-    br : ibllib.atlas.BrainRegions
+    br : iblatlas.regions.BrainRegions
         A brain regions object.
     orientation : {landscape', 'portrait'}, default='landscape'
         The plot orientation.
@@ -1062,7 +1062,7 @@ def plot_swanson(acronyms=None, values=None, ax=None, hemisphere=None, br=None,
         An axis object to plot onto.
     hemisphere : {'left', 'right', 'both', 'mirror'}
         The hemisphere to display.
-    br : ibllib.atlas.BrainRegions
+    br : iblatlas.regions.BrainRegions
         A brain regions object.
     orientation : {landscape', 'portrait'}, default='landscape'
         The plot orientation.
@@ -1149,7 +1149,7 @@ def annotate_swanson(ax, acronyms=None, orientation='landscape', br=None, thres=
         A list or numpy array of acronyms or Allen region IDs. If None plot all acronyms.
     orientation : {landscape', 'portrait'}, default='landscape'
         The plot orientation.
-    br : ibllib.atlas.BrainRegions
+    br : iblatlas.regions.BrainRegions
         A brain regions object.
     thres : int, default=20000
         The number of pixels above which a region is labelled.

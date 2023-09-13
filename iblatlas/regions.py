@@ -548,7 +548,7 @@ class BrainRegions(_BrainRegions):
     """
     A struct of Allen brain regions, their names, IDs, relationships and associated plot colours.
 
-    ibllib.atlas.regions.BrainRegions(brainmap='Allen')
+    iblatlas.regions.BrainRegions(brainmap='Allen')
 
     Notes
     -----
@@ -707,6 +707,6 @@ def regions_from_allen_csv():
 
     :return: BrainRegions object
     """
-    _logger.warning("ibllib.atlas.regions.regions_from_allen_csv() is deprecated. "
+    _logger.warning("iblatlas.regions.regions_from_allen_csv() is deprecated. "
                     "Use BrainRegions() instead")
     return BrainRegions()
