@@ -1,3 +1,8 @@
+## [0.2.0]
+
+### Modified
+- Changed packaging from setup.py to pyproject.toml
+
 ## [0.1.1]
 
 ### Modified
