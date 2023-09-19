@@ -1,3 +1,8 @@
+## [0.2.1]
+
+### Modified
+- HOTFIX: Pass reg id into polygon functions in plot_scalar_on_slice
+
 ## [0.2.0]
 
 ### Modified

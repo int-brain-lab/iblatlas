@@ -194,4 +194,4 @@ References
    http://help.brain-map.org/download/attachments/8323525/Mouse_Common_Coordinate_Framework.pdf
 
 """
-__version__ = '0.2.0'
+__version__ = '0.2.1'
