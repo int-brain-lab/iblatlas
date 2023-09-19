@@ -1,0 +1,38 @@
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "iblatlas"
+description = "IBL atlas module"
+readme = "README.md"
+requires-python = ">=3.8"
+license = {file = "LICENSE"}
+authors = [
+    {name = "IBL staff", email = "info@internationalbrainlab.org"},
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+dynamic = ["dependencies", "version"]
+
+
+[project.urls]
+"Homepage" = "https://github.com/int-brain-lab/iblatlas"
+"Documentation" = "https://github.com/int-brain-lab/iblatlas/tree/main/examples"
+"ChangeLog" = "https://github.com/int-brain-lab/iblatlas/blob/main/CHANGELOG.md"
+"Bug Tracker" = "https://github.com/int-brain-lab/iblatlas/issues"
+
+
+[tool.setuptools.dynamic]
+dependencies = {file = ["requirements.txt"]}
+version = {attr = "iblatlas.__version__"}
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+exclude = ["iblatlas.tests*", "examples*"]  # exclude packages matching these glob patterns
