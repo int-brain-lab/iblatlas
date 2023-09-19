@@ -333,6 +333,7 @@ def _plot_slice_vector(coords, slice, values, mapping, empty_color='silver', cle
 
     for i, reg in enumerate(slice_json):
         color = rgba_color[reg['thisID']]
+        reg_id = reg['thisID']
         if any(np.isnan(color)):
             color = empty_color
         else:
@@ -344,10 +345,10 @@ def _plot_slice_vector(coords, slice, values, mapping, empty_color='silver', cle
 
         if isinstance(coords, (list, tuple)):
             vertices, codes = coords_for_poly_hole(coords)
-            plot_polygon_with_hole(ax, vertices, codes, color, **kwargs)
+            plot_polygon_with_hole(ax, vertices, codes, color, reg_id, **kwargs)
         else:
             xy = np.c_[coords['x'], coords['y']]
-            plot_polygon(ax, xy, color, **kwargs)
+            plot_polygon(ax, xy, color, reg_id, **kwargs)
 
         ax.set_xlim(xlim)
         ax.set_ylim(ylim)
