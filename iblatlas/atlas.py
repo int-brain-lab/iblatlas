@@ -1199,26 +1199,27 @@ class Insertion:
     @staticmethod
     def _get_surface_intersection(traj, brain_atlas, surface='top'):
         """
-        TODO Document!
+        Computes the intersection of a trajectory with either the top or the bottom surface of an atlas.
 
         Parameters
         ----------
-        traj
-        brain_atlas
-        surface
+        traj: iblatlas.atlas.Trajectory object
+        brain_atlas: iblatlas.atlas.BrainAtlas (or descendant) object
+        surface: str, optional (defaults to 'top') 'top' or 'bottom'
 
         Returns
         -------
-
+        xyz: np.array, 3 elements, x, y, z coordinates of the intersection point with the surface
         """
         brain_atlas.compute_surface()
-
         distance = traj.mindist(brain_atlas.srf_xyz)
         dist_sort = np.argsort(distance)
         # In some cases the nearest two intersection points are not the top and bottom of brain
         # So we find all intersection points that fall within one voxel and take the one with
         # highest dV to be entry and lowest dV to be exit
         idx_lim = np.sum(distance[dist_sort] * 1e6 < np.max(brain_atlas.res_um))
+        if idx_lim == 0:  # no intersection found
+            return
         dist_lim = dist_sort[0:idx_lim]
         z_val = brain_atlas.srf_xyz[dist_lim, 2]
         if surface == 'top':
