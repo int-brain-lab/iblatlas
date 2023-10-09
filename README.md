@@ -8,3 +8,13 @@ The documentation can be found here: https://int-brain-lab.github.io/iblenv/note
 
 ## Installation
 `pip install iblatlas`
+
+
+## Contributing
+Changes are merged by pull requests.
+Release checklist:
+- [ ] Update version in `iblatlas/__init__.py`
+- [ ] Update `CHANGELOG.md`
+- [ ] Create a pull request to the `main` branch on GitHub
+
+Once merged the package is uploaded to PyPI using GitHub Actions.

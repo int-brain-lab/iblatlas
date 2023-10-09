@@ -538,6 +538,12 @@ class TestInsertion(unittest.TestCase):
         self.assertTrue(brain_entry[2] == brain_atlas.bc.i2z(100))
         brain_exit = insertion.get_brain_exit(insertion.trajectory, brain_atlas)
         self.assertTrue(brain_exit[2] == brain_atlas.bc.i2z(104))
+        # test getting no intersection with the brain surface
+        brain_atlas.srf_xyz *= np.NaN
+        with self.assertRaises(ValueError):
+            insertion.get_brain_entry(insertion.trajectory, brain_atlas)
+        self.assertIsNone(insertion.get_brain_entry(insertion.trajectory, brain_atlas, mode='none'))
+        self.assertIsNone(insertion.get_brain_exit(insertion.trajectory, brain_atlas, mode='none'))
 
 
 class TestTrajectory(unittest.TestCase):
