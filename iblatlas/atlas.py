@@ -496,6 +496,18 @@ class BrainAtlas:
         path_atlas = Path(par.CACHE_DIR).joinpath('histology', 'ATLAS', 'Needles', 'Allen', 'flatmaps')
         return path_atlas
 
+    def mask(self):
+        """
+        Returns a Boolean mask volume of the brain atlas, where 1 is inside the convex brain and 0 is outside
+        This returns an ovoid volume shaped like the brain and this will contain void values in the ventricules.
+        :return: np.array Bool (nap, nml, ndv)
+        """
+        self.compute_surface()
+        mask = np.logical_and(np.cumsum(self.label != 0, axis=-1) > 0,
+                              np.flip(np.cumsum(np.flip(self.label, axis=-1) != 0, axis=-1), axis=-1) > 0)
+        mask[np.isnan(self.top)] = 0
+        return mask
+
     def compute_surface(self):
         """
         Get the volume top, bottom, left and right surfaces, and from these the outer surface of
@@ -1207,11 +1219,12 @@ class Insertion:
         brain_atlas: iblatlas.atlas.BrainAtlas (or descendant) object
         surface: str, optional (defaults to 'top') 'top' or 'bottom'
         mode: str, optional (defaults to 'raise') 'raise' or 'none': raise an error if no intersection
-         with the brain surface is found
+         with the brain surface is found otherwise returns None
 
         Returns
         -------
         xyz: np.array, 3 elements, x, y, z coordinates of the intersection point with the surface
+             None if no intersection is found and mode is not set to 'raise'
         """
         brain_atlas.compute_surface()
         distance = traj.mindist(brain_atlas.srf_xyz)

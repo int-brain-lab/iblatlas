@@ -330,6 +330,11 @@ class TestAtlas(unittest.TestCase):
         self.ba.compute_regions_volume()
         self.assertTrue(self.ba.regions.volume.shape == self.ba.regions.acronym.shape)
 
+    def test_compute_surfaces(self):
+        self.ba.compute_surface()
+        self.assertEqual(self.ba.surface.shape, self.ba.label.shape)
+        self.assertEqual(self.ba.surface.shape, self.ba.mask().shape)
+
 
 class TestAtlasPlots(unittest.TestCase):
 
