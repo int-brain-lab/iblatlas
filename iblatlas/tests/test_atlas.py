@@ -94,12 +94,16 @@ class TestBrainRegions(unittest.TestCase):
         atlas_id = np.array([463, 685])  # CA3 and PO
         cosmos_id = self.brs.remap(atlas_id, source_map='Allen', target_map='Cosmos')
         expected_cosmos_id = [1089, 549]  # HPF and TH
-        assert np.all(cosmos_id == expected_cosmos_id)
+        np.testing.assert_equal(cosmos_id, expected_cosmos_id)
 
         # Test remap when we have nans
         atlas_id = np.array([463, np.nan, 685])
         cosmos_id = self.brs.remap(atlas_id, source_map='Allen', target_map='Cosmos')
         expected_cosmos_id = np.array([1089, np.nan, 549], dtype=float)  # HPF and TH
+        np.testing.assert_equal(cosmos_id, expected_cosmos_id)
+
+        # Test with providing the mapping array instead
+        cosmos_id = self.brs.remap(atlas_id, source_map=self.brs.mappings['Allen'], target_map=self.brs.mappings['Cosmos'])
         np.testing.assert_equal(cosmos_id, expected_cosmos_id)
 
     def test_id2id(self):
