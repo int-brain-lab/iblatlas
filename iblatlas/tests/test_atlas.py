@@ -94,12 +94,16 @@ class TestBrainRegions(unittest.TestCase):
         atlas_id = np.array([463, 685])  # CA3 and PO
         cosmos_id = self.brs.remap(atlas_id, source_map='Allen', target_map='Cosmos')
         expected_cosmos_id = [1089, 549]  # HPF and TH
-        assert np.all(cosmos_id == expected_cosmos_id)
+        np.testing.assert_equal(cosmos_id, expected_cosmos_id)
 
         # Test remap when we have nans
         atlas_id = np.array([463, np.nan, 685])
         cosmos_id = self.brs.remap(atlas_id, source_map='Allen', target_map='Cosmos')
         expected_cosmos_id = np.array([1089, np.nan, 549], dtype=float)  # HPF and TH
+        np.testing.assert_equal(cosmos_id, expected_cosmos_id)
+
+        # Test with providing the mapping array instead
+        cosmos_id = self.brs.remap(atlas_id, source_map=self.brs.mappings['Allen'], target_map=self.brs.mappings['Cosmos'])
         np.testing.assert_equal(cosmos_id, expected_cosmos_id)
 
     def test_id2id(self):
@@ -330,6 +334,11 @@ class TestAtlas(unittest.TestCase):
         self.ba.compute_regions_volume()
         self.assertTrue(self.ba.regions.volume.shape == self.ba.regions.acronym.shape)
 
+    def test_compute_surfaces(self):
+        self.ba.compute_surface()
+        self.assertEqual(self.ba.surface.shape, self.ba.label.shape)
+        self.assertEqual(self.ba.surface.shape, self.ba.mask().shape)
+
 
 class TestAtlasPlots(unittest.TestCase):
 
@@ -538,6 +547,12 @@ class TestInsertion(unittest.TestCase):
         self.assertTrue(brain_entry[2] == brain_atlas.bc.i2z(100))
         brain_exit = insertion.get_brain_exit(insertion.trajectory, brain_atlas)
         self.assertTrue(brain_exit[2] == brain_atlas.bc.i2z(104))
+        # test getting no intersection with the brain surface
+        brain_atlas.srf_xyz *= np.NaN
+        with self.assertRaises(ValueError):
+            insertion.get_brain_entry(insertion.trajectory, brain_atlas)
+        self.assertIsNone(insertion.get_brain_entry(insertion.trajectory, brain_atlas, mode='none'))
+        self.assertIsNone(insertion.get_brain_exit(insertion.trajectory, brain_atlas, mode='none'))
 
 
 class TestTrajectory(unittest.TestCase):

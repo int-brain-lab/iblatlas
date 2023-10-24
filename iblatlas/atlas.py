@@ -496,6 +496,18 @@ class BrainAtlas:
         path_atlas = Path(par.CACHE_DIR).joinpath('histology', 'ATLAS', 'Needles', 'Allen', 'flatmaps')
         return path_atlas
 
+    def mask(self):
+        """
+        Returns a Boolean mask volume of the brain atlas, where 1 is inside the convex brain and 0 is outside
+        This returns an ovoid volume shaped like the brain and this will contain void values in the ventricules.
+        :return: np.array Bool (nap, nml, ndv)
+        """
+        self.compute_surface()
+        mask = np.logical_and(np.cumsum(self.label != 0, axis=-1) > 0,
+                              np.flip(np.cumsum(np.flip(self.label, axis=-1) != 0, axis=-1), axis=-1) > 0)
+        mask[np.isnan(self.top)] = 0
+        return mask
+
     def compute_surface(self):
         """
         Get the volume top, bottom, left and right surfaces, and from these the outer surface of
@@ -1197,28 +1209,35 @@ class Insertion:
         return sph2cart(- self.depth, self.theta, self.phi) + np.array((self.x, self.y, self.z))
 
     @staticmethod
-    def _get_surface_intersection(traj, brain_atlas, surface='top'):
+    def _get_surface_intersection(traj, brain_atlas, surface='top', mode='raise'):
         """
-        TODO Document!
+        Computes the intersection of a trajectory with either the top or the bottom surface of an atlas.
 
         Parameters
         ----------
-        traj
-        brain_atlas
-        surface
+        traj: iblatlas.atlas.Trajectory object
+        brain_atlas: iblatlas.atlas.BrainAtlas (or descendant) object
+        surface: str, optional (defaults to 'top') 'top' or 'bottom'
+        mode: str, optional (defaults to 'raise') 'raise' or 'none': raise an error if no intersection
+         with the brain surface is found otherwise returns None
 
         Returns
         -------
-
+        xyz: np.array, 3 elements, x, y, z coordinates of the intersection point with the surface
+             None if no intersection is found and mode is not set to 'raise'
         """
         brain_atlas.compute_surface()
-
         distance = traj.mindist(brain_atlas.srf_xyz)
         dist_sort = np.argsort(distance)
         # In some cases the nearest two intersection points are not the top and bottom of brain
         # So we find all intersection points that fall within one voxel and take the one with
         # highest dV to be entry and lowest dV to be exit
         idx_lim = np.sum(distance[dist_sort] * 1e6 < np.max(brain_atlas.res_um))
+        if idx_lim == 0:  # no intersection found
+            if mode == 'raise':
+                raise ValueError('No intersection found with brain surface')
+            else:
+                return
         dist_lim = dist_sort[0:idx_lim]
         z_val = brain_atlas.srf_xyz[dist_lim, 2]
         if surface == 'top':
@@ -1236,7 +1255,7 @@ class Insertion:
         return xyz
 
     @staticmethod
-    def get_brain_exit(traj, brain_atlas):
+    def get_brain_exit(traj, brain_atlas, mode='raise'):
         """
         Given a Trajectory and a BrainAtlas object, computes the brain exit coordinate as the
         intersection of the trajectory and the brain surface (brain_atlas.surface)
@@ -1244,10 +1263,10 @@ class Insertion:
         :return: 3 element array x,y,z
         """
         # Find point where trajectory intersects with bottom of brain
-        return Insertion._get_surface_intersection(traj, brain_atlas, surface='bottom')
+        return Insertion._get_surface_intersection(traj, brain_atlas, surface='bottom', mode=mode)
 
     @staticmethod
-    def get_brain_entry(traj, brain_atlas):
+    def get_brain_entry(traj, brain_atlas, mode='raise'):
         """
         Given a Trajectory and a BrainAtlas object, computes the brain entry coordinate as the
         intersection of the trajectory and the brain surface (brain_atlas.surface)
@@ -1255,7 +1274,7 @@ class Insertion:
         :return: 3 element array x,y,z
         """
         # Find point where trajectory intersects with top of brain
-        return Insertion._get_surface_intersection(traj, brain_atlas, surface='top')
+        return Insertion._get_surface_intersection(traj, brain_atlas, surface='top', mode=mode)
 
 
 class AllenAtlas(BrainAtlas):

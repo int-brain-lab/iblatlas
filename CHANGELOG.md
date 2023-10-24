@@ -1,3 +1,8 @@
+## [0.3.0]
+### Modified
+- Insertion._get_surface_intersection: can return None if and when mode is not set to raise and insertion is not intersecting with any surface
+- BrainAtlas.mask(): method that computes a mask of the convex brain volume shape
+
 ## [0.2.1]
 
 ### Modified

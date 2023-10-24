@@ -675,10 +675,14 @@ class BrainRegions(_BrainRegions):
         ----------
         region_ids : array_like of int
             The region IDs to remap.
-        source_map : str
-            The source map name, in `self.mappings`.
-        target_map : str
-            The target map name, in `self.mappings`.
+        source_map : str | np.array
+            if string, it should be a key existing in self.mappings such as 'Allen', 'Cosmos' or 'Beryl'
+            if np.array, it should be a [nregions,] array containing the mapped regions index such as
+            mapping[original_allen_region_index] = target_mapping_region_index
+        target_map : str | np.array
+            if string, it should be a key existing in self.mappings such as 'Allen', 'Cosmos' or 'Beryl'
+            if np.array, it should be a [nregions,] array containing the mapped regions index such as
+            mapping[original_allen_region_index] = target_mapping_region_index
 
         Returns
         -------
@@ -686,15 +690,17 @@ class BrainRegions(_BrainRegions):
             The input IDs mapped to `target_map`.
         """
         isnan = np.isnan(region_ids)
+        idx_source_map = self.mappings[source_map] if isinstance(source_map, str) else source_map
+        idx_target_map = self.mappings[target_map] if isinstance(target_map, str) else target_map
         if np.sum(isnan) > 0:
             # In case the user provides nans
             nan_loc = np.where(isnan)[0]
-            _, inds = ismember(region_ids[~isnan], self.id[self.mappings[source_map]])
-            mapped_ids = self.id[self.mappings[target_map][inds]].astype(float)
+            _, inds = ismember(region_ids[~isnan], self.id[idx_source_map])
+            mapped_ids = self.id[idx_target_map[inds]].astype(float)
             mapped_ids = np.insert(mapped_ids, nan_loc, np.full(nan_loc.shape, np.nan))
         else:
-            _, inds = ismember(region_ids, self.id[self.mappings[source_map]])
-            mapped_ids = self.id[self.mappings[target_map][inds]]
+            _, inds = ismember(region_ids, self.id[idx_source_map])
+            mapped_ids = self.id[idx_target_map[inds]]
 
         return mapped_ids
 
