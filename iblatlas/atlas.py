@@ -620,7 +620,7 @@ class BrainAtlas:
         else:  # if the regions exist and have the rgb attribute, do the rgb lookup
             return self.regions.rgb[imlabel]
 
-    def tilted_slice(self, xyz, axis, volume='image'):
+    def tilted_slice(self, xyz, axis, volume='image', mode='raise'):
         """
         From line coordinates, extracts the tilted plane containing the line from the 3D volume
         :param xyz: np.array: points defining a probe trajectory in 3D space (xyz triplets)
@@ -630,6 +630,9 @@ class BrainAtlas:
             1: along ap = coronal-slice
             2: along dv = horizontal-slice
         :param volume: 'image' or 'annotation'
+        :param mode: error mode for out of bounds coordinates
+            -   'raise' raise an error
+            -   'clip' gets the first or last index
         :return: np.array, abscissa extent (width), ordinate extent (height),
         squeezed axis extent (depth)
         """
@@ -643,7 +646,7 @@ class BrainAtlas:
         trj = Trajectory.fit(xyz)
         sub_volume = trj._eval(self.bc.lim(axis=hdim), axis=hdim)
         sub_volume[:, wdim] = self.bc.lim(axis=wdim)
-        sub_volume_i = self.bc.xyz2i(sub_volume)
+        sub_volume_i = self.bc.xyz2i(sub_volume, mode=mode)
         tile_shape = np.array([np.diff(sub_volume_i[:, hdim])[0] + 1, self.bc.nxyz[wdim]])
         # get indices along each dimension
         indx = np.arange(tile_shape[1])
@@ -687,7 +690,7 @@ class BrainAtlas:
         elif axis == 2:
             axis_labels = np.array(['ml (um)', 'ap (um)', 'dv (um)'])
 
-        tslice, width, height, depth = self.tilted_slice(xyz, axis, volume=volume)
+        tslice, width, height, depth = self.tilted_slice(xyz, axis, volume=volume, mode=kwargs.pop('mode', None))
         width = width * 1e6
         height = height * 1e6
         depth = depth * 1e6
