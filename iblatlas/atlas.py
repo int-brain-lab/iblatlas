@@ -148,19 +148,6 @@ class BrainCoordinates:
         """numpy.array: Coordinates of the element volume[0, 0, 0] in the coordinate space."""
         return np.array([self.nx, self.ny, self.nz])
 
-    """Methods ratios to indices"""
-    def r2ix(self, r):
-        # FIXME Document
-        return int((self.nx - 1) * r)
-
-    def r2iy(self, r):
-        # FIXME Document
-        return int((self.nz - 1) * r)
-
-    def r2iz(self, r):
-        # FIXME Document
-        return int((self.nz - 1) * r)
-
     """Methods distance to indices"""
     @staticmethod
     def _round(i, round=True):
@@ -478,8 +465,8 @@ class BrainAtlas:
         self.image = image
         self.label = label
         self.regions = regions
-        self.dims2xyz = dims2xyz
-        self.xyz2dims = xyz2dims
+        self.dims2xyz = np.array(dims2xyz)
+        self.xyz2dims = np.array(xyz2dims)
         assert np.all(self.dims2xyz[self.xyz2dims] == np.array([0, 1, 2]))
         assert np.all(self.xyz2dims[self.dims2xyz] == np.array([0, 1, 2]))
         # create the coordinate transform object that maps volume indices to real world coordinates
@@ -800,7 +787,10 @@ class BrainAtlas:
             - if volume='volume', region_values must have shape ba.image.shape
             - if volume='value', region_values must have shape ba.regions.id
         :param mapping: mapping to use. Options can be found using ba.regions.mappings.keys()
-        :return: 2d array or 3d RGB numpy int8 array
+        :return: 2d array or 3d RGB numpy int8 array of dimensions:
+            - 0: nap x ndv (sagittal slice)
+            - 1: nml x ndv (coronal slice)
+            - 2: nap x nml (horizontal slice)
         """
         if axis == 0:
             index = self.bc.x2i(np.array(coordinate), mode=mode)
@@ -809,43 +799,53 @@ class BrainAtlas:
         elif axis == 2:
             index = self.bc.z2i(np.array(coordinate), mode=mode)
 
-        # np.take is 50 thousand times slower than straight slicing !
         def _take(vol, ind, axis):
+            """
+            This is a 2 steps process to get the slice along the correct axis
+            1) slice the volume according to the mapped axis corresponding to the sclice
+            we do this because np.take is 50 thousand times slower than straight slicing !
+            2) reshape the output array according to the slice specifications
+            """
+            volume_axis = self.xyz2dims[axis]
             if mode == 'clip':
-                ind = np.minimum(np.maximum(ind, 0), vol.shape[axis] - 1)
-            if axis == 0:
-                return vol[ind, :, :]
-            elif axis == 1:
-                return vol[:, ind, :]
-            elif axis == 2:
-                return vol[:, :, ind]
+                ind = np.minimum(np.maximum(ind, 0), vol.shape[volume_axis] - 1)
+            if volume_axis == 0:
+                slic = vol[ind, :, :]
+            elif volume_axis == 1:
+                slic =  vol[:, ind, :]
+            elif volume_axis == 2:
+                slic = vol[:, :, ind]
+            output_sizes = [[1, 2], [0, 2], [1, 0]]  # we expect those sizes where index is the axis
+            if np.diff(self.xyz2dims[output_sizes[axis]])[0] < 0:
+                slic = slic.swapaxes(1, 2)
+            return slic
 
         def _take_remap(vol, ind, axis, mapping):
             # For the labels, remap the regions indices according to the mapping
             return self._get_mapping(mapping=mapping)[_take(vol, ind, axis)]
 
         if isinstance(volume, np.ndarray):
-            return _take(volume, index, axis=self.xyz2dims[axis])
+            return _take(volume, index, axis=axis)
         elif volume in 'annotation':
-            iregion = _take_remap(self.label, index, self.xyz2dims[axis], mapping)
+            iregion = _take_remap(self.label, index, axis=axis, mapping=mapping)
             return self._label2rgb(iregion)
         elif volume == 'image':
-            return _take(self.image, index, axis=self.xyz2dims[axis])
+            return _take(self.image, index, axis=axis)
         elif volume == 'value':
-            return region_values[_take_remap(self.label, index, self.xyz2dims[axis], mapping)]
+            return region_values[_take_remap(self.label, index, axis, mapping)]
         elif volume == 'image':
-            return _take(self.image, index, axis=self.xyz2dims[axis])
+            return _take(self.image, index, axis=axis)
         elif volume in ['surface', 'edges']:
             self.compute_surface()
-            return _take(self.surface, index, axis=self.xyz2dims[axis])
+            return _take(self.surface, index, axis=axis)
         elif volume == 'boundary':
-            iregion = _take_remap(self.label, index, self.xyz2dims[axis], mapping)
+            iregion = _take_remap(self.label, index, axis, mapping)
             return self.compute_boundaries(iregion)
 
         elif volume == 'volume':
             if bc is not None:
                 index = bc.xyz2i(np.array([coordinate] * 3))[axis]
-            return _take(region_values, index, axis=self.xyz2dims[axis])
+            return _take(region_values, index, axis=axis)
 
     def compute_boundaries(self, values):
         """
@@ -901,7 +901,6 @@ class BrainAtlas:
         :param **kwargs: matplotlib.pyplot.imshow kwarg arguments
         :return: matplotlib ax object
         """
-
         cslice = self.slice(ap_coordinate, axis=1, volume=volume, mapping=mapping, region_values=region_values)
         return self._plot_slice(np.moveaxis(cslice, 0, 1), extent=self.extent(axis=1), volume=volume, **kwargs)
 
@@ -969,14 +968,11 @@ class BrainAtlas:
         :param kwargs:
         :return:
         """
-
         self.compute_surface()
         ix, iy = np.meshgrid(np.arange(self.bc.nx), np.arange(self.bc.ny))
         iz = self.bc.z2i(self.top)
         inds = self._lookup_inds(np.stack((ix, iy, iz), axis=-1))
-
         regions = self._get_mapping(mapping=mapping)[self.label.flat[inds]]
-
         if volume == 'annotation':
             im = self._label2rgb(regions)
         elif volume == 'image':
