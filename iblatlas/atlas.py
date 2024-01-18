@@ -817,7 +817,7 @@ class BrainAtlas:
                 slic = vol[:, :, ind]
             output_sizes = [[1, 2], [0, 2], [1, 0]]  # we expect those sizes where index is the axis
             if np.diff(self.xyz2dims[output_sizes[axis]])[0] < 0:
-                slic = slic.swapaxes(1, 2)
+                slic = slic.transpose().copy()
             return slic
 
         def _take_remap(vol, ind, axis, mapping):

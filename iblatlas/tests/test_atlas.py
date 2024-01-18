@@ -422,7 +422,7 @@ class TestAtlasSlicesConversion(unittest.TestCase):
 
     def test_slice_axes(self):
         # here we
-        nx, ny, nz = (25, 30, 15)
+        nx, nz, ny = (58, 41, 67)
         ba_gene_atlas_like = BrainAtlas(
             image=np.random.randn(nx, nz, ny),
             label=np.ones((nx, nz, ny)),
@@ -432,13 +432,13 @@ class TestAtlasSlicesConversion(unittest.TestCase):
             dims2xyz=[0, 2, 1],
             xyz2dims=[0, 2, 1]
         )
-        for k, ba in {'allen':self.ba, 'gene_expression': ba_gene_atlas_like}.items():
+        for k, ba in {'allen': self.ba, 'gene_expression': ba_gene_atlas_like}.items():
             with self.subTest(ba=k):
                 nx, ny, nz = ba.bc.nxyz
                 # tests output shapes
                 self.assertTrue(ba.slice(axis=0, coordinate=0).shape == (ny, nz))  # sagittal
                 self.assertTrue(ba.slice(axis=1, coordinate=0).shape == (nx, nz))  # coronal
-                self.assertTrue(ba.slice(axis=2, coordinate=-.002).shape == (ny, nx))  # horizontal
+                self.assertTrue(ba.slice(axis=2, coordinate=.0002).shape == (ny, nx))  # horizontal
                 # tests out of bound
                 with self.assertRaises(ValueError):
                     ba.slice(axis=1, coordinate=123)
