@@ -19,10 +19,8 @@ _logger = logging.getLogger(__name__)
 
 
 class FlatMap(AllenAtlas):
-    """The Allen Atlas flatmap.
+    """
 
-    FIXME Document! How are these flatmaps determined? Are they related to the Swansan atlas or is
-     that something else?
     """
 
     def __init__(self, flatmap='dorsal_cortex', res_um=25):
@@ -46,7 +44,7 @@ class FlatMap(AllenAtlas):
 
     def _get_flatmap_from_file(self):
         # gets the file in the ONE cache for the flatmap name in the property, downloads it if needed
-        file_flatmap = self._get_cache_dir().joinpath(f'{self.name}_{self.res_um}.nrrd')
+        file_flatmap = self._get_cache_dir().joinpath('flatmaps', f'{self.name}_{self.res_um}.nrrd')
         if not file_flatmap.exists():
             file_flatmap.parent.mkdir(exist_ok=True, parents=True)
             aws.s3_download_file(f'atlas/{file_flatmap.name}', file_flatmap)
@@ -214,8 +212,12 @@ def circles(N=5, atlas=None, display='flat'):
 
 def swanson(filename="swanson2allen.npz"):
     """
-    FIXME Document! Which publication to reference? Are these specifically for flat maps?
-     Shouldn't this be made into an Atlas class with a mapping or scaling applied?
+    A rasterized rendition of the Swanson projection of the mouse brain, which is a 2D
+    representation of the mouse brain.
+    Each pixel in the image corresponds to a region index in the Allen CCFv2 annotation volume.
+    [1] J. D. Hahn et al., “An open access mouse brain flatmap and upgraded rat and human
+    brain flatmaps based on current reference atlases,”
+    J Comp Neurol, vol. 529, no. 3, pp. 576–594, Feb. 2021, doi: 10.1002/cne.24966.
 
     Parameters
     ----------
@@ -231,7 +233,7 @@ def swanson(filename="swanson2allen.npz"):
         'bb0554ecc704dd4b540151ab57f73822',  # version 2022-05-02 (remapped)
         '7722c1307cf9a6f291ad7632e5dcc88b',  # version 2022-05-09 (removed wolf pixels and 2 artefact regions)
     ]
-    npz_file = AllenAtlas._get_cache_dir().joinpath(filename)
+    npz_file = AllenAtlas._get_cache_dir().joinpath('flatmaps', filename)
     if not npz_file.exists() or md5(npz_file) in OLD_MD5:
         npz_file.parent.mkdir(exist_ok=True, parents=True)
         _logger.info(f'downloading swanson image from {aws.S3_BUCKET_IBL} s3 bucket...')
@@ -260,7 +262,7 @@ def swanson_json(filename="swansonpaths.json", remap=True):
                # and CUL4 split (on s3 called swansonpaths_56daa.json)
                'f848783954883c606ca390ceda9e37d2']
 
-    json_file = AllenAtlas._get_cache_dir().joinpath(filename)
+    json_file = AllenAtlas._get_cache_dir().joinpath('flatmaps', filename)
     if not json_file.exists() or md5(json_file) in OLD_MD5:
         json_file.parent.mkdir(exist_ok=True, parents=True)
         _logger.info(f'downloading swanson paths from {aws.S3_BUCKET_IBL} s3 bucket...')

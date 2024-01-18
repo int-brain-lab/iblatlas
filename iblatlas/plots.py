@@ -231,7 +231,7 @@ def load_slice_files(slice, mapping):
         'top': []
     }
 
-    slice_file = AllenAtlas._get_cache_dir().parent.joinpath('svg', f'{slice}_{mapping}_paths.npy')
+    slice_file = AllenAtlas._get_cache_dir().joinpath('svg', f'{slice}_{mapping}_paths.npy')
     if not slice_file.exists() or md5(slice_file) in OLD_MD5[slice]:
         slice_file.parent.mkdir(exist_ok=True, parents=True)
         _logger.info(f'downloading swanson paths from {aws.S3_BUCKET_IBL} s3 bucket...')

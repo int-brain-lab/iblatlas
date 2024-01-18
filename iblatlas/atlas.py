@@ -492,8 +492,13 @@ class BrainAtlas:
 
     @staticmethod
     def _get_cache_dir():
+        """
+        ./histology/ATLAS/Needles/Allen
+        Where . is the main ONE cache directory
+        :return: pathlib.Path
+        """
         par = one.params.get(silent=True)
-        path_atlas = Path(par.CACHE_DIR).joinpath('histology', 'ATLAS', 'Needles', 'Allen', 'flatmaps')
+        path_atlas = Path(par.CACHE_DIR).joinpath('histology', 'ATLAS', 'Needles', 'Allen')
         return path_atlas
 
     def mask(self):
