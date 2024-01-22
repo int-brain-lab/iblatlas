@@ -36,3 +36,5 @@ class TestLoadAgea(unittest.TestCase):
             self.assertEqual(gene_expression_volumes.shape, (3, 58, 41, 67))
             self.assertEqual(atlas_agea.image.shape, (58, 41, 67))
             self.assertEqual(atlas_agea.label.shape, (58, 41, 67))
+            # on windows we need to close the memmap for the tempdir to be deleted
+            gene_expression_volumes._mmap.close()
