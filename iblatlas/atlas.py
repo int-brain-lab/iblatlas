@@ -741,10 +741,11 @@ class BrainAtlas:
         if not cmap:
             cmap = plt.get_cmap('bone')
 
-        if isinstance(volume, str) & (volume == 'boundary'):
-            imb = np.zeros((*im.shape[:2], 4), dtype=np.uint8)
-            imb[im == 1] = np.array([0, 0, 0, 255])
-            im = imb
+        if isinstance(volume, str):
+            if volume == 'boundary':
+                imb = np.zeros((*im.shape[:2], 4), dtype=np.uint8)
+                imb[im == 1] = np.array([0, 0, 0, 255])
+                im = imb
 
         ax.imshow(im, extent=extent, cmap=cmap, **kwargs)
         return ax

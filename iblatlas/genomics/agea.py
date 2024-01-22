@@ -31,7 +31,7 @@ def load(folder_cache=None, expression_size=DIM_EXP):
         a brainatlas object with the labels and coordinates matching the gene expression volumes
     """
     OLD_VERSIONS = ['2023-06-12']
-    folder_cache = Path(folder_cache) or atlas.AllenAtlas._get_cache_dir().joinpath('agea')
+    folder_cache = Path(folder_cache or atlas.AllenAtlas._get_cache_dir().joinpath('agea'))
     # check the AWS version and download the files if needed
     version_flag = next(folder_cache.glob('*.version'), None)
     if version_flag is None or version_flag.stem in OLD_VERSIONS:
