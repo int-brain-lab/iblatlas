@@ -421,7 +421,6 @@ class TestAtlasSlicesConversion(unittest.TestCase):
         assert axs.shape == (2, 2)
 
     def test_slice_axes(self):
-        # here we
         nx, nz, ny = (58, 41, 67)
         ba_gene_atlas_like = BrainAtlas(
             image=np.random.randn(nx, nz, ny),
@@ -442,7 +441,7 @@ class TestAtlasSlicesConversion(unittest.TestCase):
                 # tests out of bound
                 with self.assertRaises(ValueError):
                     ba.slice(axis=1, coordinate=123)
-                self.assertTrue(ba.slice(axis=1, coordinate=21, mode='clip').shape == (nx, nz)) # another coronal
+                self.assertTrue(ba.slice(axis=1, coordinate=21, mode='clip').shape == (nx, nz))  # another coronal
 
     def test_slice_volumes(self):
         """

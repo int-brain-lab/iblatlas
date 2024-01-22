@@ -1,3 +1,13 @@
+## [1.0.0]
+
+### Added
+- `iblatlas.genomics` module for working with genomics data from Allen contains
+  - the Allen gene expression atlas in the `iblatlas.genomics.agea` module
+  - the Allen cell types atlas in the `iblatlas.genomics.merfish` module
+### Modified
+- slices of the atlas are now always returned with consistent sizes regardless of the volume layout on disk
+- atlases now can have an extra dimension in the image volume, to allow for multiple layers
+
 ## [0.3.0]
 ### Modified
 - Insertion._get_surface_intersection: can return None if and when mode is not set to raise and insertion is not intersecting with any surface

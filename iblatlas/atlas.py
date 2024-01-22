@@ -446,10 +446,13 @@ class BrainAtlas:
     yet this class can be used for other atlases arises.
     """
 
-    """numpy.array: An image volume."""
+    """numpy.array: A 3D image volume."""
     image = None
-    """numpy.array: An annotation label volume."""
+    """numpy.array: A 3D annotation label volume."""
     label = None
+    """numpy.array: One or several optional data volumes, the 3 last dimensions should match
+    the image and the label volumes dimensions"""
+    volumes = None
 
     def __init__(self, image, label, dxyz, regions, iorigin=[0, 0, 0],
                  dims2xyz=[0, 1, 2], xyz2dims=[0, 1, 2]):
@@ -721,7 +724,7 @@ class BrainAtlas:
         cmap : str, matplotlib.colors.Colormap
             The Colormap instance or registered colormap name used to map scalar data to colors.
             Defaults to 'bone'.
-        volume : str
+        volume : str | np.array
             If 'boundary', assumes image is an outline of boundaries between all regions.
             FIXME How does this affect the plot?
         **kwargs
@@ -738,7 +741,7 @@ class BrainAtlas:
         if not cmap:
             cmap = plt.get_cmap('bone')
 
-        if volume == 'boundary':
+        if isinstance(volume, str) & (volume == 'boundary'):
             imb = np.zeros((*im.shape[:2], 4), dtype=np.uint8)
             imb[im == 1] = np.array([0, 0, 0, 255])
             im = imb
@@ -812,7 +815,7 @@ class BrainAtlas:
             if volume_axis == 0:
                 slic = vol[ind, :, :]
             elif volume_axis == 1:
-                slic =  vol[:, ind, :]
+                slic = vol[:, ind, :]
             elif volume_axis == 2:
                 slic = vol[:, :, ind]
             output_sizes = [[1, 2], [0, 2], [1, 0]]  # we expect those sizes where index is the axis
@@ -1291,8 +1294,10 @@ class AllenAtlas(BrainAtlas):
 
     """numpy.array: A diffusion weighted imaging (DWI) image volume.
 
-    The Allen atlas DWI average template volume has with the shape (ap, ml, dv) and contains uint16
-    values.  FIXME What do the values represent?
+    This average template brain was created from images of 1,675 young adult C57BL/6J mouse brains
+    acquired using serial two-photon tomography.
+    This volume has a C-ordered shape of (ap, ml, dv) and contains uint16
+    values.
     """
     image = None
 
