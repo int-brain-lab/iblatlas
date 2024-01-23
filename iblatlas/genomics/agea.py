@@ -1,3 +1,9 @@
+"""
+[1] E. S. Lein et al., “Genome-wide atlas of gene expression in the adult mouse brain,”
+ Nature, vol. 445, no. 7124, Art. no. 7124, Jan. 2007, doi: 10.1038/nature05453.
+[2] L. Ng et al., “An anatomic gene expression atlas of the adult mouse brain,”
+ Nat Neurosci, vol. 12, no. 3, Art. no. 3, Mar. 2009, doi: 10.1038/nn.2281.
+"""
 import logging
 from pathlib import Path
 
@@ -16,12 +22,7 @@ _, NML, NDV, NAP = DIM_EXP = (4345, 58, 41, 67)  # nexperiments, nml, ndv, nap
 def load(folder_cache=None, expression_size=DIM_EXP):
     """
     Reads in the Allen gene expression experiments binary data.
-    Generation scripts from the Allen Institute are available
-    [1] E. S. Lein et al., “Genome-wide atlas of gene expression in the adult mouse brain,”
-     Nature, vol. 445, no. 7124, Art. no. 7124, Jan. 2007, doi: 10.1038/nature05453.
-    [2] L. Ng et al., “An anatomic gene expression atlas of the adult mouse brain,”
-     Nat Neurosci, vol. 12, no. 3, Art. no. 3, Mar. 2009, doi: 10.1038/nn.2281.
-
+    Generation scripts from the Allen Institute are available in the gene-expression-scrapping folder
     :param filename:
     :param folder_cache:
     :return:

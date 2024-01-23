@@ -35,4 +35,5 @@ version = {attr = "iblatlas.__version__"}
 include-package-data = true
 
 [tool.setuptools.packages.find]
-exclude = ["iblatlas.tests*", "examples*"]  # exclude packages matching these glob patterns
+# exclude packages matching these glob patterns
+exclude = ["iblatlas.tests*", "examples*", "iblatlas.genomics.gene_expression_scrapping"]

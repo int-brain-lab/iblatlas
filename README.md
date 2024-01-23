@@ -19,5 +19,6 @@ Release checklist:
 - [x] Update version in `iblatlas/__init__.py`
 - [x] Update `CHANGELOG.md`
 - [x] Create a pull request to the `main` branch on GitHub
+- [x] Once the PR is merged, create a new tag and push the tag
 
-Once merged the package is uploaded automatically to PyPI using GitHub Actions.
+Once a tag is pushed on main the package is uploaded to PyPI using GitHub Actions.
