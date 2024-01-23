@@ -3,7 +3,7 @@ import unittest
 import numpy as np
 import matplotlib.pyplot as plt
 
-from iblatlas.atlas import (BrainCoordinates, cart2sph, sph2cart, Trajectory,
+from iblatlas.atlas import (BrainCoordinates, cart2sph, sph2cart, Trajectory, BrainAtlas,
                             Insertion, ALLEN_CCF_LANDMARKS_MLAPDV_UM, AllenAtlas)
 from iblatlas.regions import BrainRegions, FranklinPaxinosRegions
 from iblatlas.plots import prepare_lr_data, reorder_data
@@ -420,21 +420,35 @@ class TestAtlasSlicesConversion(unittest.TestCase):
         axs = self.ba.plot_slices(np.array([0, -.0024, -.0038]))
         assert axs.shape == (2, 2)
 
-    def test_slice(self):
-        ba = self.ba
-        nx, ny, nz = ba.bc.nxyz
-        # tests output shapes
-        self.assertTrue(ba.slice(axis=0, coordinate=0).shape == (ny, nz))  # sagittal
-        self.assertTrue(ba.slice(axis=1, coordinate=0).shape == (nx, nz))  # coronal
-        self.assertTrue(ba.slice(axis=2, coordinate=-.002).shape == (ny, nx))  # horizontal
-        # tests out of bound
-        with self.assertRaises(ValueError):
-            ba.slice(axis=1, coordinate=123)
-        self.assertTrue(ba.slice(axis=1, coordinate=21, mode='clip').shape == (nx, nz))
+    def test_slice_axes(self):
+        nx, nz, ny = (58, 41, 67)
+        ba_gene_atlas_like = BrainAtlas(
+            image=np.random.randn(nx, nz, ny),
+            label=np.ones((nx, nz, ny)),
+            dxyz=200 / 1e6,
+            regions=BrainRegions(),
+            iorigin=[0, 0, 0],
+            dims2xyz=[0, 2, 1],
+            xyz2dims=[0, 2, 1]
+        )
+        for k, ba in {'allen': self.ba, 'gene_expression': ba_gene_atlas_like}.items():
+            with self.subTest(ba=k):
+                nx, ny, nz = ba.bc.nxyz
+                # tests output shapes
+                self.assertTrue(ba.slice(axis=0, coordinate=0).shape == (ny, nz))  # sagittal
+                self.assertTrue(ba.slice(axis=1, coordinate=0).shape == (nx, nz))  # coronal
+                self.assertTrue(ba.slice(axis=2, coordinate=.0002).shape == (ny, nx))  # horizontal
+                # tests out of bound
+                with self.assertRaises(ValueError):
+                    ba.slice(axis=1, coordinate=123)
+                self.assertTrue(ba.slice(axis=1, coordinate=21, mode='clip').shape == (nx, nz))  # another coronal
+
+    def test_slice_volumes(self):
         """
         here we test the different volumes and mappings
         """
-        # the label volume contains the region index (not id!),
+        ba = self.ba
+        nx, ny, nz = ba.bc.nxyz
         iregions = ba.slice(axis=0, coordinate=0, volume=ba.label)
         assert np.all(np.unique(iregions) == np.array([0, 1327]))
         rgb_slice = ba.slice(axis=0, coordinate=0, volume='annotation')

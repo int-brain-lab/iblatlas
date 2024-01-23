@@ -148,19 +148,6 @@ class BrainCoordinates:
         """numpy.array: Coordinates of the element volume[0, 0, 0] in the coordinate space."""
         return np.array([self.nx, self.ny, self.nz])
 
-    """Methods ratios to indices"""
-    def r2ix(self, r):
-        # FIXME Document
-        return int((self.nx - 1) * r)
-
-    def r2iy(self, r):
-        # FIXME Document
-        return int((self.nz - 1) * r)
-
-    def r2iz(self, r):
-        # FIXME Document
-        return int((self.nz - 1) * r)
-
     """Methods distance to indices"""
     @staticmethod
     def _round(i, round=True):
@@ -459,10 +446,13 @@ class BrainAtlas:
     yet this class can be used for other atlases arises.
     """
 
-    """numpy.array: An image volume."""
+    """numpy.array: A 3D image volume."""
     image = None
-    """numpy.array: An annotation label volume."""
+    """numpy.array: A 3D annotation label volume."""
     label = None
+    """numpy.array: One or several optional data volumes, the 3 last dimensions should match
+    the image and the label volumes dimensions"""
+    volumes = None
 
     def __init__(self, image, label, dxyz, regions, iorigin=[0, 0, 0],
                  dims2xyz=[0, 1, 2], xyz2dims=[0, 1, 2]):
@@ -478,8 +468,8 @@ class BrainAtlas:
         self.image = image
         self.label = label
         self.regions = regions
-        self.dims2xyz = dims2xyz
-        self.xyz2dims = xyz2dims
+        self.dims2xyz = np.array(dims2xyz)
+        self.xyz2dims = np.array(xyz2dims)
         assert np.all(self.dims2xyz[self.xyz2dims] == np.array([0, 1, 2]))
         assert np.all(self.xyz2dims[self.dims2xyz] == np.array([0, 1, 2]))
         # create the coordinate transform object that maps volume indices to real world coordinates
@@ -492,8 +482,13 @@ class BrainAtlas:
 
     @staticmethod
     def _get_cache_dir():
+        """
+        ./histology/ATLAS/Needles/Allen
+        Where . is the main ONE cache directory
+        :return: pathlib.Path
+        """
         par = one.params.get(silent=True)
-        path_atlas = Path(par.CACHE_DIR).joinpath('histology', 'ATLAS', 'Needles', 'Allen', 'flatmaps')
+        path_atlas = Path(par.CACHE_DIR).joinpath('histology', 'ATLAS', 'Needles', 'Allen')
         return path_atlas
 
     def mask(self):
@@ -729,7 +724,7 @@ class BrainAtlas:
         cmap : str, matplotlib.colors.Colormap
             The Colormap instance or registered colormap name used to map scalar data to colors.
             Defaults to 'bone'.
-        volume : str
+        volume : str | np.array
             If 'boundary', assumes image is an outline of boundaries between all regions.
             FIXME How does this affect the plot?
         **kwargs
@@ -746,10 +741,11 @@ class BrainAtlas:
         if not cmap:
             cmap = plt.get_cmap('bone')
 
-        if volume == 'boundary':
-            imb = np.zeros((*im.shape[:2], 4), dtype=np.uint8)
-            imb[im == 1] = np.array([0, 0, 0, 255])
-            im = imb
+        if isinstance(volume, str):
+            if volume == 'boundary':
+                imb = np.zeros((*im.shape[:2], 4), dtype=np.uint8)
+                imb[im == 1] = np.array([0, 0, 0, 255])
+                im = imb
 
         ax.imshow(im, extent=extent, cmap=cmap, **kwargs)
         return ax
@@ -795,7 +791,10 @@ class BrainAtlas:
             - if volume='volume', region_values must have shape ba.image.shape
             - if volume='value', region_values must have shape ba.regions.id
         :param mapping: mapping to use. Options can be found using ba.regions.mappings.keys()
-        :return: 2d array or 3d RGB numpy int8 array
+        :return: 2d array or 3d RGB numpy int8 array of dimensions:
+            - 0: nap x ndv (sagittal slice)
+            - 1: nml x ndv (coronal slice)
+            - 2: nap x nml (horizontal slice)
         """
         if axis == 0:
             index = self.bc.x2i(np.array(coordinate), mode=mode)
@@ -804,43 +803,53 @@ class BrainAtlas:
         elif axis == 2:
             index = self.bc.z2i(np.array(coordinate), mode=mode)
 
-        # np.take is 50 thousand times slower than straight slicing !
         def _take(vol, ind, axis):
+            """
+            This is a 2 steps process to get the slice along the correct axis
+            1) slice the volume according to the mapped axis corresponding to the sclice
+            we do this because np.take is 50 thousand times slower than straight slicing !
+            2) reshape the output array according to the slice specifications
+            """
+            volume_axis = self.xyz2dims[axis]
             if mode == 'clip':
-                ind = np.minimum(np.maximum(ind, 0), vol.shape[axis] - 1)
-            if axis == 0:
-                return vol[ind, :, :]
-            elif axis == 1:
-                return vol[:, ind, :]
-            elif axis == 2:
-                return vol[:, :, ind]
+                ind = np.minimum(np.maximum(ind, 0), vol.shape[volume_axis] - 1)
+            if volume_axis == 0:
+                slic = vol[ind, :, :]
+            elif volume_axis == 1:
+                slic = vol[:, ind, :]
+            elif volume_axis == 2:
+                slic = vol[:, :, ind]
+            output_sizes = [[1, 2], [0, 2], [1, 0]]  # we expect those sizes where index is the axis
+            if np.diff(self.xyz2dims[output_sizes[axis]])[0] < 0:
+                slic = slic.transpose().copy()
+            return slic
 
         def _take_remap(vol, ind, axis, mapping):
             # For the labels, remap the regions indices according to the mapping
             return self._get_mapping(mapping=mapping)[_take(vol, ind, axis)]
 
         if isinstance(volume, np.ndarray):
-            return _take(volume, index, axis=self.xyz2dims[axis])
+            return _take(volume, index, axis=axis)
         elif volume in 'annotation':
-            iregion = _take_remap(self.label, index, self.xyz2dims[axis], mapping)
+            iregion = _take_remap(self.label, index, axis=axis, mapping=mapping)
             return self._label2rgb(iregion)
         elif volume == 'image':
-            return _take(self.image, index, axis=self.xyz2dims[axis])
+            return _take(self.image, index, axis=axis)
         elif volume == 'value':
-            return region_values[_take_remap(self.label, index, self.xyz2dims[axis], mapping)]
+            return region_values[_take_remap(self.label, index, axis, mapping)]
         elif volume == 'image':
-            return _take(self.image, index, axis=self.xyz2dims[axis])
+            return _take(self.image, index, axis=axis)
         elif volume in ['surface', 'edges']:
             self.compute_surface()
-            return _take(self.surface, index, axis=self.xyz2dims[axis])
+            return _take(self.surface, index, axis=axis)
         elif volume == 'boundary':
-            iregion = _take_remap(self.label, index, self.xyz2dims[axis], mapping)
+            iregion = _take_remap(self.label, index, axis, mapping)
             return self.compute_boundaries(iregion)
 
         elif volume == 'volume':
             if bc is not None:
                 index = bc.xyz2i(np.array([coordinate] * 3))[axis]
-            return _take(region_values, index, axis=self.xyz2dims[axis])
+            return _take(region_values, index, axis=axis)
 
     def compute_boundaries(self, values):
         """
@@ -896,7 +905,6 @@ class BrainAtlas:
         :param **kwargs: matplotlib.pyplot.imshow kwarg arguments
         :return: matplotlib ax object
         """
-
         cslice = self.slice(ap_coordinate, axis=1, volume=volume, mapping=mapping, region_values=region_values)
         return self._plot_slice(np.moveaxis(cslice, 0, 1), extent=self.extent(axis=1), volume=volume, **kwargs)
 
@@ -964,14 +972,11 @@ class BrainAtlas:
         :param kwargs:
         :return:
         """
-
         self.compute_surface()
         ix, iy = np.meshgrid(np.arange(self.bc.nx), np.arange(self.bc.ny))
         iz = self.bc.z2i(self.top)
         inds = self._lookup_inds(np.stack((ix, iy, iz), axis=-1))
-
         regions = self._get_mapping(mapping=mapping)[self.label.flat[inds]]
-
         if volume == 'annotation':
             im = self._label2rgb(regions)
         elif volume == 'image':
@@ -1290,8 +1295,10 @@ class AllenAtlas(BrainAtlas):
 
     """numpy.array: A diffusion weighted imaging (DWI) image volume.
 
-    The Allen atlas DWI average template volume has with the shape (ap, ml, dv) and contains uint16
-    values.  FIXME What do the values represent?
+    This average template brain was created from images of 1,675 young adult C57BL/6J mouse brains
+    acquired using serial two-photon tomography.
+    This volume has a C-ordered shape of (ap, ml, dv) and contains uint16
+    values.
     """
     image = None
 
