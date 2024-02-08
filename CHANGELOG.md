@@ -1,9 +1,12 @@
-## [1.0.0]
-
+## [0.5.0]
 ### Added
-- `iblatlas.genomics` module for working with genomics data from Allen contains
-  - the Allen gene expression atlas in the `iblatlas.genomics.agea` module
-  - the Allen cell types atlas in the `iblatlas.genomics.merfish` module
+- `iblatlas.genomics.merfish` module for working with the Allen gene expression
+ atlas in the `iblatlas.genomics.merfish` module
+
+## [0.4.0]
+### Added
+- `iblatlas.genomics.agea` module for working with the Allen gene expression
+ atlas in the `iblatlas.genomics.agea` module
 ### Modified
 - slices of the atlas are now always returned with consistent sizes regardless of the volume layout on disk
 - atlases now can have an extra dimension in the image volume, to allow for multiple layers
