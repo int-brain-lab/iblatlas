@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 
 from iblatlas.genomics import agea
+from iblatlas.genomics import merfish
 
 
 class TestLoadAgea(unittest.TestCase):
@@ -38,3 +39,13 @@ class TestLoadAgea(unittest.TestCase):
             self.assertEqual(atlas_agea.label.shape, (58, 41, 67))
             # on windows we need to close the memmap for the tempdir to be deleted
             gene_expression_volumes._mmap.close()
+
+
+class TestMerfish(unittest.TestCase):
+
+    def test_rgba(self):
+        array = np.array([4278216447, 4293910672]).astype(np.uint32)
+        assert np.all(np.isclose(
+            merfish.int2rgb(array), np.array([[1., 0.4, 0., 1.], [0.56470588, 0.87843137, 0.9372549, 1.]])))
+        assert np.all(np.isclose(
+            merfish.int2rgb(array, dtype=int), np.array([[255, 102, 0, 255], [144, 224, 239, 255]], dtype=int)))
