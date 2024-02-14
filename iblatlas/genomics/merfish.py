@@ -38,7 +38,7 @@ def load(folder_cache=None):
         import dask.dataframe as dd
         df_cells = dd.read_parquet(list(folder_cache.rglob('*_cells.pqt')))
         df_cells = df_cells.compute()
-    except ImportError:
+    except Exception:  # there are more subtle errors than import errors if dask is intalled partially
         df_cells = pd.concat([pd.read_parquet(f) for f in folder_cache.rglob('*_cells.pqt')])
     # reads in the other tables
     df_classes = pd.read_parquet(folder_cache.joinpath('classes.pqt'))

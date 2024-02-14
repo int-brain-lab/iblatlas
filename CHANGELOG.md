@@ -1,3 +1,8 @@
+## [0.5.1]
+### Modified
+- `iblatlas.genomics.merfish.load` does not return an error when dask is installed but
+dask.dataframe is not.
+
 ## [0.5.0]
 ### Added
 - `iblatlas.genomics.merfish` module for working with the Allen gene expression
