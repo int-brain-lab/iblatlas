@@ -302,7 +302,7 @@ def _plot_slice_vector(coords, slice, values, mapping, empty_color='silver', cle
     else:
         fig = ax.get_figure()
 
-    colormap = cm.get_cmap(cmap)
+    colormap = colors.get_cmap(cmap)
     norm = colors.Normalize(vmin=clevels[0], vmax=clevels[1])
     nan_vals = np.isnan(values)
     rgba_color = np.full((values.size, 4), fill_value=np.nan)
@@ -521,7 +521,7 @@ def plot_scalar_on_flatmap(regions, values, depth=0, flatmap='dorsal_cortex', ma
     d_idx = int(np.round(depth / ba.res_um))  # need to find nearest to 25
 
     if background == 'boundary':
-        cmap_bound = cm.get_cmap("bone_r").copy()
+        cmap_bound = colors.get_cmap("bone_r").copy()
         cmap_bound.set_under([1, 1, 1], 0)
 
     if ax:
@@ -893,7 +893,7 @@ def plot_swanson_vector(acronyms=None, values=None, ax=None, hemisphere=None, br
 
     if acronyms is not None:
         ibr, vals = br.propagate_down(acronyms, values)
-        colormap = cm.get_cmap(cmap)
+        colormap = colors.get_cmap(cmap)
         vmin = vmin or np.nanmin(vals)
         vmax = vmax or np.nanmax(vals)
         norm = colors.Normalize(vmin=vmin, vmax=vmax)
