@@ -1,3 +1,7 @@
+## [0.5.2]
+### Modified
+- `iblatlas.plots` uses colors.get_cmap instead of deprecated cm.get_cmap
+
 ## [0.5.1]
 ### Modified
 - `iblatlas.genomics.merfish.load` does not return an error when dask is installed but
