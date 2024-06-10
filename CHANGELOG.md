@@ -1,6 +1,10 @@
+## [0.5.3]
+### Modified
+- `iblatlas.plots` uses matplotlib.colormaps.get_cmap instead of deprecated cm.get_cmap
+
 ## [0.5.2]
 ### Modified
-- `iblatlas.plots` uses colors.get_cmap instead of deprecated cm.get_cmap
+- `iblatlas.plots` uses colors.get_cmap instead of deprecated colors.get_cmap
 
 ## [0.5.1]
 ### Modified
