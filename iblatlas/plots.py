@@ -914,9 +914,9 @@ def plot_swanson_vector(acronyms=None, values=None, ax=None, hemisphere=None, br
         norm = colors.Normalize(vmin=vmin, vmax=vmax)
         rgba_color = colormap(norm(vals), bytes=True)
         if show_cbar:
-            _cbar = fig.colorbar(cm.ScalarMappable(norm=norm, cmap=cmap),
-                            ax=ax, orientation='vertical', extend=extend,
-            )
+            fig.colorbar(cm.ScalarMappable(norm=norm, cmap=cmap),
+                         ax=ax, orientation='vertical', extend=extend,
+                         )
 
     if mask is not None:
         imr, _ = br.propagate_down(mask, np.ones_like(mask))
