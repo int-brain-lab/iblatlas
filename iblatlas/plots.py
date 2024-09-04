@@ -907,7 +907,7 @@ def plot_swanson_vector(acronyms=None, values=None, ax=None, hemisphere=None, br
         elif isinstance(cmap, str):
             colormap = matplotlib.colormaps.get_cmap(cmap)
         else:
-            raise ValueError(f"Invalid option for `cmap`")
+            raise ValueError("`cmap` option must be of type `str` or `matplotlib.colors.Colormap`")
 
         vmin = vmin if vmin is not None else np.nanmin(vals)
         vmax = vmax if vmax is not None else np.nanmax(vals)
@@ -915,8 +915,8 @@ def plot_swanson_vector(acronyms=None, values=None, ax=None, hemisphere=None, br
         rgba_color = colormap(norm(vals), bytes=True)
         if show_cbar:
             _cbar = fig.colorbar(cm.ScalarMappable(norm=norm, cmap=cmap),
-                     ax=ax, orientation='vertical', extend=extend,
-                )
+                            ax=ax, orientation='vertical', extend=extend,
+            )
 
     if mask is not None:
         imr, _ = br.propagate_down(mask, np.ones_like(mask))
