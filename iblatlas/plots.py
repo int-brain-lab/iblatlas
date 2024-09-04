@@ -855,8 +855,8 @@ def plot_swanson_vector(acronyms=None, values=None, ax=None, hemisphere=None, br
         Minimum value to restrict the colormap
     vmax: float
         Maximum value to restrict the colormap
-    cmap: string
-        matplotlib named colormap to use
+    cmap: string or matplotlib.colors.Colormap
+        matplotlib colormap to use
     show_cbar: bool, default=False
         Whether to display a colorbar.
     extend: str, default='neither'
