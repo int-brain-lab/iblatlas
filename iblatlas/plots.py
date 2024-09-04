@@ -829,7 +829,7 @@ def plot_scalar_on_barplot(acronyms, values, errors=None, order=True, ax=None, b
 def plot_swanson_vector(acronyms=None, values=None, ax=None, hemisphere=None, br=None, orientation='landscape',
                         empty_color='silver', vmin=None, vmax=None, cmap='viridis', annotate=False, annotate_n=10,
                         annotate_order='top', annotate_list=None, mask=None, mask_color='w', fontsize=10,
-                        show_cbar=False, **kwargs):
+                        show_cbar=False, extend='neither', **kwargs):
     """
     Function to plot scalar value per allen region on the swanson projection. Plots on a vecortised version of the
     swanson projection
@@ -859,6 +859,8 @@ def plot_swanson_vector(acronyms=None, values=None, ax=None, hemisphere=None, br
         matplotlib named colormap to use
     show_cbar: bool, default=False
         Whether to display a colorbar.
+    extend: str, default='neither'
+        Which side of the colorbar to extend. See `colorbar` documentation.
     annotate : bool, default=False
         If true, labels the regions with acronyms.
     annotate_n: int
@@ -907,19 +909,9 @@ def plot_swanson_vector(acronyms=None, values=None, ax=None, hemisphere=None, br
         else:
             raise ValueError(f"Invalid option for `cmap`")
 
-        if show_cbar:
-            if (vmin is not None) and (vmax is not None):
-                extend = 'both'
-            elif vmin is not None:
-                extend = 'min'
-            elif vmax is not None:
-                extend = 'max'
-            else:
-                extend = 'neither'
-
         vmin = vmin if vmin is not None else np.nanmin(vals)
         vmax = vmax if vmax is not None else np.nanmax(vals)
-        norm = colors.Normalize(vmin=vmin, vmax=vmax)#, clip=True)
+        norm = colors.Normalize(vmin=vmin, vmax=vmax)
         rgba_color = colormap(norm(vals), bytes=True)
         if show_cbar:
             _cbar = fig.colorbar(cm.ScalarMappable(norm=norm, cmap=cmap),
