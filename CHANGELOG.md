@@ -1,3 +1,7 @@
+## [0.5.4]
+### Modified
+- `iblatlas.plots.plot_swanson_vector` option to show colorbar
+
 ## [0.5.3]
 ### Modified
 - `iblatlas.plots` uses matplotlib.colormaps.get_cmap instead of deprecated cm.get_cmap
