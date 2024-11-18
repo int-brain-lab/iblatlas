@@ -1493,7 +1493,7 @@ class AllenAtlas(BrainAtlas):
             self.regions.volume = self.regions.volume * (self.res_um / 1e3) ** 3
 
 
-def NeedlesAtlas(*args, **kwargs):
+def NeedlesAtlas(*args, **kwargs) -> AllenAtlas:
     """
     Instantiates an atlas.BrainAtlas corresponding to the Allen CCF at the given resolution
     using the IBL Bregma and coordinate system. The Needles atlas defines a stretch along AP

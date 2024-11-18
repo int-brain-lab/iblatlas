@@ -658,7 +658,7 @@ class BrainRegions(_BrainRegions):
         _, user_indices = ismember(user_aids, self.id)
         self.compute_hierarchy()
         ia, ib = ismember(self.hierarchy, user_indices)
-        v = np.zeros_like(ia, dtype=np.float64) * np.NaN
+        v = np.zeros_like(ia, dtype=np.float64) * np.nan
         v[ia] = values[ib]
         all_values = np.nanmedian(v, axis=0)
         indices = np.where(np.any(ia, axis=0))[0]
