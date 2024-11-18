@@ -1,6 +1,6 @@
 # iblatlas
 Tools to manipulate hierarchical 3D representations of the mouse brain anatomy for electrophysiolgy experiments.
-The tools are mainly using the the Allen CCF although some other atlases can be used.
+The tools are mainly using the Allen CCF although some other atlases can be used.
 
 **This repository uses minimal requirements, based of standard `matplotlib`, `numpy` and `scipy` libraries, to the exclusion
 of more complex visualization tools such as `pyqt`.**

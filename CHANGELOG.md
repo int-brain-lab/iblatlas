@@ -1,3 +1,8 @@
+## [0.5.5]
+### Modified
+- removed instances of `np.NaN` to replace with `np.nan` for numpy 2.0 compatibility
+
+
 ## [0.5.4]
 ### Modified
 - `iblatlas.plots.plot_swanson_vector` option to show colorbar
