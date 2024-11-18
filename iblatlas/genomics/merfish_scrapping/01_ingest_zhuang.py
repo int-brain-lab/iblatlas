@@ -45,7 +45,7 @@ def int_after_colon(text):
         captured_integer = int(match.group(1))
         return float(captured_integer)
     else:
-        return np.NaN
+        return np.nan
 
 
 def fcn_groupby_check_unique(df_cells, group, fields):
@@ -79,7 +79,7 @@ def reindex_missing_rows(df):
         elif isinstance(missing_rec[k], int | np.uint32 | np.int32 | np.uint64 | np.int64):
             missing_rec[k] = 0
         elif isinstance(missing_rec[k], float | np.float32 | np.float64):
-            missing_rec[k] = np.NaN
+            missing_rec[k] = np.nan
     df = df.reindex(pd.Index(np.arange(np.max(df.index) + 1), name=df.index.name), fill_value=0)
     df.iloc[imiss, :] = missing_rec
     return df

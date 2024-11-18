@@ -527,7 +527,7 @@ class TestInsertion(unittest.TestCase):
 
         brain_atlas = _create_mock_atlas()
         brain_atlas.compute_surface()
-        brain_atlas.top = brain_atlas.top * np.NaN
+        brain_atlas.top = brain_atlas.top * np.nan
         ins = Insertion.from_dict(d, brain_atlas=brain_atlas)
         # eval the entry point, should be super close
         dxyz = ins.trajectory.eval_x(d['x'] / 1e6) - np.array((d['x'], d['y'], d['z'])) / 1e6
@@ -562,7 +562,7 @@ class TestInsertion(unittest.TestCase):
         brain_exit = insertion.get_brain_exit(insertion.trajectory, brain_atlas)
         self.assertTrue(brain_exit[2] == brain_atlas.bc.i2z(104))
         # test getting no intersection with the brain surface
-        brain_atlas.srf_xyz *= np.NaN
+        brain_atlas.srf_xyz *= np.nan
         with self.assertRaises(ValueError):
             insertion.get_brain_entry(insertion.trajectory, brain_atlas)
         self.assertIsNone(insertion.get_brain_entry(insertion.trajectory, brain_atlas, mode='none'))
