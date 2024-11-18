@@ -42,7 +42,7 @@ class TestBrainRegions(unittest.TestCase):
 
     def test_get(self):
         ctx = self.brs.get(688)
-        self.assertTrue(len(ctx.acronym) == 1 and ctx.acronym == 'CTX')
+        self.assertEqual('CTX', ctx.acronym)
 
     def test_ancestors_descendants(self):
         # here we use the same brain region as in the alyx test
