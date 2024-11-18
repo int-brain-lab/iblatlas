@@ -831,7 +831,7 @@ def plot_swanson_vector(acronyms=None, values=None, ax=None, hemisphere=None, br
                         annotate_order='top', annotate_list=None, mask=None, mask_color='w', fontsize=10,
                         show_cbar=False, extend='neither', **kwargs):
     """
-    Function to plot scalar value per allen region on the swanson projection. Plots on a vecortised version of the
+    Function to plot scalar value per allen region on the swanson projection. Plots on a vectorised version of the
     swanson projection
 
     Parameters
