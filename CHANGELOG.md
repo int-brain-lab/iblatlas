@@ -1,7 +1,7 @@
 ## [0.5.5]
 ### Modified
 - removed instances of `np.NaN` to replace with `np.nan` for numpy 2.0 compatibility
-
+- set python 3.10 as minimum python version
 
 ## [0.5.4]
 ### Modified
