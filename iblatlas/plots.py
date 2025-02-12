@@ -921,7 +921,7 @@ def plot_swanson_vector(acronyms=None, values=None, ax=None, hemisphere=None, br
     if mask is not None:
         imr, _ = br.propagate_down(mask, np.ones_like(mask))
     else:
-        imr = []
+        imr = np.array([])
 
     sw_json = swanson_json()
     if hemisphere == 'both':

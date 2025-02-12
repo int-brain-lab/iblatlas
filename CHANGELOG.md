@@ -1,3 +1,7 @@
+## [0.5.6]
+### Bugfix
+- Cast list to numpy array for compatibility with numpy 2.0
+
 ## [0.5.5]
 ### Modified
 - removed instances of `np.NaN` to replace with `np.nan` for numpy 2.0 compatibility
