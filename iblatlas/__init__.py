@@ -194,4 +194,4 @@ References
 .. [10] Allen Mouse Common Coordinate Framework Technical White Paper (October 2017 v3)
    http://help.brain-map.org/download/attachments/8323525/Mouse_Common_Coordinate_Framework.pdf
 """
-__version__ = '0.5.5'
+__version__ = '0.5.6'
