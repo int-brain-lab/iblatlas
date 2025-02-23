@@ -779,6 +779,7 @@ class BrainAtlas:
             - 2: horizontal slice (along dv axis)
         :param volume:
             - 'image' - allen image volume
+            - 'rindex' - brain region index value
             - 'annotation' - allen annotation volume
             - 'surface' - outer surface of mesh
             - 'boundary' - outline of boundaries between all regions
@@ -830,6 +831,8 @@ class BrainAtlas:
 
         if isinstance(volume, np.ndarray):
             return _take(volume, index, axis=axis)
+        elif volume == 'rindex':
+            return _take_remap(self.label, index, axis=axis, mapping=mapping)
         elif volume in 'annotation':
             iregion = _take_remap(self.label, index, axis=axis, mapping=mapping)
             return self._label2rgb(iregion)
