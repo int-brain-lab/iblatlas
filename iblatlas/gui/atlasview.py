@@ -179,6 +179,16 @@ class TopView(QtWidgets.QMainWindow):
         for line in self.ctrl.lines_horizontal:
             line.setValue(val)
 
+    def set_volume(self, volume: np.ndarray, colormap: str = 'magma'):
+        self.ctrl.volume = volume
+        cmap = pg.colormap.get(colormap)
+        levels = np.nanpercentile(volume, [0.5, 99.5])
+        for _, sl in self.ctrl.slices.items():
+            sl.ctrl.image_layers['image'].image_item.setLookupTable(cmap.getLookupTable(alpha=True))
+            sl.ctrl.image_layers['image'].pg_kwargs = {'mode': 'clip', 'levels': levels}
+        self._refresh()
+
+
 class SliceView(QtWidgets.QWidget):
     """
     Window containing a volume slice
@@ -189,7 +199,7 @@ class SliceView(QtWidgets.QWidget):
         self.topview = topview
         self.ctrl = SliceController(self, waxis, haxis, daxis, **kwargs)
         uic.loadUi(Path(__file__).parent.joinpath('sliceview.ui'), self)
-        self.add_image_layer(slice_kwargs={'volume': 'image', 'mode': 'clip'},
+        self.add_image_layer(slice_kwargs={'mode': 'clip'},
                              pg_kwargs={'opacity': 0.8}, name='image')
         self.add_image_layer(slice_kwargs={'volume': 'annotation', 'mode': 'clip'},
                              pg_kwargs={'opacity': 0.2}, name='annotation')
@@ -240,6 +250,7 @@ class SliceView(QtWidgets.QWidget):
             return
         qpoint = self.ctrl.image_layers['image'].image_item.mapFromScene(scenepos)
         iw, ih, w, h, v, region = self.ctrl.cursor2xyamp(qpoint)
+        self.label_v.setText(f"{v:.2f}")
         self.label_x.setText(f"{w * 1e6:.0f}")
         self.label_y.setText(f"{h * 1e6:.0f}")
         self.label_ix.setText(f"{iw:.0f}")
@@ -393,6 +404,8 @@ class ControllerTopView(PgImageController):
                     _slice = self.atlas.compute_boundaries(_slice)
                     _slice = np.tile(_slice.astype(np.uint8)[:, :, np.newaxis], (1, 1, 4)) * 255
                     layer.image_item.setOpacity(1)
+            elif layer_name == 'image':
+                _slice = self.atlas.slice(coord, axis=daxis, mapping=mapping, volume=self.volume, **layer.slice_kwargs)
             else:
                 _slice = self.atlas.slice(coord, axis=daxis, mapping=mapping, **layer.slice_kwargs)
             fig.ctrl.set_image(layer.image_item, _slice, dw, dh, wl, hl, **layer.pg_kwargs)
@@ -401,17 +414,16 @@ class ControllerTopView(PgImageController):
 
     def set_top(self):
         self.atlas.compute_surface()
-        if np.diff(ismember(self.atlas.dims2xyz, [0, 1])[1])[0] < 0:
-            img = self.atlas.top.transpose().copy()
-        else:
-            img = self.atlas.top.copy()
+        img = self.atlas.top.T.copy()
         img[np.isnan(img)] = np.nanmin(img)  # img has dims ml, ap
-        dw, dh = (self.atlas.bc.dxyz[0], self.atlas.bc.dxyz[1])
-        wl, hl = (self.atlas.bc.xlim, self.atlas.bc.ylim)
         if (ir := self.highlight_region) is not None:
             _, iir = self.atlas.regions.descendants(self.atlas.regions.id[ir], return_indices=True)
-            bounds = np.any(ismember(self.atlas.label, iir)[0], axis=-1).astype(bool).T
+            bounds = np.any(ismember(self.atlas.label, iir)[0], axis=self.atlas.xyz2dims[-1]).astype(bool).T
             img[bounds] = np.nan
+        if np.diff(ismember(self.atlas.dims2xyz, [0, 1])[1])[0] > 0:
+            img = img.T
+        dw, dh = (self.atlas.bc.dxyz[0], self.atlas.bc.dxyz[1])
+        wl, hl = (self.atlas.bc.xlim, self.atlas.bc.ylim)
         self.set_image(self.image_layers['top'].image_item, img, dw, dh, wl[0], hl[0])
 
     def set_scatter(self, fig, coord=0):
@@ -427,9 +439,6 @@ class ControllerTopView(PgImageController):
             y = self.scatter_data[idx, 2]
 
         fig.ctrl.set_points(x, y)
-
-    def set_volume(self, volume):
-        self.volume = volume
 
 
 class SliceController(PgImageController):
@@ -454,15 +463,19 @@ class SliceController(PgImageController):
         :return:
         """
         iw, ih, w, h, v = super(SliceController, self).cursor2xyamp(qpoint)
-        ba = self.qwidget.topview.ctrl.atlas
+        ctrl = self.qwidget.topview.ctrl
         xyz = np.zeros(3)
         xyz[np.array([self.waxis, self.haxis, self.daxis])] = [w, h, self.slice_coord]
         mapping = self.qwidget.topview.comboBox_mappings.currentText()
         try:
-            region = ba.regions.get(ba.get_labels(xyz, mapping=mapping))
+            region = ctrl.atlas.regions.get(ctrl.atlas.get_labels(xyz, mapping=mapping))
         except ValueError:
             region = None
+        i = ctrl.atlas._lookup(xyz, mode='clip')
+        vol = ctrl.atlas.image if isinstance(ctrl.volume, str) else ctrl.volume
+        v = vol[*np.unravel_index(i, vol.shape)]
         return iw, ih, w, h, v, region
+
 
 
 @dataclass
