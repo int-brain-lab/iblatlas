@@ -12,7 +12,7 @@ from qtpy.QtCore import Qt, QSortFilterProxyModel, QRegExp, Signal, Slot
 import numpy as np
 from iblutil.numerical import ismember
 from iblatlas.atlas import BrainRegions
-from qt_helpers import qt
+from ibllib.misc import qt  # FIXME: remove ibllib dependency
 
 
 class BrainTree(QWidget):

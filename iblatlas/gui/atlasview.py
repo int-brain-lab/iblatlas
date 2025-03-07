@@ -23,9 +23,9 @@ import pyqtgraph as pg
 import matplotlib
 
 from iblatlas.atlas import AllenAtlas
-from qt_helpers import qt
 
-from iblapps.atlasview.braintree import BrainTree
+from ibllib.misc import qt  # FIXME: remove ibllib dependency
+from iblatlas.gui.braintree import BrainTree
 from iblutil.numerical import ismember
 
 
@@ -179,13 +179,13 @@ class TopView(QtWidgets.QMainWindow):
         for line in self.ctrl.lines_horizontal:
             line.setValue(val)
 
-    def set_volume(self, volume: np.ndarray, colormap: str = 'magma'):
+    def set_volume(self, volume: np.ndarray, colormap: str = 'magma', levels=None):
         self.ctrl.volume = volume
         cmap = pg.colormap.get(colormap)
-        levels = np.nanpercentile(volume, [0.5, 99.5])
+        self.ctrl.levels = np.nanpercentile(volume, [0.5, 99.5]) if levels is None else levels
         for _, sl in self.ctrl.slices.items():
             sl.ctrl.image_layers['image'].image_item.setLookupTable(cmap.getLookupTable(alpha=True))
-            sl.ctrl.image_layers['image'].pg_kwargs = {'mode': 'clip', 'levels': levels}
+            sl.ctrl.image_layers['image'].pg_kwargs = {'mode': 'clip', 'levels': self.ctrl.levels}
         self._refresh()
 
 
@@ -491,12 +491,15 @@ class ImageLayer:
     pg_kwargs: dict = field(default_factory=lambda: {})
     slice_kwargs: dict = field(default_factory=lambda: {'volume': 'image', 'mode': 'clip'})
 
+
 def view(res=25, title=None, atlas=None):
     """ application entry point """
     qt.create_app()
     av = TopView._get_or_create(title=title, res=res, atlas=atlas)
     av.show()
     return av
+
+
 
 
 if __name__ == "__main__":
