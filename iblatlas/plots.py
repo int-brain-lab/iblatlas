@@ -243,7 +243,7 @@ def load_slice_files(slice, mapping):
     return slice_data
 
 
-def _plot_slice_vector(coords, slice, values, mapping, empty_color='silver', clevels=None, cmap='viridis', show_cbar=False,
+def _plot_slice_vector(coords, slice, values, mapping, empty_color='silver', mask=None, mask_color='w', clevels=None, cmap='viridis', show_cbar=False,
                        ba=None, ax=None, slice_json=None, **kwargs):
     """
     Function to plot scalar value per allen region on vectorised version of histology slice. Do not use directly but use
@@ -335,7 +335,9 @@ def _plot_slice_vector(coords, slice, values, mapping, empty_color='silver', cle
     for i, reg in enumerate(slice_json):
         color = rgba_color[reg['thisID']]
         reg_id = reg['thisID']
-        if any(np.isnan(color)):
+        if reg_id in mask:
+            color = mask_color
+        elif any(np.isnan(color)):
             color = empty_color
         else:
             color = color / 255
@@ -364,7 +366,7 @@ def _plot_slice_vector(coords, slice, values, mapping, empty_color='silver', cle
 
 def plot_scalar_on_slice(regions, values, coord=-1000, slice='coronal', mapping=None, hemisphere='left',
                          background='image', cmap='viridis', clevels=None, show_cbar=False, empty_color='silver',
-                         brain_atlas=None, ax=None, vector=False, slice_files=None, **kwargs):
+                         mask=None, mask_color='w', brain_atlas=None, ax=None, vector=False, slice_files=None, **kwargs):
     """
     Function to plot scalar value per region on histology slice.
 
@@ -449,11 +451,21 @@ def plot_scalar_on_slice(regions, values, coord=-1000, slice='coronal', mapping=
                 region_values[br.n_lr:] = np.nan
                 region_values[0] = np.nan
 
+    if mask is not None:
+        in_mask, _ = ismember(br.acronym[br.mappings[map]], np.array(mask))
+        mask_idx = np.where(in_mask)[0]
+        if hemisphere == 'left':
+            mask_idx = mask_idx[mask_idx > br.n_lr]
+        elif hemisphere == 'right':
+            mask_idx = mask_idx[mask_idx <= br.n_lr]
+    else:
+        mask_idx = []
+
     if show_cbar:
         if vector:
             fig, ax, cbar = _plot_slice_vector(coord / 1e6, slice, region_values, map, clevels=clevels, cmap=cmap, ba=ba,
                                                ax=ax, empty_color=empty_color, show_cbar=show_cbar, slice_json=slice_files,
-                                               **kwargs)
+                                               mask=mask_idx, mask_color=mask_color, **kwargs)
         else:
             fig, ax, cbar = _plot_slice(coord / 1e6, slice, region_values, 'value', background=background, map=map,
                                         clevels=clevels, cmap=cmap, ba=ba, ax=ax, show_cbar=show_cbar)
@@ -461,7 +473,8 @@ def plot_scalar_on_slice(regions, values, coord=-1000, slice='coronal', mapping=
     else:
         if vector:
             fig, ax = _plot_slice_vector(coord / 1e6, slice, region_values, map, clevels=clevels, cmap=cmap, ba=ba,
-                                         ax=ax, empty_color=empty_color, show_cbar=show_cbar, slice_json=slice_files, **kwargs)
+                                         ax=ax, empty_color=empty_color, show_cbar=show_cbar, slice_json=slice_files,
+                                         mask=mask_idx, mask_color=mask_color, **kwargs)
         else:
             fig, ax = _plot_slice(coord / 1e6, slice, region_values, 'value', background=background, map=map, clevels=clevels,
                                   cmap=cmap, ba=ba, ax=ax, show_cbar=show_cbar)
@@ -1190,4 +1203,5 @@ def annotate_swanson(ax, acronyms=None, orientation='landscape', br=None, thres=
             continue
         # rotate the labels if the display is in portrait mode
         xy = np.flip(labels[ilabel]) if orientation == 'portrait' else labels[ilabel]
-        ax.annotate(br.acronym[ilabel], xy=xy, ha='center', va='center', **kwargs)
+        ax.text(xy[0], xy[1], br.acronym[ilabel],  ha='center', va='center', **kwargs)
+        #ax.annotate(br.acronym[ilabel], xy=xy, ha='center', va='center', **kwargs)
