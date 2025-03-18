@@ -243,8 +243,8 @@ def load_slice_files(slice, mapping):
     return slice_data
 
 
-def _plot_slice_vector(coords, slice, values, mapping, empty_color='silver', mask=None, mask_color='w', clevels=None, cmap='viridis', show_cbar=False,
-                       ba=None, ax=None, slice_json=None, **kwargs):
+def _plot_slice_vector(coords, slice, values, mapping, empty_color='silver', mask=None, mask_color='w', clevels=None,
+                       cmap='viridis', show_cbar=False, ba=None, ax=None, slice_json=None, **kwargs):
     """
     Function to plot scalar value per allen region on vectorised version of histology slice. Do not use directly but use
     through plot_scalar_on_slice function with vector=True.
@@ -1203,5 +1203,5 @@ def annotate_swanson(ax, acronyms=None, orientation='landscape', br=None, thres=
             continue
         # rotate the labels if the display is in portrait mode
         xy = np.flip(labels[ilabel]) if orientation == 'portrait' else labels[ilabel]
-        ax.text(xy[0], xy[1], br.acronym[ilabel],  ha='center', va='center', **kwargs)
-        #ax.annotate(br.acronym[ilabel], xy=xy, ha='center', va='center', **kwargs)
+        ax.text(xy[0], xy[1], br.acronym[ilabel], ha='center', va='center', **kwargs)
+        # ax.annotate(br.acronym[ilabel], xy=xy, ha='center', va='center', **kwargs)
