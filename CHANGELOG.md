@@ -1,3 +1,8 @@
+## [0.6.0]
+### Added
+- `iblatlas.genomics.agea` option to load pre-processed volume
+- `iblatlas.gui.atlasview` QT-based GUI to explore the Allen Atlas 
+
 ## [0.5.7]
 ### Modified
 - `iblatlas.plots.plot_scalar_on_slice` option to add mask with specific color when using vector=True
