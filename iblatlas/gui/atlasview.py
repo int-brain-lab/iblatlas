@@ -61,9 +61,9 @@ class TopView(QtWidgets.QMainWindow):
         # setup one horizontal and one vertical line that can be moved
         for line in self.ctrl.lines_coronal:
             line.sigDragged.connect(self._refresh_coronal)
-        for line in self.ctrl.lines_sagittal:# sigPositionChangeFinished
+        for line in self.ctrl.lines_sagittal:  # sigPositionChangeFinished
             line.sigDragged.connect(self._refresh_sagittal)
-        for line in self.ctrl.lines_horizontal:# sigPositionChangeFinished
+        for line in self.ctrl.lines_horizontal:  # sigPositionChangeFinished
             line.sigDragged.connect(self._refresh_horizontal)
         # set the horizontal slice start value in the middle of the volume
         self.ctrl.lines_horizontal[0].setValue(-.004)
@@ -82,13 +82,11 @@ class TopView(QtWidgets.QMainWindow):
         self.ctrl.fig_brain_tree.signal_region_selected.connect(self.on_brain_tree_selection)
         self.setFocusPolicy(QtCore.Qt.StrongFocus)
 
-
     def focusInEvent(self, event):
         print('focusInEvent')
         for fig in self.ctrl.figures.values():
             fig.setWindowState(fig.windowState() & ~QtCore.Qt.WindowMinimized | QtCore.Qt.WindowActive)
             fig.activateWindow()
-
 
     def closeEvent(self, event):
         super(TopView, self).closeEvent(event)
@@ -163,7 +161,6 @@ class TopView(QtWidgets.QMainWindow):
                             mapping=self.comboBox_mappings.currentText())
         for line in self.ctrl.lines_coronal:
             line.setValue(val)
-
 
     def _refresh_sagittal(self, line=None):
         line = self.ctrl.line_sagittal if line is None else line
@@ -297,7 +294,6 @@ class PgImageController:
         """returns the first image item"""
         return next((self.image_layers[k].image_item for k in self.image_layers))
 
-
     def set_image(self, pg_image_item, im, dw, dh, w0, h0, **pg_kwargs):
         """
         :param im:
@@ -376,11 +372,10 @@ class ControllerTopView(PgImageController):
             'sagittal': self.fig_sagittal,
             'horizontal': self.fig_horizontal,
         }
+
     @property
     def figures(self) -> dict:
         return self.slices | {'brain_tree': self.fig_brain_tree}
-
-
 
     def set_slice(self, fig, coord=0, mapping="Allen"):
         waxis, haxis, daxis = (fig.ctrl.waxis, fig.ctrl.haxis, fig.ctrl.daxis)
@@ -437,7 +432,6 @@ class ControllerTopView(PgImageController):
             idx = np.where(self.scatter_data_ind[:, 0] == self.atlas.bc.x2i(coord))[0]
             x = self.scatter_data[idx, 1]
             y = self.scatter_data[idx, 2]
-
         fig.ctrl.set_points(x, y)
 
 
@@ -477,7 +471,6 @@ class SliceController(PgImageController):
         return iw, ih, w, h, v, region
 
 
-
 @dataclass
 class ImageLayer:
     """
@@ -500,10 +493,12 @@ def view(res=25, title=None, atlas=None):
     return av
 
 
-
-
-if __name__ == "__main__":
+def main():
     app = QtWidgets.QApplication([])
     w = TopView()
     w.show()
     sys.exit(app.exec_())
+
+
+if __name__ == "__main__":
+    main()

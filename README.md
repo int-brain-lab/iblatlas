@@ -13,6 +13,8 @@ of more complex visualization tools such as `pyqt`.**
 ## Installation
 `pip install iblatlas`
 
+For PyQT5 features
+
 ## Contributing
 Changes are merged by pull requests.
 Release checklist:
