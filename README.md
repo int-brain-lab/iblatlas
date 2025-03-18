@@ -13,6 +13,9 @@ of more complex visualization tools such as `pyqt`.**
 ## Installation
 `pip install iblatlas`
 
+For GUI features, you'll need to install with optional dependencies:
+`pip install iblatlas[gui]`
+
 ## Contributing
 Changes are merged by pull requests.
 Release checklist:
