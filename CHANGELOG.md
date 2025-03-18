@@ -1,3 +1,7 @@
+## [0.5.7]
+### Modified
+- `iblatlas.plots.plot_scalar_on_slice` option to add mask with specific color when using vector=True
+
 ## [0.5.6]
 ### Bugfix
 - Cast list to numpy array for compatibility with numpy 2.0
