@@ -78,7 +78,7 @@ def compute_agea_ppca(input_memmap, atlas_agea, output_memmap=None, ppca_n_compo
     gexps[gexps < 0] = np.nan
     C, ss, M, X, Ye = pyppca.ppca(gexps, d=ppca_n_components, dia=True)
     output_memmap = np.copy(input_memmap) if output_memmap is None else output_memmap
-    output_memmap[:, *np.unravel_index(inside_idx, input_memmap.shape[1:])] = Ye.T
+    output_memmap[:, *np.unravel_index(inside_idx, input_memmap.shape[1:])] = Ye.T  # noqa
     output_memmap[:, *outside_idx] = input_memmap[:, *outside_idx]
     return output_memmap
 
