@@ -1753,7 +1753,12 @@ def get_bc(res_um=10):
 
 
 def _download_depth_files(file_name):
-
+    """
+    These files have been generated using this script
+    https://github.com/int-brain-lab/ibldevtools/blob/master/Mayo/flatmaps/2025-03-20_depths_from_streamlines.py
+    :param file_name:
+    :return:
+    """
     file_path = BrainAtlas._get_cache_dir().joinpath('depths', file_name)
     if not file_path.exists():
         file_path.parent.mkdir(exist_ok=True, parents=True)
