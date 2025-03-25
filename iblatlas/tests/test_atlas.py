@@ -1,10 +1,11 @@
 import unittest
+from unittest import mock
 
 import numpy as np
 import matplotlib.pyplot as plt
 
 from iblatlas.atlas import (BrainCoordinates, cart2sph, sph2cart, Trajectory, BrainAtlas,
-                            Insertion, ALLEN_CCF_LANDMARKS_MLAPDV_UM, AllenAtlas)
+                            Insertion, ALLEN_CCF_LANDMARKS_MLAPDV_UM, AllenAtlas, get_bc, xyz_to_depth)
 from iblatlas.regions import BrainRegions, FranklinPaxinosRegions
 from iblatlas.plots import prepare_lr_data, reorder_data
 from iblutil.numerical import ismember
@@ -727,6 +728,21 @@ class TestFranklinPaxinos(unittest.TestCase):
         np.testing.assert_equal(self.frs.acronym2id('ORBl2/3'), 412)
         np.testing.assert_equal(self.brs.acronym2id('ORBl2/3'), 412)
         np.testing.assert_equal(self.frs.acronym2id('LO-2/3'), np.array([]))
+
+
+class TestDepths(unittest.TestCase):
+
+    @mock.patch('iblatlas.atlas._download_depth_files',
+                side_effect=[np.array([35838117, 41837813]), np.array([400, 600])])
+    def test_depth_lookup(self, mock_file):
+        bc = get_bc(25)
+        # First two coordinates in isocortex, third in thalamus
+        idx = np.array([[245, 274, 37], [286, 327, 53], [225, 287, 170]])  # ap, ml, dv
+        xyz = np.c_[bc.i2x(idx[:, 1]), bc.i2y(idx[:, 0]), bc.i2z(idx[:, 2])]
+
+        depths = xyz_to_depth(xyz)
+
+        assert np.array_equal(depths, np.array([400, 600, np.nan]), equal_nan=True)
 
 
 if __name__ == "__main__":

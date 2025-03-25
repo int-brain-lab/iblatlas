@@ -1723,3 +1723,81 @@ class FranklinPaxinosAtlas(BrainAtlas):
             raise ValueError(
                 f'"{file_volume.suffix}" files not supported, must be either ".nrrd" or ".npz"')
         return volume
+
+
+def get_bc(res_um=10):
+    """
+    Get BrainCoordinates object for Allen Atlas with bregma origin without reading in volumes
+
+    Parameters
+    ----------
+    res_um : float or int
+        The resolution of the brain coordinates object to return in um. Options are 50, 25 or 10
+
+    Returns
+    -------
+    BrainCoordinates object with bregma origin
+    """
+
+    dims2xyz = np.array([1, 0, 2])
+    scaling = np.array([1, 1, 1])
+    sf = 50 / res_um
+    im_shape = np.array([int(264 * sf), int(228 * sf), int(160 * sf)])
+    iorigin = (ALLEN_CCF_LANDMARKS_MLAPDV_UM['bregma'] / res_um)
+    dxyz = res_um * 1e-6 * np.array([1, -1, -1]) * scaling
+    nxyz = np.array(im_shape)[dims2xyz]
+    bc = BrainCoordinates(nxyz=nxyz, xyz0=(0, 0, 0), dxyz=dxyz)
+    bc = BrainCoordinates(nxyz=nxyz, xyz0=-bc.i2xyz(iorigin), dxyz=dxyz)
+
+    return bc
+
+
+def _download_depth_files(file_name):
+    """
+    These files have been generated using this script
+    https://github.com/int-brain-lab/ibldevtools/blob/master/Mayo/flatmaps/2025-03-20_depths_from_streamlines.py
+    :param file_name:
+    :return:
+    """
+    file_path = BrainAtlas._get_cache_dir().joinpath('depths', file_name)
+    if not file_path.exists():
+        file_path.parent.mkdir(exist_ok=True, parents=True)
+        aws.s3_download_file(f'atlas/depths/{file_path.name}', file_path)
+
+    return np.load(file_path)
+
+
+def xyz_to_depth(xyz, res_um=25):
+    """
+    For a given xyz coordinates find the depth from the surface of the cortex. Note the lookup will only
+    work for xyz cooordinates that are in the Isocortex of the Allen volume. If coordinates outside of this
+    region are given then the depth is returned as nan.
+
+    Parameters
+    ----------
+    xyz : numpy.array
+        An (n, 3) array of Cartesian coordinates. The order is ML, AP, DV and coordinates should be given in meters
+        relative to bregma.
+
+    res_um : float or int
+        The resolution of the brain atlas to do the depth lookup
+
+    Returns
+    -------
+        numpy.array
+        The depths from the surface of the cortex for each cartesian coordinate. If the coordinate does not lie within
+        the Isocortex, depth value returned is nan
+    """
+
+    ind_flat = _download_depth_files(f'depths_ind_{res_um}.npy')
+    depths = _download_depth_files(f'depths_um_{res_um}.npy')
+    bc = get_bc(res_um=res_um)
+
+    ixyz = bc.xyz2i(xyz, mode='clip')
+    iravel = np.ravel_multi_index((ixyz[:, 1], ixyz[:, 0], ixyz[:, 2]), (bc.ny, bc.nx, bc.nz))
+    a, b = ismember(ind_flat, iravel)
+
+    lookup_depths = np.full(iravel.shape, np.nan, dtype=np.float32)
+    lookup_depths[b] = depths[a]
+
+    return lookup_depths
