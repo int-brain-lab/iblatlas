@@ -1,3 +1,9 @@
+## [0.7.0]
+### Added
+- `iblatlas.atlas.xyz_to_depth` a lookup from xyz coord to depth in cortex
+### Modified
+- Moved `iblatlas.plots.get_bc10` to `iblatlas.atlas.get_bc`
+
 ## [0.6.0]
 ### Added
 - `iblatlas.genomics.agea` option to load pre-processed volume
