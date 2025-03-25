@@ -18,31 +18,9 @@ import one.remote.aws as aws
 
 from iblatlas.flatmaps import FlatMap, _swanson_labels_positions, swanson, swanson_json
 from iblatlas.regions import BrainRegions
-from iblatlas.atlas import AllenAtlas, BrainCoordinates, ALLEN_CCF_LANDMARKS_MLAPDV_UM
+from iblatlas.atlas import AllenAtlas, get_bc
 
 _logger = logging.getLogger(__name__)
-
-
-def get_bc_10():
-    """
-    Get BrainCoordinates object for 10um Allen Atlas
-
-    Returns
-    -------
-    BrainCoordinates object
-    """
-    dims2xyz = np.array([1, 0, 2])
-    res_um = 10
-    scaling = np.array([1, 1, 1])
-    image_10 = np.array([1320, 1140, 800])
-
-    iorigin = (ALLEN_CCF_LANDMARKS_MLAPDV_UM['bregma'] / res_um)
-    dxyz = res_um * 1e-6 * np.array([1, -1, -1]) * scaling
-    nxyz = np.array(image_10)[dims2xyz]
-    bc = BrainCoordinates(nxyz=nxyz, xyz0=(0, 0, 0), dxyz=dxyz)
-    bc = BrainCoordinates(nxyz=nxyz, xyz0=-bc.i2xyz(iorigin), dxyz=dxyz)
-
-    return bc
 
 
 def plot_polygon(ax, xy, color, reg_id, edgecolor='k', linewidth=0.3, alpha=1):
@@ -295,7 +273,7 @@ def _plot_slice_vector(coords, slice, values, mapping, empty_color='silver', mas
     if ba.res_um == 10:
         bc10 = ba.bc
     else:
-        bc10 = get_bc_10()
+        bc10 = get_bc(res_um=10)
 
     if ax is None:
         fig, ax = plt.subplots()
