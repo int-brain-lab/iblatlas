@@ -31,6 +31,15 @@ dynamic = ["dependencies", "version"]
 dependencies = {file = ["requirements.txt"]}
 version = {attr = "iblatlas.__version__"}
 
+[project.optional-dependencies]
+gui = [
+    "pyqt5",
+    "qtpy"
+]
+[project.gui-scripts]
+atlas = "iblatlas.gui.atlasview:main"
+
+
 [tool.setuptools]
 include-package-data = true
 
