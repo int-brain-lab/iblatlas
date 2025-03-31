@@ -99,6 +99,67 @@ def sph2cart(r, theta, phi):
     return x, y, z
 
 
+def rodrigues_rotation(v: np.ndarray, k: np.ndarray, theta: float) -> np.ndarray:
+    """
+    Rotate vector v around axis k by angle theta using Rodrigues' rotation formula.
+
+    Parameters
+    ----------
+    v : np.ndarray
+        The vector to be rotated, shape (3,)
+    k : np.ndarray
+        The axis of rotation (should be a unit vector), shape (3,)
+    theta : float
+        The angle of rotation in radians
+
+    Returns
+    -------
+    np.ndarray
+        The rotated vector, shape (3,)
+
+    Notes
+    -----
+    https://en.wikipedia.org/wiki/Rodrigues%27_rotation_formula
+    """
+    k = k / np.linalg.norm(k)  # Ensure k is a unit vector
+    return (v * np.cos(theta) +
+            np.cross(k, v) * np.sin(theta) +
+            k * np.dot(k, v) * (1 - np.cos(theta)))
+
+
+def tilt_spherical(theta: float, phi: float, tilt_angle: float = -5) -> tuple[float, float]:
+    """
+    Rotate the coordinates (theta, phi) around the x-axis by tilt_angle degrees.
+
+    Parameters
+    ----------
+    theta : float
+        Polar angle from z+ (up) in degrees
+    phi : float
+        Azimuthal angle from x+ (right), counter-clockwise, in degrees
+    tilt_angle : float, optional
+        The angle of rotation around the x-axis in degrees. Default is -5.
+        A positive tilt_angle lifts the mouse chin upwards.
+
+    Returns
+    -------
+    theta_ : float
+        The new polar angle in degrees after tilt correction
+    phi_ : float
+        The new azimuthal angle in degrees after tilt correction,
+        normalized to the range [0, 360)
+
+    Notes
+    -----
+    This function uses the Rodrigues rotation formula to apply the tilt.
+    """
+    v = np.array(sph2cart(1, theta, phi))  # unit vector
+    k = np.array([1, 0, 0])  # rotation axis
+    vrot = rodrigues_rotation(v, k, np.deg2rad(tilt_angle))
+    _, theta_, phi_ = cart2sph(*vrot)
+    return theta_, (phi_ % 360 + 360) % 360
+
+
 class BrainCoordinates:
     """
     Class for mapping and indexing a 3D array to real-world coordinates.
