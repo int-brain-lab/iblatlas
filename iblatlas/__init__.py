@@ -1,3 +1,5 @@
+__version__ = '0.8.0'
+
 """A package for working with brain atlases.
 
 For examples and tutorials on using the IBL atlas package, see
@@ -194,4 +196,4 @@ References
 .. [10] Allen Mouse Common Coordinate Framework Technical White Paper (October 2017 v3)
    http://help.brain-map.org/download/attachments/8323525/Mouse_Common_Coordinate_Framework.pdf
 """
-__version__ = '0.7.0'
+

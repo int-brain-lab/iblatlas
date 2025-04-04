@@ -1,3 +1,11 @@
+## [0.8.0]
+### Added
+- `iblatlas.atlas.tilt_spherical` allows to recompute spherical coordinates after tilting the brain
+- documented the creation of merfish volumes in ./iblatlas/genomics/merfish_scrapping/02_create_volumes.py
+### Fixed
+- `iblatlas.gui.atlasview` syntax is now compatible with Python 3.10
+- `iblatlas.atlas.xyz_to_depth` allows for duplicate ixyz indices in the volume 
+
 ## [0.7.0]
 ### Added
 - `iblatlas.atlas.xyz_to_depth` a lookup from xyz coord to depth in cortex
