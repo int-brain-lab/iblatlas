@@ -1856,9 +1856,9 @@ def xyz_to_depth(xyz, res_um=25):
 
     ixyz = bc.xyz2i(xyz, mode='clip')
     iravel = np.ravel_multi_index((ixyz[:, 1], ixyz[:, 0], ixyz[:, 2]), (bc.ny, bc.nx, bc.nz))
-    a, b = ismember(ind_flat, iravel)
+    a, b = ismember(iravel, ind_flat)
 
     lookup_depths = np.full(iravel.shape, np.nan, dtype=np.float32)
-    lookup_depths[b] = depths[a]
+    lookup_depths[a] = depths[b]
 
     return lookup_depths
