@@ -4,7 +4,8 @@ from unittest import mock
 import numpy as np
 import matplotlib.pyplot as plt
 
-from iblatlas.atlas import (BrainCoordinates, cart2sph, sph2cart, Trajectory, BrainAtlas,
+import iblatlas.atlas
+from iblatlas.atlas import (BrainCoordinates, Trajectory, BrainAtlas,
                             Insertion, ALLEN_CCF_LANDMARKS_MLAPDV_UM, AllenAtlas, get_bc, xyz_to_depth)
 from iblatlas.regions import BrainRegions, FranklinPaxinosRegions
 from iblatlas.plots import prepare_lr_data, reorder_data
@@ -676,15 +677,35 @@ class TestsCoordinatesSimples(unittest.TestCase):
         theta = np.array([0., 180., 0., 0., 90., 90., 0., 90., 90.])
         r = np.array([0., 1, 1, 0., 1, 1, 0., 1, 1])
 
-        r_, t_, p_ = cart2sph(ml, ap, dv)
+        r_, t_, p_ = iblatlas.atlas.cart2sph(ml, ap, dv)
         assert np.all(np.isclose(r, r_))
         assert np.all(np.isclose(phi, p_))
         assert np.all(np.isclose(theta, t_))
 
-        x_, y_, z_ = sph2cart(r, theta, phi)
+        x_, y_, z_ = iblatlas.atlas.sph2cart(r, theta, phi)
         assert np.all(np.isclose(ml, x_))
         assert np.all(np.isclose(ap, y_))
         assert np.all(np.isclose(dv, z_))
+
+    def test_tilt_rotation(self):
+        test_cases = [
+            {"phi": 90, "theta": 5, "tilt": -5, "expected_phi": 90, "expected_theta": 10},
+            {"phi": 270, "theta": 5, "tilt": -5, "expected_phi": 270, "expected_theta": 0},
+            {"phi": 0, "theta": 0, "tilt": 5, "expected_phi": 270, "expected_theta": 5},
+            {"phi": 0, "theta": 5, "tilt": -5, "expected_phi": 44.89, "expected_theta": 7.067},
+        ]
+        # Run tests
+        for i, case in enumerate(test_cases, 1):
+            with self.subTest(phi=case['phi'], theta=case['theta'], tilt=case['tilt']):
+                theta_, phi_ = iblatlas.atlas.tilt_spherical(case['theta'], case['phi'], case['tilt'])
+                # Check if the result is close to the expected value (within 0.1 degree)
+                phi_close = np.isclose(phi_, case['expected_phi'], atol=0.01)
+                theta_close = np.isclose(theta_, case['expected_theta'], atol=0.01)
+                fail_message = (f"Test case {i} failed: expected (phi, theta) = ({case['expected_phi']},"
+                                f" {case['expected_theta']}), got ({phi_:.3f}, {theta_:.3f})")
+                assert theta_close, fail_message
+                if ~np.isclose(theta_, 0):
+                    assert phi_close, fail_message
 
 
 class TestFranklinPaxinos(unittest.TestCase):

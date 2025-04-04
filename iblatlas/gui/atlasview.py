@@ -467,7 +467,7 @@ class SliceController(PgImageController):
             region = None
         i = ctrl.atlas._lookup(xyz, mode='clip')
         vol = ctrl.atlas.image if isinstance(ctrl.volume, str) else ctrl.volume
-        v = vol[*np.unravel_index(i, vol.shape)] # noqa
+        v = np.take(vol, i)
         return iw, ih, w, h, v, region
 
 
