@@ -2,7 +2,8 @@ import pandas as pd
 import numpy as np
 from iblutil.numerical import ismember
 import matplotlib.pyplot as plt
-from iblatlas.atlas import get_bc, BrainAtlas, aws
+from iblatlas.atlas import get_bc, BrainAtlas, aws, AllenAtlas
+from iblatlas.regions import BrainRegions
 
 
 def _download_depth_files(file_name):
@@ -60,6 +61,42 @@ def xyz_to_depth(xyz, per=True, res_um=25):
     return lookup_depths
 
 
+def get_mask(volume='annotation', br=None):
+    """
+    Generate a mask to plot results onto
+
+    Parameters:
+    -----------
+    volume : str, optional
+        The type of volume to project. Options are:
+        - 'image': Projects the anatomical image using max intensity.
+        - 'annotation': Projects the labeled regions and maps them to RGB colors.
+        - 'boundary': Projects labeled regions and extracts anatomical boundaries.
+        Default is 'annotation'.
+
+    br : BrainRegions, optional
+        An instance of the BrainRegions If None, a default BrainRegions is initialized.
+
+    Returns:
+    --------
+    img : np.ndarray
+        The resulting 2D flatmap projection image, either grayscale, RGB, or binary mask,
+        depending on the selected volume type.
+    """
+
+    br = br or BrainRegions()
+    if volume == 'image':
+        img = np.load(_download_depth_files('dorsal_image.npy'))
+    elif volume == 'annotation':
+        img = np.load(_download_depth_files('dorsal_annotation.npy'))
+        img = br.rgb[img]
+    elif volume == 'boundary':
+        img = np.load(_download_depth_files('dorsal_annotation.npy'))
+        img = AllenAtlas.compute_boundaries(img)
+
+    return img
+
+
 def validate_aggr(aggr: str) -> None:
     """
     Validates if the provided aggregation type is valid.
@@ -74,7 +111,7 @@ def validate_aggr(aggr: str) -> None:
     AssertionError
         If the aggregation type is not one of the allowed values.
     """
-    poss_aggrs = ['sum', 'count', 'mean', 'std', 'median', 'min', 'max']
+    poss_aggrs = ['sum', 'count', 'mean', 'std', 'median', 'min', 'max', 'first', 'last']
     assert aggr in poss_aggrs, f"Aggregation must be one of {poss_aggrs}."
 
 

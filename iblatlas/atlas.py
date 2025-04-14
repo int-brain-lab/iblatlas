@@ -915,7 +915,8 @@ class BrainAtlas:
                 index = bc.xyz2i(np.array([coordinate] * 3))[axis]
             return _take(region_values, index, axis=axis)
 
-    def compute_boundaries(self, values):
+    @staticmethod
+    def compute_boundaries(values):
         """
         Compute the boundaries between regions on slice
         :param values:

@@ -29,6 +29,7 @@ import h5py
 import pandas as pd
 import numpy as np
 from iblatlas.atlas import AllenAtlas, get_bc
+from iblatlas.streamlines.utils import project_volume_onto_flatmap
 from pathlib import Path
 file_path = Path('/Users/admin/Downloads/flatmap')
 
@@ -121,3 +122,19 @@ flatmap = f1['flat'][:]
 f1.close()
 
 np.save(file_path.joinpath('dorsal_flatmap.npy'), flatmap)
+
+
+# -------------------------------------------------------------------------------------------------
+# Get the image and annotation files
+# -------------------------------------------------------------------------------------------------
+ba = AllenAtlas(10)
+
+# Annotation
+img = project_volume_onto_flatmap(ba.label, res_um=10, aggr='first', plot=False)
+img[0, 0] = 0
+np.save(file_path.joinpath('dorsal_annotation.npy'), img.astype(np.int16))
+
+# Image
+img = project_volume_onto_flatmap(ba.image, res_um=10, aggr='first', plot=False)
+img[0, 0] = 0
+np.save(file_path.joinpath('dorsal_image.npy'), img.astype(np.float16))
