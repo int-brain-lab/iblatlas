@@ -754,7 +754,7 @@ class TestFranklinPaxinos(unittest.TestCase):
 
 class TestDepths(unittest.TestCase):
 
-    @mock.patch('iblatlas.streamlines.utils._download_depth_files',
+    @mock.patch('iblatlas.streamlines.utils.np.load',
                 side_effect=[np.array([35838117, 41837813]), np.array([400, 600])])
     def test_depth_lookup(self, mock_file):
         bc = get_bc(25)
