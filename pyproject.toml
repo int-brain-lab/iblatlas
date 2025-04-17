@@ -45,4 +45,5 @@ include-package-data = true
 
 [tool.setuptools.packages.find]
 # exclude packages matching these glob patterns
-exclude = ["iblatlas.tests*", "examples*", "iblatlas.genomics.gene_expression_scrapping"]
+exclude = ["iblatlas.tests*", "examples*", "iblatlas.genomics.gene_expression_scrapping",
+    "iblatlas.streamlines.streamlines_scraping"]

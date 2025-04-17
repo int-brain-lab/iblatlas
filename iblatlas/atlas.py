@@ -915,7 +915,8 @@ class BrainAtlas:
                 index = bc.xyz2i(np.array([coordinate] * 3))[axis]
             return _take(region_values, index, axis=axis)
 
-    def compute_boundaries(self, values):
+    @staticmethod
+    def compute_boundaries(values):
         """
         Compute the boundaries between regions on slice
         :param values:
@@ -1811,54 +1812,3 @@ def get_bc(res_um=10):
     bc = BrainCoordinates(nxyz=nxyz, xyz0=-bc.i2xyz(iorigin), dxyz=dxyz)
 
     return bc
-
-
-def _download_depth_files(file_name):
-    """
-    These files have been generated using this script
-    https://github.com/int-brain-lab/ibldevtools/blob/master/Mayo/flatmaps/2025-03-20_depths_from_streamlines.py
-    :param file_name:
-    :return:
-    """
-    file_path = BrainAtlas._get_cache_dir().joinpath('depths', file_name)
-    if not file_path.exists():
-        file_path.parent.mkdir(exist_ok=True, parents=True)
-        aws.s3_download_file(f'atlas/depths/{file_path.name}', file_path)
-
-    return np.load(file_path)
-
-
-def xyz_to_depth(xyz, res_um=25):
-    """
-    For a given xyz coordinates find the depth from the surface of the cortex. Note the lookup will only
-    work for xyz cooordinates that are in the Isocortex of the Allen volume. If coordinates outside of this
-    region are given then the depth is returned as nan.
-
-    Parameters
-    ----------
-    xyz : numpy.array
-        An (n, 3) array of Cartesian coordinates. The order is ML, AP, DV and coordinates should be given in meters
-        relative to bregma.
-
-    res_um : float or int
-        The resolution of the brain atlas to do the depth lookup
-
-    Returns
-    -------
-        numpy.array
-        The depths from the surface of the cortex for each cartesian coordinate. If the coordinate does not lie within
-        the Isocortex, depth value returned is nan
-    """
-
-    ind_flat = _download_depth_files(f'depths_ind_{res_um}.npy')
-    depths = _download_depth_files(f'depths_um_{res_um}.npy')
-    bc = get_bc(res_um=res_um)
-
-    ixyz = bc.xyz2i(xyz, mode='clip')
-    iravel = np.ravel_multi_index((ixyz[:, 1], ixyz[:, 0], ixyz[:, 2]), (bc.ny, bc.nx, bc.nz))
-    a, b = ismember(iravel, ind_flat)
-
-    lookup_depths = np.full(iravel.shape, np.nan, dtype=np.float32)
-    lookup_depths[a] = depths[b]
-
-    return lookup_depths
