@@ -1,3 +1,11 @@
+## [0.9.0]
+### Added
+- `iblatlas.atlas.streamlines.xyz_to_depth` possible to get both absolute and percentage cortical depth.
+- merfish folder on AWS contains generated volumes
+
+### Modified
+- `iblatlas.atlas.streamlines` has its own package.
+
 ## [0.8.0]
 ### Added
 - `iblatlas.atlas.tilt_spherical` allows to recompute spherical coordinates after tilting the brain

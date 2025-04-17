@@ -25,7 +25,7 @@ def load(folder_cache=None):
     df_neurotransmitters: a dataframe of neurotransmitters (9, 2), where each record corresponds to a single
      neurotransmitter
     """
-    OLD_VERSIONS = ['2023-06-12']
+    OLD_VERSIONS = ['2024-02-02', '2023-06-12']
     folder_cache = Path(folder_cache or atlas.AllenAtlas._get_cache_dir().joinpath('merfish'))
     # check the AWS version and download the files if needed
     version_flag = next(folder_cache.glob('*.version'), None)
