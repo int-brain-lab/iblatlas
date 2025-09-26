@@ -1,6 +1,12 @@
+import tempfile
+from pathlib import Path
+import unittest
+from unittest import mock
+from textwrap import dedent
+
 import numpy as np
 import matplotlib.pyplot as plt
-import unittest
+
 from iblatlas.atlas import AllenAtlas, BrainRegions
 from iblatlas.flatmaps import FlatMap
 from iblatlas.plots import plot_swanson, annotate_swanson
@@ -118,3 +124,44 @@ class TestGeneExpression(unittest.TestCase):
         df_genes, gene_expression, atlas_agea = agea.load()
         self.assertEqual(df_genes.shape[0], gene_expression.shape[0])
         self.assertEqual(gene_expression.shape[1:], (58, 41, 67))
+
+
+class TestReadVolume(unittest.TestCase):
+
+    @mock.patch('iblatlas.atlas._download_atlas_allen')
+    def test_read_volume(self, mock_download):
+        """Test that NRRD files are read corrrectly, and redownloaded when corrupted."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmpdir_path = Path(tmpdir)
+            file_image = tmpdir_path / 'annotation_25.nrrd'
+            # create dummy files
+            file_image.write_bytes(b'\xFF')  # invalid nrrd
+            # mock the download to just write a dummy file
+            mock_download.side_effect = self._side_effect
+            with self.assertLogs('iblatlas.atlas', level='ERROR') as cm:
+                volume = AllenAtlas._read_volume(file_image)
+            self.assertIn('An error occured when loading atlas volumes', cm.output[0])
+            # the mock should have been called twice, once for each file
+            self.assertEqual(mock_download.call_count, 1)
+        self.assertEqual(volume.shape, (3, 3, 3))
+
+    @staticmethod
+    def _side_effect(file_path):
+        """Write a dummy file with correct header for nrrd."""
+        s = dedent(
+            """\
+            NRRD0003
+            type: unsigned char
+            dimension: 3
+            sizes: 3 3 3
+            spacings: 1.0458000000000001 1.0458000000000001 1.0458000000000001
+            kinds: domain domain domain
+            encoding: ASCII\n\n
+            """)
+        s += '\n'.join(map(str, list(range(3**3))))
+        file_path.write_bytes(s.encode())
+        return file_path
+
+
+if __name__ == "__main__":
+    unittest.main(exit=False, verbosity=2)

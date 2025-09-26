@@ -4,7 +4,6 @@ Classes for manipulating brain atlases, insertions, and coordinates.
 from pathlib import Path, PurePosixPath
 from dataclasses import dataclass
 import logging
-import os
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -1456,14 +1455,14 @@ class AllenAtlas(BrainAtlas):
         super().__init__(image, label, dxyz, regions, ibregma, dims2xyz=dims2xyz, xyz2dims=xyz2dims)
 
     @staticmethod
-    def _read_volume(file_volume):
+    def _read_volume(file_volume: Path):
         if file_volume.suffix == '.nrrd':
             try:
                 volume, _ = nrrd.read(file_volume, index_order='C')  # ml, dv, ap
             except nrrd.NRRDError as e:
-                _logger.warning(f"An error occured when loading atlas volumes: {e}. \
-                                  Deleting and redownloading the files.")
-                os.remove(file_volume)
+                _logger.error(f"An error occured when loading atlas volumes: {e}. \
+                                Deleting and redownloading the files.")
+                file_volume.unlink(missing_ok=True)
                 file_volume = _download_atlas_allen(file_volume)
                 volume, _ = nrrd.read(file_volume, index_order='C')  # ml, dv, ap
             # we want the coronal slice to be the most contiguous
