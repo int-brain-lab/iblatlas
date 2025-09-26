@@ -1455,9 +1455,16 @@ class AllenAtlas(BrainAtlas):
         super().__init__(image, label, dxyz, regions, ibregma, dims2xyz=dims2xyz, xyz2dims=xyz2dims)
 
     @staticmethod
-    def _read_volume(file_volume):
+    def _read_volume(file_volume: Path):
         if file_volume.suffix == '.nrrd':
-            volume, _ = nrrd.read(file_volume, index_order='C')  # ml, dv, ap
+            try:
+                volume, _ = nrrd.read(file_volume, index_order='C')  # ml, dv, ap
+            except nrrd.NRRDError as e:
+                _logger.error(f"An error occured when loading atlas volumes: {e}. \
+                                Deleting and redownloading the files.")
+                file_volume.unlink(missing_ok=True)
+                file_volume = _download_atlas_allen(file_volume)
+                volume, _ = nrrd.read(file_volume, index_order='C')  # ml, dv, ap
             # we want the coronal slice to be the most contiguous
             volume = np.transpose(volume, (2, 0, 1))  # image[iap, iml, idv]
         elif file_volume.suffix == '.npz':

@@ -1,3 +1,7 @@
+## [0.10.0]
+### Modified
+- attempt redownload of Allen atlas volume if file unreadable
+
 ## [0.9.0]
 ### Added
 - `iblatlas.atlas.streamlines.xyz_to_depth` possible to get both absolute and percentage cortical depth.
@@ -12,7 +16,7 @@
 - documented the creation of merfish volumes in ./iblatlas/genomics/merfish_scrapping/02_create_volumes.py
 ### Fixed
 - `iblatlas.gui.atlasview` syntax is now compatible with Python 3.10
-- `iblatlas.atlas.xyz_to_depth` allows for duplicate ixyz indices in the volume 
+- `iblatlas.atlas.xyz_to_depth` allows for duplicate ixyz indices in the volume
 
 ## [0.7.0]
 ### Added
@@ -23,7 +27,7 @@
 ## [0.6.0]
 ### Added
 - `iblatlas.genomics.agea` option to load pre-processed volume
-- `iblatlas.gui.atlasview` QT-based GUI to explore the Allen Atlas 
+- `iblatlas.gui.atlasview` QT-based GUI to explore the Allen Atlas
 
 ## [0.5.7]
 ### Modified
@@ -91,5 +95,5 @@ dask.dataframe is not.
 ## [0.1.0]
 
 ### Added
- - Atlas files that were located in the ibllib github repository. These include all files 
-   in the ibllib.atlas module, in examples.atlas and ibllib.tests.test_atlas.py 
+ - Atlas files that were located in the ibllib github repository. These include all files
+   in the ibllib.atlas module, in examples.atlas and ibllib.tests.test_atlas.py
