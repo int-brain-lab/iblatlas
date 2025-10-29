@@ -288,7 +288,8 @@ def _plot_slice_vector(coords, slice, values, mapping, empty_color='silver', mas
     rgba_color[~nan_vals] = colormap(norm(values[~nan_vals]), bytes=True)
 
     if slice_json is None:
-        slice_json = load_slice_files(slice, mapping)
+        slice_file = slice if slice != 'dorsal_cortex' else 'top'
+        slice_json = load_slice_files(slice_file, mapping)
 
     if slice == 'coronal':
         idx = bc10.y2i(coords)
@@ -307,8 +308,16 @@ def _plot_slice_vector(coords, slice, values, mapping, empty_color='silver', mas
         xlim = np.array([0, bc10.nx])
         ylim = np.array([0, bc10.ny])
 
-    if slice != 'top':
+    if slice not in ['top', 'dorsal_cortex']:
         slice_json = slice_json.item().get(str(int(idx)))
+
+    if slice == 'dorsal_cortex':
+        temp = []
+        for reg in slice_json:
+            ansc = ba.regions.ancestors(ba.regions.id[reg['thisID']])
+            if 'Isocortex' in ansc['acronym']:
+                temp.append(reg)
+        slice_json = temp
 
     for i, reg in enumerate(slice_json):
         color = rgba_color[reg['thisID']]
