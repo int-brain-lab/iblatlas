@@ -19,9 +19,10 @@ For GUI features, you'll need to install with optional dependencies:
 ## Contributing
 Changes are merged by pull requests.
 Release checklist:
-- [x] Update version in `iblatlas/__init__.py`
-- [x] Update `CHANGELOG.md`
-- [x] Create a pull request to the `main` branch on GitHub
-- [x] Once the PR is merged, create a new tag and push the tag
+- [ ] Update version in `iblatlas/__init__.py`
+- [ ] Update `CHANGELOG.md`
+- [ ] Merge changes to the `main` branch on GitHub
+- [ ] Create a new tag on `main` and push it: `git tag <version> && git push origin <version>`
+- [ ] Create a GitHub release from that tag (via the GitHub UI or `gh release create`)
 
-Once a tag is pushed on main the package is uploaded to PyPI using GitHub Actions.
+Once a GitHub release is published the package is uploaded to PyPI automatically via GitHub Actions.
