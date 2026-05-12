@@ -1,0 +1,26 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+type: software
+title: "iblatlas: IBL Atlas Module"
+abstract: >
+  A Python library for working with the Allen Mouse Brain Atlas and
+  IBL-derived volumetric data, including electrophysiological atlas
+  volumes, MERFISH cell-type density maps, and gene expression volumes,
+  all registered to the Allen Common Coordinate Framework.
+version: 0.10.0
+license: MIT
+repository-code: "https://github.com/int-brain-lab/iblatlas"
+url: "https://github.com/int-brain-lab/iblatlas"
+doi: "PLACEHOLDER"
+authors:
+  - name: "International Brain Laboratory"
+    email: "info@internationalbrainlab.org"
+    website: "https://www.internationalbrainlab.com"
+keywords:
+  - neuroscience
+  - mouse brain atlas
+  - Allen Common Coordinate Framework
+  - electrophysiology
+  - MERFISH
+  - gene expression
+  - Neuropixels

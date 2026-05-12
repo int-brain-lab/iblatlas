@@ -51,6 +51,7 @@ ROOT_DIR = Path("/mnt/s1/2025/denoise_agea")
     df_neurotransmitters,
 ) = merfish.load()
 df_cells["n_cells"] = 1.0
+# Convert continuous CCF coordinates to integer voxel indices on the AGEA 200 µm grid
 df_cells["ix"] = ba.bc.x2i(df_cells["x"].values).astype(np.int16)
 df_cells["iy"] = ba.bc.y2i(df_cells["y"].values).astype(np.int16)
 df_cells["iz"] = ba.bc.z2i(df_cells["z"].values).astype(np.int16)
@@ -59,13 +60,43 @@ df_cells["iz"] = ba.bc.z2i(df_cells["z"].values).astype(np.int16)
 def aggregates_slices(
     df_cells, section_type="coronal", brain_atlas=None, pivot_column="class"
 ):
+    """
+    Aggregate per-cell MERFISH counts into sparse 3-D voxel bins, handling coronal
+    and sagittal section geometries separately.
+
+    Because MERFISH cells come from discrete physical sections, we first count cells
+    within each (section, in-plane-voxel) bin, derive the mean out-of-plane coordinate
+    for that bin, convert it to a voxel index, and finally sum across sections that
+    land in the same 3-D voxel.  The column `n_slices` records how many sections
+    contributed to each voxel so that downstream code can normalise accordingly.
+
+    Parameters
+    ----------
+    df_cells : pd.DataFrame
+        One row per cell.  Must contain columns: donor_label, brain_section_label,
+        ix, iy, iz (voxel indices), x, y, z (CCF coordinates), n_cells, and the
+        pivot_column.
+    section_type : {'coronal', 'sagittal'}
+        Coronal donors: C57BL6J-638850, Zhuang-ABCA-1, Zhuang-ABCA-2.
+        Sagittal donors: Zhuang-ABCA-3, Zhuang-ABCA-4.
+    brain_atlas : AllenAtlas, optional
+    pivot_column : str
+        Hierarchical level to count ('class', 'subclass', 'neurotransmitter').
+
+    Returns
+    -------
+    df_vol : pd.DataFrame
+        Sparse voxel table with columns [ix, iy, iz, <cell-type labels>, n_cells, n_slices].
+    """
     brain_atlas = AllenAtlas() if brain_atlas is None else brain_atlas
     print(f"select {section_type} slices")
     # ['C57BL6J-638850',  'Zhuang-ABCA-1',  'Zhuang-ABCA-2',  'Zhuang-ABCA-3', 'Zhuang-ABCA-4']
     # Zhuang 3 and 4 are sagittal, all others coronal
     i_sagittal = df_cells["donor_label"].isin(["Zhuang-ABCA-3", "Zhuang-ABCA-4"])
     i_coronal = ~i_sagittal
-    # first for each slice, count the number of cells in each class and x, y voxels
+    # For coronal sections the out-of-plane axis is y (dorsoventral); for sagittal it is x (mediolateral).
+    # ih: the in-plane voxel index used for grouping within a section
+    # h:  the continuous coordinate of the out-of-plane axis, averaged per bin then converted to a voxel index
     match section_type:
         case "coronal":
             (ih, h) = ("ix", "y")
@@ -73,6 +104,7 @@ def aggregates_slices(
         case "sagittal":
             (ih, h) = ("iy", "x")
             df_cells_slices = df_cells.loc[i_sagittal, :].copy()
+    # Count cells per (section, in-plane voxel, ap-voxel) bin, pivoted by cell-type label
     df_slices = df_cells_slices.pivot_table(
         index=["brain_section_label", ih, "iz"],
         values="n_cells",
@@ -82,7 +114,8 @@ def aggregates_slices(
     )
     df_slices["n_cells"] = df_slices.sum(axis=1)
     df_slices["n_slices"] = 1
-    # for each x, y slice voxel, attach the average of the z coordinate
+    # Compute the mean out-of-plane continuous coordinate within each bin,
+    # which gives a representative position between sections for that voxel
     df_slices = df_slices.merge(
         df_cells_slices.loc[:, ["brain_section_label", ih, "iz", h]]
         .groupby(["brain_section_label", ih, "iz"])
@@ -91,6 +124,7 @@ def aggregates_slices(
         right_index=True,
         how="left",
     ).reset_index()
+    # Convert the mean out-of-plane coordinate to a voxel index
     if section_type == "coronal":
         df_slices["iy"] = brain_atlas.bc.y2i(df_slices["y"].values, mode="clip").astype(
             np.int16
@@ -99,6 +133,7 @@ def aggregates_slices(
         df_slices["ix"] = brain_atlas.bc.x2i(df_slices["x"].values, mode="clip").astype(
             np.int16
         )
+    # Sum across sections that map to the same 3-D voxel
     df_vol = df_slices.iloc[:, 1:].groupby(["ix", "iy", "iz"]).sum().reset_index()
     return df_vol
 
@@ -120,6 +155,7 @@ level_dictionary = {
     ),
 }
 
+# Aggregate coronal and sagittal sections independently, then merge
 df_vol_sagittal = aggregates_slices(
     df_cells, section_type="sagittal", brain_atlas=ba, pivot_column=LEVEL
 )
@@ -134,6 +170,8 @@ df_vol = (
 )
 # df_vol = df_vol_coronal
 classes = level_dictionary[LEVEL]["index"]
+# Normalise cell counts by the number of sections that overlapped each voxel,
+# so voxels covered by both coronal and sagittal sections are not double-counted
 df_vol.loc[:, classes] = (
     df_vol.loc[:, classes] / df_vol["n_slices"].values[:, np.newaxis]
 )
@@ -162,7 +200,17 @@ else:
 
 
 def interpolate_volume(i, iclass):
-    print(i, iclass)
+    """
+    Interpolate sparse voxel counts for one cell-type label onto the full bilateral 3-D grid.
+
+    Strategy:
+    - MERFISH sections cover only the right hemisphere (positive mediolateral x).
+    - All data-point x-coordinates are reflected to positive values so the interpolator
+      sees a denser, right-hemisphere-only point cloud.
+    - Linear scattered-data interpolation fills the right hemisphere; the left hemisphere
+      is then produced by flipping the result along the mediolateral axis.
+    """
+    # Build a meshgrid covering the right hemisphere only (x from midline to nx)
     xxx, yyy, zzz = np.meshgrid(
         np.arange(ba.bc.x2i(0), ba.bc.nx),
         np.arange(ba.bc.ny),
@@ -171,6 +219,8 @@ def interpolate_volume(i, iclass):
     )
     values = df_vol.loc[:, iclass].to_numpy()
     points = df_vol.loc[:, ["ix", "iy", "iz"]].to_numpy().astype(float)
+    # Reflect all x-coordinates to the right hemisphere (positive mediolateral)
+    # so that left-hemisphere observations also inform the interpolation
     points[:, 0] = ba.bc.x2i(np.abs(ba.bc.i2x(points[:, 0])))
 
     volume_interp = scipy.interpolate.griddata(
@@ -178,6 +228,7 @@ def interpolate_volume(i, iclass):
     )
     volume_interp = np.moveaxis(volume_interp, ba.xyz2dims, np.arange(3))
 
+    # Mirror the right hemisphere to obtain the left, then concatenate into a full bilateral volume
     volume_interp_dual = np.concatenate(
         (np.flip(volume_interp, axis=ba.xyz2dims[0]), volume_interp), axis=0
     )
