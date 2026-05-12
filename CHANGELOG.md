@@ -1,3 +1,7 @@
+## [1.0.0]
+### Added
+- `CITATION.cff` citation file for the repository
+
 ## [0.10.0]
 ### Modified
 - attempt redownload of Allen atlas volume if file unreadable
