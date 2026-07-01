@@ -3,10 +3,12 @@ from pathlib import Path
 
 import pandas as pd
 import numpy as np
+from scipy.ndimage import gaussian_filter
 
 import one.remote.aws as aws
 
 from iblatlas import atlas
+from iblatlas.genomics import agea
 
 _logger = logging.getLogger(__name__)
 
@@ -48,6 +50,85 @@ def load(folder_cache=None):
     df_genes = pd.read_parquet(folder_cache.joinpath('genes.pqt'))
     df_neurotransmitters = pd.read_parquet(folder_cache.joinpath('neurotransmitters.pqt'))
     return df_cells, df_classes, df_subclasses, df_supertypes, df_clusters, df_genes, df_neurotransmitters
+
+
+def denoise_volume(volume, brain_mask, n_drop_non_neuronal=5, sigma=0.5, seed=42):
+    """
+    Denoise a raw MERFISH cell-type density volume.
+
+    Raw volumes can contain NaN voxels with no nearby source data. Naively filling *every* NaN
+    voxel with Dirichlet noise also fills the background outside the brain with random noise,
+    which then bleeds a few voxels inward once Gaussian-smoothed. This restricts the
+    fill/smooth/normalize steps to `brain_mask` and re-zeroes anything outside it after smoothing.
+
+    :param volume: (n_types, dim0, dim1, dim2) raw density volume, as returned by
+     `load_volume(..., label='')`
+    :param brain_mask: (dim0, dim1, dim2) bool, True for voxels inside the brain (e.g.
+     `atlas_agea.label != 0`)
+    :param n_drop_non_neuronal: number of trailing non-neuronal types to drop (Astro-Epen,
+     OPC-Oligo, OEC, Vascular, Immune are always the last 5 rows at the 'class' level); set to 0
+     to keep all types
+    :param sigma: Gaussian smoothing sigma in voxels, applied per type independently; set to 0 to
+     disable
+    :param seed: seed for the Dirichlet noise used to fill in-brain voxels that are NaN across
+     every type
+    :return: a (n_types - n_drop_non_neuronal, dim0, dim1, dim2) float32 array; in-brain voxels
+     sum to ~1 over the type axis, out-of-brain voxels are 0
+    """
+    rng = np.random.RandomState(seed)
+    vol = np.array(volume[: len(volume) - n_drop_non_neuronal], dtype=np.float32)
+    all_nan = np.isnan(vol).all(axis=0) & brain_mask
+    vol = np.nan_to_num(vol, nan=0.0)
+    vol[:, all_nan] = rng.dirichlet(np.ones(vol.shape[0]), size=all_nan.sum()).T
+    if sigma:
+        vol = np.stack([gaussian_filter(channel, sigma=sigma) for channel in vol])
+    vol *= brain_mask  # undo any smoothing bleed into the background
+    vol /= vol.sum(axis=0, keepdims=True) + 1e-10
+    return vol
+
+
+def load_volume(level='class', label='processed', folder_cache=None):
+    """
+    Reads in a pre-computed MERFISH cell-type density volume and its type labels.
+
+    These are dense 4-D arrays (one 3-D volume per cell type), built by
+    `iblatlas/genomics/merfish_scrapping/02_create_volumes.py` on the same 200 um grid as
+    `iblatlas.genomics.agea.load()` (not the default 25 um `AllenAtlas()` grid).
+
+    :param level: taxonomy level to load, one of 'class', 'subclass', 'supertype', 'cluster'
+    :param label: which volume to return
+     - '': the raw, unprocessed volume (may contain NaN; returned memory-mapped)
+     - 'processed': denoised via `denoise_volume()` (non-neuronal types dropped, NaNs filled,
+       Gaussian-smoothed, renormalized to sum to 1 per in-brain voxel). Default -- unlike
+       `agea.load()`, which defaults to the raw (`label=''`) volume.
+    :param folder_cache:
+    :return:
+    volume: a (n_types, ml, dv, ap) array, one density volume per cell type, on the same grid as
+     the `expression_volumes` returned by `agea.load()`. float16 memory-mapped if label='', float32
+     in memory if label='processed'.
+    labels: a (n_types,) array of type ids for each channel of `volume`, matching the index of the
+     corresponding dataframe returned by `load()` (e.g. df_classes.index for level='class').
+     Truncated to match `volume` when label='processed' drops non-neuronal types.
+    atlas_agea: a brainatlas object with the labels and coordinates matching `volume` (same object
+     as returned by `agea.load()` / `agea.load_atlas()`)
+    """
+    feasible_levels = ['class', 'subclass', 'supertype', 'cluster']
+    assert level in feasible_levels, f'level must be one of {feasible_levels}'
+    assert label in ('', 'processed'), "label must be '' (raw) or 'processed'"
+    folder_cache = Path(folder_cache or atlas.AllenAtlas._get_cache_dir().joinpath('merfish'))
+    # download only the 2 files needed for this level, not the whole `atlas/merfish` folder
+    # (which also holds the multi-GB cell tables and the volumes for every other level)
+    for filename in (f'merfish_{level}.npy', f'merfish_{level}_labels.npy'):
+        file_path = folder_cache.joinpath(filename)
+        if not file_path.exists():
+            aws.s3_download_file(f'atlas/merfish/{filename}', file_path)
+    volume = np.load(folder_cache.joinpath(f'merfish_{level}.npy'), mmap_mode='r')
+    labels = np.load(folder_cache.joinpath(f'merfish_{level}_labels.npy'), allow_pickle=True)
+    atlas_agea = agea.load_atlas()
+    if label == 'processed':
+        volume = denoise_volume(volume, atlas_agea.label != 0)
+        labels = labels[:volume.shape[0]]
+    return volume, labels, atlas_agea
 
 
 def int2rgb(array, dtype=None):

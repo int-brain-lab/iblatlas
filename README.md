@@ -11,10 +11,10 @@ of more complex visualization tools such as `pyqt`.**
 [Notebooks and examples](https://int-brain-lab.github.io/iblenv/notebooks_external/atlas_working_with_ibllib_atlas.html)
 
 ## Installation
-`pip install iblatlas`
+`uv pip install iblatlas`
 
 For GUI features, you'll need to install with optional dependencies:
-`pip install iblatlas[gui]`
+`uv pip install iblatlas[gui]`
 
 ## Contributing
 Changes are merged by pull requests.

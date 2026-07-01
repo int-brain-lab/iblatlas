@@ -15,6 +15,34 @@ _logger = logging.getLogger(__name__)
 _, NML, NDV, NAP = DIM_EXP = (4345, 58, 41, 67)  # nexperiments, nml, ndv, nap
 
 
+def load_atlas(folder_cache=None):
+    """
+    Builds the brain atlas matching the AGEA / MERFISH 200 um grid.
+
+    Only fetches `image.npy` and `label.npy` (a few MB) rather than the full `atlas/agea` S3
+    folder, so this is cheap to call even when the gene expression volumes themselves are not
+    needed -- e.g. to index a MERFISH volume (`iblatlas.genomics.merfish.load_volume`).
+
+    :param folder_cache:
+    :return: a brainatlas object with the labels and coordinates matching the gene expression /
+     MERFISH volumes
+    """
+    folder_cache = Path(folder_cache or atlas.AllenAtlas._get_cache_dir().joinpath('agea'))
+    for filename in ('image.npy', 'label.npy'):
+        file_path = folder_cache.joinpath(filename)
+        if not file_path.exists():
+            aws.s3_download_file(f'atlas/agea/{filename}', file_path)
+    return atlas.BrainAtlas(
+        image=np.load(folder_cache.joinpath('image.npy')),
+        label=np.load(folder_cache.joinpath('label.npy')),
+        dxyz=200 / 1e6 * np.array([1, -1, -1]),
+        regions=atlas.BrainRegions(),
+        iorigin=atlas.ALLEN_CCF_LANDMARKS_MLAPDV_UM['bregma'] / 200 + np.array([0, 0, 0]),
+        dims2xyz=[0, 2, 1],
+        xyz2dims=[0, 2, 1]
+    )
+
+
 def load(folder_cache=None, expression_size=DIM_EXP, label=''):
     """
     Reads in the Allen gene expression experiments binary data.
@@ -39,21 +67,11 @@ def load(folder_cache=None, expression_size=DIM_EXP, label=''):
         aws.s3_download_folder('atlas/agea', folder_cache)
 
     # load the genes dataframe and the gene expression volumes
-    file_parquet = Path(folder_cache).joinpath('gene-expression.pqt')
+    file_parquet = folder_cache.joinpath('gene-expression.pqt')
     fn = f'gene-expression-{label}.bin' if label else 'gene-expression.bin'
-    file_expression = Path(folder_cache).joinpath(fn)
+    file_expression = folder_cache.joinpath(fn)
     df_genes = pd.read_parquet(file_parquet)
     expression_volumes = np.memmap(file_expression, dtype=np.float16, mode='r', offset=0, shape=expression_size)
-
-    # create a brain atlas object with the gene expression volume geometry and pre-computed labels
-    atlas_agea = atlas.BrainAtlas(
-        image=np.load(Path(folder_cache).joinpath('image.npy')),
-        label=np.load(Path(folder_cache).joinpath('label.npy')),
-        dxyz=200 / 1e6 * np.array([1, -1, -1]),
-        regions=atlas.BrainRegions(),
-        iorigin=atlas.ALLEN_CCF_LANDMARKS_MLAPDV_UM['bregma'] / 200 + np.array([0, 0, 0]),
-        dims2xyz=[0, 2, 1],
-        xyz2dims=[0, 2, 1]
-    )
+    atlas_agea = load_atlas(folder_cache)
 
     return df_genes, expression_volumes, atlas_agea
