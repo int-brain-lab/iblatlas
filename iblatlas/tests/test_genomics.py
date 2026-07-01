@@ -105,6 +105,8 @@ class TestMerfishLoadVolume(unittest.TestCase):
                 np.testing.assert_array_equal(np.asarray(vol_raw), volume)
                 np.testing.assert_array_equal(lab_raw, labels)
                 self.assertIs(ba, fake_atlas)
+                # on windows we need to close the memmap for the tempdir to be deleted
+                vol_raw._mmap.close()
 
                 vol_proc, lab_proc, _ = merfish.load_volume(
                     level='class', label='processed', folder_cache=folder_cache)
