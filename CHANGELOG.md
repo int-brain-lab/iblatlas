@@ -1,3 +1,7 @@
+## [1.1.0]
+### Added
+- `iblatlas.genomics.merfish.load_volume` to load MERFISH cell-type density volumes, denoised by default
+
 ## [1.0.0]
 ### Added
 - `CITATION.cff` citation file for the repository
