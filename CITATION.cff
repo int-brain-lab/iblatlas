@@ -5,8 +5,9 @@ title: "iblatlas: IBL Atlas Module"
 abstract: >
   A Python library for working with the Allen Mouse Brain Atlas and
   IBL-derived volumetric data, including electrophysiological atlas
-  volumes, MERFISH cell-type density maps, and gene expression volumes,
-  all registered to the Allen Common Coordinate Framework.
+  volumes, MERFISH cell-type density maps, gene expression volumes, and
+  mesoscale structural connectivity data, all registered to the Allen
+  Common Coordinate Framework.
 version: 0.10.0
 license: MIT
 repository-code: "https://github.com/int-brain-lab/iblatlas"
@@ -23,4 +24,5 @@ keywords:
   - electrophysiology
   - MERFISH
   - gene expression
+  - mesoscale connectivity
   - Neuropixels
