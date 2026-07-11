@@ -1,3 +1,9 @@
+## [1.2.0]
+### Added
+- `iblatlas.connectivity.mesoscale` to load the Oh/Knox regularized-regression mesoscale
+  connectivity matrix (regionalized, with per-structure volumes) and the Harris et al. (2019)
+  cortico-thalamic hierarchy scores
+
 ## [1.1.0]
 ### Added
 - `iblatlas.genomics.merfish.load_volume` to load MERFISH cell-type density volumes, denoised by default

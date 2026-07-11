@@ -1,4 +1,4 @@
-__version__ = '1.1.0'
+__version__ = '1.2.0'
 
 """A package for working with brain atlases.
 
@@ -164,6 +164,11 @@ Remote files
   region were then simplified using the `Ramer Douglas Peucker algorithm <https://rdp.readthedocs.io/en/latest/>`_
 * **swanson2allen.npz** - TODO Document who made this, its contents, purpose and data type
 * **<flatmap_name>_<res_um>.nrrd** - TODO Document who made this, its contents, purpose and data type
+* **connectivity/allen_mouse_regionalized_connectivity.pqt** - The Oh et al. [11]_ / Knox et al. [12]_
+  regularized-regression mesoscale connectivity matrix, regionalized onto 291 Allen summary structures, with
+  per-structure volumes attached. See `iblatlas.connectivity.mesoscale.load`.
+* **connectivity/allen_mouse_hierarchy_scores.pqt** - Harris et al. [13]_ precomputed cortico-thalamic hierarchy
+  scores for 61 cortical and thalamic areas. See `iblatlas.connectivity.mesoscale.load_hierarchy`.
 
 .. [*] The annotation and average template volumes were created from the images provided in Supplemtary Data 4 of Chon et al. [3]_
    and stitched together as a single volume using SimpleITK.
@@ -187,13 +192,18 @@ References
    in males emerge before those larger in females. Nat Commun 9, 2615. [doi 10.1038/s41467-018-04921-2]
 .. [6] International Brain Laboratory et al. (2022) Reproducibility of in-vivo electrophysiological measurements in mice.
    bioRxiv. [doi 10.1101/2022.05.09.491042]
-.. [7] International Brain Laboratory et al. (2023) A Brain-Wide Map of Neural Activity during Complex Behaviour.
-   bioRxiv. [doi 10.1101/2023.07.04.547681]
-.. [8] Findling C et al. (2023) Brain-wide representations of prior information in mouse decision-making.
-   bioRxiv. [doi 10.1101/2023.07.04.547684]
+.. [7] International Brain Laboratory et al. (2025) A brain-wide map of neural activity during complex behaviour.
+   Nature 645, 177-191. [doi 10.1038/s41586-025-09235-0]
+.. [8] Findling C, International Brain Laboratory et al. (2025) Brain-wide representations of prior information in
+   mouse decision-making. Nature 645, 192-200. [doi 10.1038/s41586-025-09226-1]
 .. [9] Swanson LW (2018) Brain maps 4.0—Structure of the rat brain: An open access atlas with global nervous system nomenclature
    ontology and flatmaps. J Comp Neurol. [doi 10.1002/cne.24381]
 .. [10] Allen Mouse Common Coordinate Framework Technical White Paper (October 2017 v3)
    http://help.brain-map.org/download/attachments/8323525/Mouse_Common_Coordinate_Framework.pdf
+.. [11] Oh SW et al. (2014) A mesoscale connectome of the mouse brain. Nature 508, 207-214. [doi 10.1038/nature13186]
+.. [12] Knox JE et al. (2018) High-resolution data-driven model of the mouse connectome. Network Neuroscience 3,
+   217-236. [doi 10.1162/netn_a_00066]
+.. [13] Harris JA et al. (2019) Hierarchical organization of cortical and thalamic connectivity. Nature 575,
+   195-202. [doi 10.1038/s41586-019-1716-z]
 """
 
