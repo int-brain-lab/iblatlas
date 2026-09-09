@@ -113,7 +113,7 @@ class _BrainRegions:
             A dict-like object containing the keys {'id', 'name', 'acronym', 'rgb', 'level',
             'parent', 'order'} with arrays the length of `ids`.
         """
-        uid, uind = np.unique(ids, return_inverse=True)
+        uid, uind = np.unique(np.atleast_1d(ids), return_inverse=True)
         a, iself, _ = np.intersect1d(self.id, uid, assume_unique=False, return_indices=True)
         b = Bunch()
         for k in self.__dataclass_fields__.keys():
