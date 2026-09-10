@@ -1349,7 +1349,7 @@ class Insertion:
 
 class AllenAtlas(BrainAtlas):
     """
-    The Allan Common Coordinate Framework (CCF) brain atlas.
+    The Allen Common Coordinate Framework (CCF) brain atlas.
 
     Instantiates an atlas.BrainAtlas corresponding to the Allen CCF at the given resolution
     using the IBL Bregma and coordinate system.
