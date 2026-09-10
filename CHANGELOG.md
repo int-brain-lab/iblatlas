@@ -1,9 +1,7 @@
 ## [1.2.1]
 ### Fixed
 - `BrainRegions.get()` returned only the first character of `name`/`acronym` for a single region id
-- atlas GUI: hover tooltip over a slice now shows acronym, name, atlas id, region id and level, and
-  updates smoothly
-- atlas GUI: hover tooltip now also lists the region's ancestor hierarchy, deepest first
+- atlas GUI: fixed tooltips
 
 ## [1.2.0]
 ### Added

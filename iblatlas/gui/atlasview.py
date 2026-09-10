@@ -18,7 +18,7 @@ from pathlib import Path
 import matplotlib
 import numpy as np
 import pyqtgraph as pg
-from ibllib.misc import qt  # FIXME: remove ibllib dependency
+from iblqt.tools import get_or_create_app
 from iblutil.numerical import ismember
 from qtpy import QtCore, QtWidgets, uic
 from qtpy.QtGui import QCursor, QTransform
@@ -505,7 +505,7 @@ class ImageLayer:
 
 def view(res=25, title=None, atlas=None):
     """ application entry point """
-    qt.create_app()
+    get_or_create_app()
     av = TopView._get_or_create(title=title, res=res, atlas=atlas)
     av.show()
     return av
