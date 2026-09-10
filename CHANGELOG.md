@@ -1,3 +1,8 @@
+## [1.2.1]
+### Fixed
+- `BrainRegions.get()` returned only the first character of `name`/`acronym` for a single region id
+- atlas GUI: fixed tooltips
+
 ## [1.2.0]
 ### Added
 - `iblatlas.connectivity.mesoscale` to load the Oh/Knox regularized-regression mesoscale
