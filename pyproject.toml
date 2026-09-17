@@ -34,7 +34,8 @@ version = {attr = "iblatlas.__version__"}
 [project.optional-dependencies]
 gui = [
     "pyqt5",
-    "qtpy"
+    "qtpy",
+    "iblqt"
 ]
 [project.gui-scripts]
 atlas = "iblatlas.gui.atlasview:main"
