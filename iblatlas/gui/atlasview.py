@@ -18,7 +18,7 @@ from pathlib import Path
 
 import numpy as np
 from qtpy import QtWidgets, uic, QtCore
-from qtpy.QtGui import QTransform
+from qtpy.QtGui import QCursor, QTransform
 import pyqtgraph as pg
 import matplotlib
 
@@ -213,6 +213,10 @@ class SliceView(QtWidgets.QWidget):
         s = self.plotItem_slice.getViewBox().scene()
         self.proxy = pg.SignalProxy(s.sigMouseMoved, rateLimit=60, slot=self.mouseMoveEvent)
         s.sigMouseClicked.connect(self.mouseClick)
+        # lightweight custom tooltip: avoids the native QToolTip re-creation overhead on every move
+        self._region_tooltip = QtWidgets.QLabel(self, QtCore.Qt.ToolTip)
+        self._region_tooltip.setStyleSheet(
+            "QLabel { background-color: #ffffe1; color: black; border: 1px solid black; padding: 2px; }")
 
     def add_scatter(self):
         self.scatterItem = pg.ScatterPlotItem()
@@ -255,9 +259,16 @@ class SliceView(QtWidgets.QWidget):
         if region is None:
             self.label_region.setText("")
             self.label_acronym.setText("")
+            self._region_tooltip.hide()
         else:
             self.label_region.setText(region['name'][0])
             self.label_acronym.setText(region['acronym'][0])
+            tooltip = (f"{region['acronym'][0]} - {region['name'][0]}\n"
+                       f"aid: {region['id'][0]}, rid: {region['order'][0]}, level: {region['level'][0]}")
+            self._region_tooltip.setText(tooltip)
+            self._region_tooltip.adjustSize()
+            self._region_tooltip.move(QCursor.pos() + QtCore.QPoint(12, 12))
+            self._region_tooltip.show()
 
     def replace_image_layer(self, index, **kwargs):
         if index and len(self.imageItem) >= index:

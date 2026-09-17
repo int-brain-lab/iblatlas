@@ -1,3 +1,9 @@
+## [1.2.1]
+### Fixed
+- `BrainRegions.get()` returned only the first character of `name`/`acronym` for a single region id
+- atlas GUI: hover tooltip over a slice now shows acronym, name, atlas id, region id and level, and
+  updates smoothly
+
 ## [1.2.0]
 ### Added
 - `iblatlas.connectivity.mesoscale` to load the Oh/Knox regularized-regression mesoscale
