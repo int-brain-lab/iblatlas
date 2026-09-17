@@ -12,21 +12,19 @@ The underlying data model object is an iblatlas.atlas.AllenAtlas object
 
 """
 import sys
-
 from dataclasses import dataclass, field
 from pathlib import Path
 
-import numpy as np
-from qtpy import QtWidgets, uic, QtCore
-from qtpy.QtGui import QCursor, QTransform
-import pyqtgraph as pg
 import matplotlib
+import numpy as np
+import pyqtgraph as pg
+from ibllib.misc import qt  # FIXME: remove ibllib dependency
+from iblutil.numerical import ismember
+from qtpy import QtCore, QtWidgets, uic
+from qtpy.QtGui import QCursor, QTransform
 
 from iblatlas.atlas import AllenAtlas
-
-from ibllib.misc import qt  # FIXME: remove ibllib dependency
 from iblatlas.gui.braintree import BrainTree
-from iblutil.numerical import ismember
 
 
 class TopView(QtWidgets.QMainWindow):
@@ -50,7 +48,7 @@ class TopView(QtWidgets.QMainWindow):
         return av
 
     def __init__(self, **kwargs):
-        super(TopView, self).__init__()
+        super().__init__()
         self.ctrl = ControllerTopView(self, **kwargs)
         self.ctrl.image_layers = {'top': ImageLayer()}
         uic.loadUi(Path(__file__).parent.joinpath('topview.ui'), self)
@@ -89,7 +87,7 @@ class TopView(QtWidgets.QMainWindow):
             fig.activateWindow()
 
     def closeEvent(self, event):
-        super(TopView, self).closeEvent(event)
+        super().closeEvent(event)
         self.ctrl.settings.setValue('geometry', self.saveGeometry())
         for k, fig in self.ctrl.figures.items():
             self.ctrl.settings.setValue(f'geometry_{k}', fig.saveGeometry())
@@ -141,7 +139,6 @@ class TopView(QtWidgets.QMainWindow):
             scenepos = scenepos[0]
         else:
             return
-        pass
         # qpoint = self.imageItem.mapFromScene(scenepos)
 
     @QtCore.Slot(int)
@@ -192,7 +189,7 @@ class SliceView(QtWidgets.QWidget):
     """
 
     def __init__(self, topview: TopView, waxis, haxis, daxis, **kwargs):
-        super(SliceView, self).__init__()
+        super().__init__()
         self.topview = topview
         self.ctrl = SliceController(self, waxis, haxis, daxis, **kwargs)
         uic.loadUi(Path(__file__).parent.joinpath('sliceview.ui'), self)
@@ -264,11 +261,21 @@ class SliceView(QtWidgets.QWidget):
             self.label_region.setText(region['name'][0])
             self.label_acronym.setText(region['acronym'][0])
             tooltip = (f"{region['acronym'][0]} - {region['name'][0]}\n"
-                       f"aid: {region['id'][0]}, rid: {region['order'][0]}, level: {region['level'][0]}")
+                       f"aid: {region['id'][0]}, rid: {region['order'][0]}, level: {region['level'][0]}\n\n"
+                       f"{self._hierarchy_text(region['id'][0])}")
             self._region_tooltip.setText(tooltip)
             self._region_tooltip.adjustSize()
             self._region_tooltip.move(QCursor.pos() + QtCore.QPoint(12, 12))
             self._region_tooltip.show()
+
+    def _hierarchy_text(self, region_id):
+        """Return the region's ancestor chain, deepest first, excluding the region itself."""
+        ancestors = self.topview.ctrl.atlas.regions.ancestors(region_id)
+        order = np.argsort(ancestors['level'])[::-1][1:]
+        return "\n".join(
+            f"{'  ' * ancestors['level'][i]}{ancestors['acronym'][i]} - {ancestors['name'][i]}"
+            for i in order
+        )
 
     def replace_image_layer(self, index, **kwargs):
         if index and len(self.imageItem) >= index:
@@ -303,7 +310,7 @@ class PgImageController:
     @property
     def imageItem(self):
         """returns the first image item"""
-        return next((self.image_layers[k].image_item for k in self.image_layers))
+        return next(self.image_layers[k].image_item for k in self.image_layers)
 
     def set_image(self, pg_image_item, im, dw, dh, w0, h0, **pg_kwargs):
         """
@@ -333,7 +340,7 @@ class ControllerTopView(PgImageController):
     TopView ControllerTopView
     """
     def __init__(self, qmain: TopView, res: int = 25, volume='image', atlas=None, **kwargs):
-        super(ControllerTopView, self).__init__(qmain)
+        super().__init__(qmain)
         line_kwargs = {'movable': True, 'pen': pg.mkPen((0, 255, 0), width=3)}
         self.line_coronal = pg.InfiniteLine(angle=0, pos=0, **line_kwargs)
         self.line_sagittal = pg.InfiniteLine(angle=90, pos=0, **line_kwargs)
@@ -454,7 +461,7 @@ class SliceController(PgImageController):
         :param haxis: brain atlas axis corresponding to display ordinate (coronal: 2, sagittal: 2)
         :param daxis: brain atlas axis corresponding to display abscissa (coronal: 1, sagittal: 0)
         """
-        super(SliceController, self).__init__(fig)
+        super().__init__(fig)
         self.waxis = waxis
         self.haxis = haxis
         self.daxis = daxis
@@ -467,7 +474,7 @@ class SliceController(PgImageController):
         :param qpoint:
         :return:
         """
-        iw, ih, w, h, v = super(SliceController, self).cursor2xyamp(qpoint)
+        iw, ih, w, h, v = super().cursor2xyamp(qpoint)
         ctrl = self.qwidget.topview.ctrl
         xyz = np.zeros(3)
         xyz[np.array([self.waxis, self.haxis, self.daxis])] = [w, h, self.slice_coord]
@@ -492,7 +499,7 @@ class ImageLayer:
     :param
     """
     image_item: pg.ImageItem = field(default_factory=pg.ImageItem)
-    pg_kwargs: dict = field(default_factory=lambda: {})
+    pg_kwargs: dict = field(default_factory=dict)
     slice_kwargs: dict = field(default_factory=lambda: {'volume': 'image', 'mode': 'clip'})
 
 
