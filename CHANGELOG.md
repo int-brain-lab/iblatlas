@@ -1,3 +1,9 @@
+## [Unreleased]
+### Fixed
+- `merfish.load_volume(label='processed')` dropped the last 5 types at every taxonomy level instead of the
+  non-neuronal ones: at the subclass level it removed the immune subclasses but kept 18 glial and vascular ones.
+  The non-neuronal types are now flagged from the taxonomy tables with the new `merfish.is_non_neuronal()`
+
 ## [1.2.1]
 ### Fixed
 - `BrainRegions.get()` returned only the first character of `name`/`acronym` for a single region id
