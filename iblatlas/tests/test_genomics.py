@@ -90,8 +90,8 @@ class TestMerfishDenoiseVolume(unittest.TestCase):
 
 
 def _write_fake_taxonomy(folder_cache, n_neuronal_classes=3):
-    """Writes fake classes / subclasses tables: 3 neuronal classes followed by the 5 non-neuronal ones,
-    and 6 subclasses whose 2 last ones belong to non-neuronal classes."""
+    """Writes fake classes / subclasses tables: `n_neuronal_classes` neuronal classes followed by the 5
+    non-neuronal ones, and 6 subclasses whose 2 last ones belong to non-neuronal classes."""
     class_names = [f'{i:02d} Neuronal' for i in range(1, n_neuronal_classes + 1)] + merfish.NON_NEURONAL_CLASSES
     df_classes = pd.DataFrame({'class': [''] + class_names}, index=pd.Index(range(len(class_names) + 1), name='class_id'))
     subclass_classes = [class_names[0], class_names[0], class_names[1], class_names[2], class_names[-3], class_names[-1]]
@@ -125,6 +125,12 @@ class TestMerfishLoadVolume(unittest.TestCase):
                 vol_proc, lab_proc, _ = merfish.load_volume(level='subclass', label='processed', folder_cache=folder_cache)
             self.assertEqual(vol_proc.shape, (n_types - 2, *shape))
             np.testing.assert_array_equal(lab_proc, labels[:n_types - 2])
+            with unittest.mock.patch('iblatlas.genomics.agea.load_atlas', return_value=fake_atlas):
+                vol_all, lab_all, _ = merfish.load_volume(
+                    level='subclass', label='processed', include_non_neuronal=True, folder_cache=folder_cache)
+            self.assertEqual(vol_all.shape, (n_types, *shape))
+            np.testing.assert_array_equal(lab_all, labels)
+            np.testing.assert_allclose(vol_all.sum(axis=0), 1, atol=1e-5)
 
     def test_load_volume(self):
         with tempfile.TemporaryDirectory() as folder_cache:

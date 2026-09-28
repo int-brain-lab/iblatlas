@@ -83,12 +83,11 @@ def is_non_neuronal(level, labels, folder_cache=None):
             aws.s3_download_file(f'atlas/merfish/{file_path.name}', file_path)
         return pd.read_parquet(file_path)
 
-    rows = read_table(level).loc[np.asarray(labels, dtype=int)]
-    names = rows[level]
+    names = read_table(level).loc[np.asarray(labels, dtype=int), level]
     while (parent := TAXONOMY[level][1]) is not None:
-        # the first step goes through the rows as names are not unique at the cluster level
-        names = rows[parent] if rows is not None else names.map(read_table(level).set_index(level)[parent])
-        rows, level = None, parent
+        # only the empty placeholder names are duplicated (clusters table), they all map to an empty parent
+        names = names.map(read_table(level).drop_duplicates(level).set_index(level)[parent])
+        level = parent
     return names.isin(NON_NEURONAL_CLASSES).values
 
 
@@ -127,7 +126,7 @@ def denoise_volume(volume, brain_mask, n_drop_non_neuronal=5, sigma=0.5, seed=42
     return vol
 
 
-def load_volume(level='class', label='processed', folder_cache=None):
+def load_volume(level='class', label='processed', include_non_neuronal=False, folder_cache=None):
     """
     Reads in a pre-computed MERFISH cell-type density volume and its type labels.
 
@@ -138,9 +137,12 @@ def load_volume(level='class', label='processed', folder_cache=None):
     :param level: taxonomy level to load, one of 'class', 'subclass', 'supertype', 'cluster'
     :param label: which volume to return
      - '': the raw, unprocessed volume (may contain NaN; returned memory-mapped)
-     - 'processed': denoised via `denoise_volume()` (non-neuronal types dropped, NaNs filled,
-       Gaussian-smoothed, renormalized to sum to 1 per in-brain voxel). Default -- unlike
-       `agea.load()`, which defaults to the raw (`label=''`) volume.
+     - 'processed': denoised via `denoise_volume()` (NaNs filled, Gaussian-smoothed, renormalized
+       to sum to 1 per in-brain voxel). Default -- unlike `agea.load()`, which defaults to the raw
+       (`label=''`) volume.
+    :param include_non_neuronal: only for label='processed'. If False (default), the non-neuronal
+     types flagged by `is_non_neuronal()` are dropped and the volume holds proportions among
+     neurons; if True, all types are kept and the volume holds proportions among all cells
     :param folder_cache:
     :return:
     volume: a (n_types, ml, dv, ap) array, one density volume per cell type, on the same grid as
@@ -148,7 +150,7 @@ def load_volume(level='class', label='processed', folder_cache=None):
      in memory if label='processed'.
     labels: a (n_types,) array of type ids for each channel of `volume`, matching the index of the
      corresponding dataframe returned by `load()` (e.g. df_classes.index for level='class').
-     Truncated to match `volume` when label='processed' drops non-neuronal types.
+     Non-neuronal types are removed when label='processed' and include_non_neuronal=False.
     atlas_agea: a brainatlas object with the labels and coordinates matching `volume` (same object
      as returned by `agea.load()` / `agea.load_atlas()`)
     """
@@ -166,12 +168,10 @@ def load_volume(level='class', label='processed', folder_cache=None):
     labels = np.load(folder_cache.joinpath(f'merfish_{level}_labels.npy'), allow_pickle=True)
     atlas_agea = agea.load_atlas()
     if label == 'processed':
-        non_neuronal = is_non_neuronal(level, labels, folder_cache=folder_cache)
-        n_drop = int(non_neuronal.sum())
-        # denoise_volume drops trailing types, make sure the non-neuronal types are the last ones
-        assert np.all(non_neuronal[len(labels) - n_drop:]), 'non-neuronal types are not the trailing ones'
-        volume = denoise_volume(volume, atlas_agea.label != 0, n_drop_non_neuronal=n_drop)
-        labels = labels[:volume.shape[0]]
+        if not include_non_neuronal:
+            neuronal = ~is_non_neuronal(level, labels, folder_cache=folder_cache)
+            volume, labels = volume[neuronal], labels[neuronal]
+        volume = denoise_volume(volume, atlas_agea.label != 0, n_drop_non_neuronal=0)
     return volume, labels, atlas_agea
 
 

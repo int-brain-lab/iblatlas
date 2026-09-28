@@ -3,6 +3,9 @@
 - `merfish.load_volume(label='processed')` dropped the last 5 types at every taxonomy level instead of the
   non-neuronal ones: at the subclass level it removed the immune subclasses but kept 18 glial and vascular ones.
   The non-neuronal types are now flagged from the taxonomy tables with the new `merfish.is_non_neuronal()`
+### Added
+- `merfish.load_volume(include_non_neuronal=True)` keeps the non-neuronal types in the processed volume,
+  normalized as proportions among all cells instead of among neurons
 
 ## [1.2.1]
 ### Fixed

@@ -49,4 +49,5 @@ details, and `sources/examples/08_load_merfish_volumes.py` for a worked loading 
 
 The processed volumes drop the non-neuronal types (5 classes, 23 subclasses, 45 supertypes, 117 clusters),
 flagged by `merfish.is_non_neuronal(level, labels)`, and are renormalized so in-brain voxels sum to 1
-over types: they are cell-type proportions, not densities.
+over types: they are cell-type proportions, not densities. Pass `include_non_neuronal=True` to keep them
+(proportions among all cells).
