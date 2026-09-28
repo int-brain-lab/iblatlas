@@ -12,6 +12,16 @@ from iblatlas.genomics import agea
 
 _logger = logging.getLogger(__name__)
 
+# non-neuronal classes of the Allen ABC atlas taxonomy, they are the last 5 of the 34 classes
+NON_NEURONAL_CLASSES = ['30 Astro-Epen', '31 OPC-Oligo', '32 OEC', '33 Vascular', '34 Immune']
+# taxonomy level -> (name of the parquet table, parent level)
+TAXONOMY = {
+    'class': ('classes', None),
+    'subclass': ('subclasses', 'class'),
+    'supertype': ('supertypes', 'subclass'),
+    'cluster': ('clusters', 'supertype'),
+}
+
 
 def load(folder_cache=None):
     """
@@ -52,6 +62,35 @@ def load(folder_cache=None):
     return df_cells, df_classes, df_subclasses, df_supertypes, df_clusters, df_genes, df_neurotransmitters
 
 
+def is_non_neuronal(level, labels, folder_cache=None):
+    """
+    Flags the non-neuronal cell types at any level of the taxonomy.
+
+    The type names are walked up the taxonomy (cluster -> supertype -> subclass -> class) and a
+    type is non-neuronal if its class is one of `NON_NEURONAL_CLASSES`. Only the small taxonomy
+    tables are downloaded, not the cell tables.
+
+    :param level: taxonomy level, one of 'class', 'subclass', 'supertype', 'cluster'
+    :param labels: (n_types,) array of type ids, as returned by `load_volume()`
+    :param folder_cache:
+    :return: a (n_types,) bool array, True for non-neuronal types
+    """
+    folder_cache = Path(folder_cache or atlas.AllenAtlas._get_cache_dir().joinpath('merfish'))
+
+    def read_table(lev):
+        file_path = folder_cache.joinpath(f'{TAXONOMY[lev][0]}.pqt')
+        if not file_path.exists():
+            aws.s3_download_file(f'atlas/merfish/{file_path.name}', file_path)
+        return pd.read_parquet(file_path)
+
+    names = read_table(level).loc[np.asarray(labels, dtype=int), level]
+    while (parent := TAXONOMY[level][1]) is not None:
+        # only the empty placeholder names are duplicated (clusters table), they all map to an empty parent
+        names = names.map(read_table(level).drop_duplicates(level).set_index(level)[parent])
+        level = parent
+    return names.isin(NON_NEURONAL_CLASSES).values
+
+
 def denoise_volume(volume, brain_mask, n_drop_non_neuronal=5, sigma=0.5, seed=42):
     """
     Denoise a raw MERFISH cell-type density volume.
@@ -66,8 +105,8 @@ def denoise_volume(volume, brain_mask, n_drop_non_neuronal=5, sigma=0.5, seed=42
     :param brain_mask: (dim0, dim1, dim2) bool, True for voxels inside the brain (e.g.
      `atlas_agea.label != 0`)
     :param n_drop_non_neuronal: number of trailing non-neuronal types to drop (Astro-Epen,
-     OPC-Oligo, OEC, Vascular, Immune are always the last 5 rows at the 'class' level); set to 0
-     to keep all types
+     OPC-Oligo, OEC, Vascular, Immune are always the last 5 rows at the 'class' level, the count
+     at other levels is given by `is_non_neuronal()`); set to 0 to keep all types
     :param sigma: Gaussian smoothing sigma in voxels, applied per type independently; set to 0 to
      disable
     :param seed: seed for the Dirichlet noise used to fill in-brain voxels that are NaN across
@@ -87,7 +126,7 @@ def denoise_volume(volume, brain_mask, n_drop_non_neuronal=5, sigma=0.5, seed=42
     return vol
 
 
-def load_volume(level='class', label='processed', folder_cache=None):
+def load_volume(level='class', label='processed', include_non_neuronal=False, folder_cache=None):
     """
     Reads in a pre-computed MERFISH cell-type density volume and its type labels.
 
@@ -98,9 +137,12 @@ def load_volume(level='class', label='processed', folder_cache=None):
     :param level: taxonomy level to load, one of 'class', 'subclass', 'supertype', 'cluster'
     :param label: which volume to return
      - '': the raw, unprocessed volume (may contain NaN; returned memory-mapped)
-     - 'processed': denoised via `denoise_volume()` (non-neuronal types dropped, NaNs filled,
-       Gaussian-smoothed, renormalized to sum to 1 per in-brain voxel). Default -- unlike
-       `agea.load()`, which defaults to the raw (`label=''`) volume.
+     - 'processed': denoised via `denoise_volume()` (NaNs filled, Gaussian-smoothed, renormalized
+       to sum to 1 per in-brain voxel). Default -- unlike `agea.load()`, which defaults to the raw
+       (`label=''`) volume.
+    :param include_non_neuronal: only for label='processed'. If False (default), the non-neuronal
+     types flagged by `is_non_neuronal()` are dropped and the volume holds proportions among
+     neurons; if True, all types are kept and the volume holds proportions among all cells
     :param folder_cache:
     :return:
     volume: a (n_types, ml, dv, ap) array, one density volume per cell type, on the same grid as
@@ -108,7 +150,7 @@ def load_volume(level='class', label='processed', folder_cache=None):
      in memory if label='processed'.
     labels: a (n_types,) array of type ids for each channel of `volume`, matching the index of the
      corresponding dataframe returned by `load()` (e.g. df_classes.index for level='class').
-     Truncated to match `volume` when label='processed' drops non-neuronal types.
+     Non-neuronal types are removed when label='processed' and include_non_neuronal=False.
     atlas_agea: a brainatlas object with the labels and coordinates matching `volume` (same object
      as returned by `agea.load()` / `agea.load_atlas()`)
     """
@@ -126,8 +168,10 @@ def load_volume(level='class', label='processed', folder_cache=None):
     labels = np.load(folder_cache.joinpath(f'merfish_{level}_labels.npy'), allow_pickle=True)
     atlas_agea = agea.load_atlas()
     if label == 'processed':
-        volume = denoise_volume(volume, atlas_agea.label != 0)
-        labels = labels[:volume.shape[0]]
+        if not include_non_neuronal:
+            neuronal = ~is_non_neuronal(level, labels, folder_cache=folder_cache)
+            volume, labels = volume[neuronal], labels[neuronal]
+        volume = denoise_volume(volume, atlas_agea.label != 0, n_drop_non_neuronal=0)
     return volume, labels, atlas_agea
 
 
