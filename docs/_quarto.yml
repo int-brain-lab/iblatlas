@@ -123,6 +123,7 @@ website:
         menu:
           - explanation/coordinates-and-volumes.qmd
           - explanation/brain-region-hierarchy.qmd
+          - explanation/brain-region-mappings.qmd
 
 format:
   html:

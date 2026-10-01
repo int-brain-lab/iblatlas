@@ -1,0 +1,88 @@
+---
+title: "Brain region mappings"
+---
+
+A mapping is a choice of how finely to describe anatomy. The Allen hierarchy has thousands of
+regions; almost no analysis wants that many. A mapping picks a level of the
+[structure tree](brain-region-hierarchy.qmd) and collapses everything below it.
+
+## The four mappings
+
+| Mapping | Regions | Use it when |
+|---|---|---|
+| **Allen** | 1328 | You want the full Allen parcellation; the default |
+| **Beryl** | 308 | A middle granularity, the usual choice for brain-wide summaries |
+| **Cosmos** | 12 | Coarse, major divisions only |
+| **Swanson** | 319 | You are plotting on the Swanson flat map |
+
+Cosmos is short enough to print in full: `void`, `root`, `Isocortex`, `OLF`, `HPF`, `CTXsp`,
+`CNU`, `TH`, `HY`, `MB`, `HB`, `CB`.
+
+Each has an `-lr` lateralised twin, so `br.mappings` holds eight keys in all. The plain
+variant merges hemispheres; the `-lr` variant keeps them apart using the negative-id
+convention. Allen has 1328 targets against Allen-lr's 2655; Swanson has 319 against
+Swanson-lr's 645.
+
+::: {.callout-note}
+## Where Beryl and Cosmos come from is not documented
+
+The package defines these mappings but records nothing about who drew them or on what basis.
+Allen is the Allen Institute parcellation and Swanson follows the Swanson flat map, but the
+provenance of Beryl and Cosmos is not stated anywhere in the code or the fixtures. Treat the
+names as IBL conventions until someone can source them.
+:::
+
+## What a mapping actually stores
+
+A mapping stores, for each of the 2655 regions, the **index of the highest-level ancestor that
+should be considered**. Every region below that node is given its parent's annotation.
+
+```python
+br.mappings['Beryl']        # 2655 indices -> 308 distinct targets
+br.mappings.keys()          # the eight mappings
+```
+
+So mapping is not lookup, it is collapse: `MOp1`, `MOp2/3`, `MOp5` and `MOp6a` all resolve to
+whatever ancestor the mapping terminates at. Nothing is lost from the tree itself — the
+mapping is a view over it.
+
+## Swanson behaves differently, in three ways that catch people
+
+The Swanson flat map is the signature figure of the brain-wide map papers, and it is the
+mapping people hit problems with. Three behaviours are worth knowing before you plot.
+
+### Only Swanson regions, or their parents, can be plotted
+
+The flat map draws a fixed set of 319 regions. A region outside that set has nowhere to go.
+Passing one does not raise — it is silently filled with `empty_color` (`'silver'` by default),
+so a region quietly missing from your figure is the expected failure mode, not an error.
+
+### A parent fills every Swanson region inside it
+
+Pass a parent and its value propagates down to all its descendants, via
+`BrainRegions.propagate_down`. `Isocortex` has 374 descendants, 40 of which are Swanson
+regions — so one value for `Isocortex` colours 40 separate patches identically:
+
+```python
+idx, vals = br.propagate_down(np.array(['Isocortex']), np.array([1.0]))
+len(idx)   # 374 descendants
+```
+
+This is useful when you mean it and misleading when you do not. A coarse region painted across
+a wide area looks like 40 measurements rather than one.
+
+### The mapping itself holds only one hemisphere
+
+`br.mappings['Swanson']` contains **no negative ids at all** — it is a single hemisphere.
+Only `Swanson-lr` carries both, with 322 negative entries.
+
+Consequently a two-hemisphere display needs **signed Allen ids**, not acronyms: an acronym
+such as `MOp` is identical on both sides and cannot express which one you mean. Note too that
+`plot_swanson_vector` takes the absolute value of negative ids when `hemisphere` is anything
+other than `'both'` — so passing signed ids with the wrong `hemisphere` argument silently
+merges the sides.
+
+## See also
+
+- [The brain region hierarchy](brain-region-hierarchy.qmd) — the tree these mappings collapse.
+- The Swanson how-to, for the plotting calls themselves.
