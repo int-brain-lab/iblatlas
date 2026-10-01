@@ -8,6 +8,107 @@ execute:
   # deliberately after changing a notebook — see CONTRIBUTING.md.
   freeze: auto
 
+quartodoc:
+  package: iblatlas
+  dir: reference
+  sidebar: reference/_sidebar.yml
+  options:
+    # Mandatory. Without it a subclass page shows only members defined on that class:
+    # AllenAtlas renders 5 members instead of 18, losing plot_cslice, plot_sslice,
+    # get_labels, slice, plot_top and compute_surface, all inherited from BrainAtlas.
+    include_inherited: true
+  # Grouped by theme rather than by module. quartodoc has no auto-discovery, so this
+  # list is the documented API: a new public symbol must be added here or recorded in
+  # docs/_exclusions.yml.
+  sections:
+    - title: Coordinates and geometry
+      desc: Converting between coordinates, voxel indices and angles.
+      contents:
+        - atlas.BrainCoordinates
+        - atlas.get_bc
+        - atlas.cart2sph
+        - atlas.sph2cart
+        - atlas.rodrigues_rotation
+        - atlas.tilt_spherical
+
+    - title: Atlases
+      desc: >-
+        The atlas volumes. NeedlesAtlas and MRITorontoAtlas are factory functions
+        returning a scaled AllenAtlas, not subclasses.
+      contents:
+        - atlas.BrainAtlas
+        - atlas.AllenAtlas
+        - atlas.NeedlesAtlas
+        - atlas.MRITorontoAtlas
+        - atlas.FranklinPaxinosAtlas
+
+    - title: Probe insertions
+      desc: Planning and describing probe trajectories in the atlas frame.
+      contents:
+        - atlas.Trajectory
+        - atlas.Insertion
+
+    - title: Brain regions and mappings
+      desc: The region hierarchy and the Allen, Beryl, Cosmos and Swanson mappings.
+      contents:
+        - regions.BrainRegions
+        - regions.FranklinPaxinosRegions
+        - regions.regions_from_allen_csv
+
+    - title: Plotting
+      desc: Plotting values and points on slices, flat maps and bar plots.
+      contents:
+        - plots.plot_scalar_on_slice
+        - plots.plot_points_on_slice
+        - plots.plot_volume_on_slice
+        - plots.plot_scalar_on_flatmap
+        - plots.plot_scalar_on_barplot
+        - plots.plot_swanson
+        - plots.plot_swanson_vector
+        - plots.annotate_swanson
+        - plots.plot_polygon
+        - plots.plot_polygon_with_hole
+        - plots.coords_for_poly_hole
+        - plots.compute_volume_from_points
+        - plots.load_slice_files
+        - plots.prepare_lr_data
+        - plots.reorder_data
+
+    - title: Flat maps
+      desc: Cortical and Swanson flat map projections.
+      contents:
+        - flatmaps.FlatMap
+        - flatmaps.swanson
+        - flatmaps.swanson_json
+
+    - title: Streamlines
+      desc: Allen cortical depth data, Isocortex only, at 10, 25 or 50 um.
+      contents:
+        - streamlines.utils.xyz_to_depth
+        - streamlines.utils.project_points_onto_flatmap
+        - streamlines.utils.project_volume_onto_flatmap
+        - streamlines.utils.get_mask
+        - streamlines.utils.validate_aggr
+
+    - title: Genomics
+      desc: >-
+        Allen gene expression (AGEA) and MERFISH. Note the loaders differ in default:
+        agea.load returns the raw volume, merfish.load_volume the denoised one.
+      contents:
+        - genomics.agea.load
+        - genomics.agea.load_atlas
+        - genomics.merfish.load
+        - genomics.merfish.load_volume
+        - genomics.merfish.denoise_volume
+        - genomics.merfish.is_non_neuronal
+        - genomics.merfish.int2rgb
+
+    - title: Connectivity
+      desc: Oh/Knox mesoscale connectivity and the Harris cortico-thalamic hierarchy.
+      contents:
+        - connectivity.mesoscale.load
+        - connectivity.mesoscale.load_hierarchy
+
 website:
   title: "iblatlas"
   navbar:
