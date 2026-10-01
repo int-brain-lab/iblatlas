@@ -126,6 +126,7 @@ website:
           - explanation/brain-region-mappings.qmd
           - explanation/choosing-an-atlas.qmd
           - explanation/data-downloads-and-caching.qmd
+          - explanation/external-data-in-the-common-space.qmd
 
 format:
   html:

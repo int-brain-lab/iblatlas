@@ -1,0 +1,91 @@
+---
+title: "External data in the common space"
+---
+
+Several groups have built mouse brain datasets that are not IBL's: gene expression, cell-type
+densities, connectivity, cortical depth. IBL has repackaged each of them into the atlas
+reference space and ships them through this package.
+
+That repackaging is the point of this page. These datasets are scattered across separate
+how-tos and it is easy to miss that they are one family, built on one idea.
+
+## Why a common space is worth the trouble
+
+**The registration work is already done.** Each dataset has been put into the Allen reference
+space once, carefully, by someone else. You are not aligning volumes.
+
+**Each joins to your data by one key.** Either a coordinate or an Allen region id — nothing
+more. If your recordings carry either, the join is a lookup.
+
+**The existing tools keep working.** `remap`, the flat maps and the Swanson plot operate on any
+per-region value. A connectivity weight and a firing rate are the same shape of thing to them,
+so anything you can already plot for your own data, you can plot for these.
+
+**Comparing modalities becomes a lookup in one atlas** rather than a registration project.
+
+**Downloads are versioned** with their source release recorded.
+
+Two limits belong in the same breath:
+
+- The genomics grids are **coarse** — 200 µm, against the atlas's 10–50 µm — and MERFISH is
+  interpolated between sections. These are not high-resolution volumes.
+- The connectivity tables have **no grid at all**. They are region-level, so there is nothing
+  to overlay on a slice directly.
+
+## What is available
+
+| Dataset | Joined by | Grid and axes |
+|---|---|---|
+| Allen Gene Expression Atlas | Voxel grid, Allen CCF labels downsampled from 25 µm | 200 µm, shape 58×41×67, axes (ML, DV, AP) |
+| MERFISH volumes | The same 200 µm atlas object as gene expression | 200 µm, axes (ML, DV, AP) |
+| MERFISH cells | Allen CCF coordinates converted to bregma-relative x, y, z | Continuous coordinates |
+| Oh/Knox mesoscale connectivity | Allen structure ids and acronyms, 291 summary structures | No grid; region table |
+| Harris cortico-thalamic hierarchy | Area acronyms, matching the connectivity table | No grid |
+| Allen streamlines | Depth values on the ordinary atlas grid, Isocortex only | 10, 25 or 50 µm |
+
+The gene expression volume is `(4345, 58, 41, 67)` — 4345 experiments by ML, DV, AP.
+
+## Two things that will trip you up
+
+**The genomics volumes break the axis convention.** They are built with `dims2xyz=[0, 2, 1]`
+and ordered (ML, DV, AP), not the (AP, ML, DV) that
+[Coordinates and volumes](coordinates-and-volumes.qmd) teaches for the atlas volumes. Use the
+atlas object the genomics module gives you rather than assuming the usual order.
+
+**The two loaders disagree on their default.** `agea.load` returns the **raw** volume
+(`label=''`). `merfish.load_volume` returns the **denoised** one — its default is
+`label='processed'`, meaning NaNs filled, Gaussian-smoothed and renormalised. Pass `label=''`
+to get the raw MERFISH volume. Note also that `load_volume` drops non-neuronal cell types
+unless you pass `include_non_neuronal=True`.
+
+If you are comparing the two modalities voxel by voxel, you are comparing a raw volume against
+a smoothed one unless you say otherwise.
+
+## Streamlines
+
+The Allen streamlines are cortical depth values converted onto the ordinary atlas grid, at 10,
+25 or 50 µm. They are **Isocortex only** — `xyz_to_depth` returns `nan` for coordinates
+outside it, rather than raising, so check for NaNs rather than assuming a failure would be
+loud.
+
+They sit in this family because they are Allen data repackaged onto the standard grid, like
+the others.
+
+## Citations
+
+::: {.callout-note}
+## Two source gaps
+
+**The MERFISH publication is not named.** The code attributes the data to the Zhuang lab and
+an Allen release, but cites no paper. If you publish using it, track down the citation
+yourself.
+
+**How the gene expression volumes were registered to the CCF is not recorded.** The scraping
+scripts that built them do not state the method.
+:::
+
+## Coming: the lipid atlas
+
+A lipid atlas is expected to join this family. It is not yet merged into the package, so there
+is nothing to load and nothing documented here yet — this is a placeholder so you know it is
+on the way.
