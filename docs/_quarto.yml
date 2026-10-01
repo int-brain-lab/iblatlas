@@ -1,0 +1,27 @@
+project:
+  type: website
+  output-dir: _site
+
+execute:
+  # The committed docs/_freeze/ is authoritative: a render reuses it instead of
+  # executing notebooks, which would download multi-GB atlas data. Regenerate it
+  # deliberately after changing a notebook — see CONTRIBUTING.md.
+  freeze: auto
+
+website:
+  title: "iblatlas"
+  navbar:
+    left:
+      - text: "Tutorial"
+        menu: []
+      - text: "How-To"
+        menu: []
+      - text: "Reference"
+        menu: []
+      - text: "Explanation"
+        menu: []
+
+format:
+  html:
+    theme: cosmo
+    toc: true

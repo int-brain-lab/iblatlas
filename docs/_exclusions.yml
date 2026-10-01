@@ -1,0 +1,25 @@
+# Symbols and modules deliberately left out of the documentation.
+# Nothing reads this file in the build phase; it is the record of what was omitted and
+# why, and the input the deferred coverage check will use.
+exclusions:
+  - pattern: iblatlas/gui/*
+    reason: >-
+      Pending the decision on whether the GUI is superseded. 28 of its 41 public members
+      are undocumented, so it would render largely empty stubs.
+    date: 2026-09-29
+
+  - pattern: iblatlas/genomics/gene_expression_scrapping
+    reason: One-off data-preparation code, not user-facing.
+    date: 2026-09-29
+
+  - pattern: iblatlas/genomics/merfish_scrapping
+    reason: One-off data-preparation code, not user-facing.
+    date: 2026-09-29
+
+  - pattern: iblatlas/connectivity/mesoscale_scrapping
+    reason: One-off data-preparation code, not user-facing.
+    date: 2026-09-29
+
+  - pattern: iblatlas/streamlines/streamlines_scraping
+    reason: One-off data-preparation code, not user-facing.
+    date: 2026-09-29

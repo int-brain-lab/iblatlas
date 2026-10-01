@@ -1,0 +1,6 @@
+# Render output. Nested here rather than in the repository .gitignore, which this
+# phase does not modify. Note _freeze/ is deliberately NOT ignored — it is committed.
+_site/
+
+/.quarto/
+**/*.quarto_ipynb

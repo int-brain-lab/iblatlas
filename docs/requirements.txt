@@ -1,0 +1,9 @@
+# Documentation build dependencies. Installed separately from the package because
+# pyproject.toml is an existing file this phase does not modify.
+quartodoc
+# Mandatory upper bound: quartodoc 0.11.1 declares griffe>=0.33 unbounded, resolves to
+# 2.3.0, and crashes with
+#   TypeError: parse_numpy() got an unexpected keyword argument 'allow_section_blank_line'
+griffe<2
+# Needed locally to execute notebooks and regenerate docs/_freeze/.
+jupyter

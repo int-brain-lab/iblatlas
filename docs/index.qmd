@@ -1,0 +1,7 @@
+---
+title: "iblatlas"
+---
+
+`iblatlas` puts mouse brain anatomy, and the datasets registered to it, in one common
+reference space — so data from different modalities and different labs can be compared by
+coordinate or by region id without redoing the registration.
