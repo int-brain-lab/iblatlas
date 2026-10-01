@@ -10,8 +10,8 @@ execute:
 
 quartodoc:
   package: iblatlas
-  dir: reference
-  sidebar: reference/_sidebar.yml
+  dir: reference/api
+  sidebar: reference/api/_sidebar.yml
   options:
     # Mandatory. Without it a subclass page shows only members defined on that class:
     # AllenAtlas renders 5 members instead of 18, losing plot_cslice, plot_sslice,
@@ -143,7 +143,10 @@ website:
           - how-to/convert-allen-meshes-to-glb.qmd
 
       - text: "Reference"
-        href: reference/index.qmd
+        menu:
+          - reference/index.qmd
+          - reference/api/index.qmd
+          - reference/data-files.qmd
 
       - text: "Explanation"
         menu:

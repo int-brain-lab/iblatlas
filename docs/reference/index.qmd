@@ -1,0 +1,28 @@
+---
+title: "Reference"
+---
+
+## Conventions, in three lines
+
+- **Units** — coordinates are in **metres**, except `Insertion.from_dict`, which takes micrometres.
+- **Origin** — **bregma**, so bregma is `(0, 0, 0)`.
+- **Signs** — ML `+` right / `−` left; AP `+` anterior / `−` posterior; DV `+` dorsal / `−` ventral,
+  so deeper is more negative.
+
+Coordinates are ordered **(ML, AP, DV)**; the atlas image volumes are indexed **(AP, ML, DV)**.
+[Coordinates and volumes](../explanation/coordinates-and-volumes.qmd) has the full table.
+
+::: {.callout-warning}
+The DV convention is stated incorrectly in the `iblatlas` module docstring, which the generated
+API pages reproduce verbatim. Where the two disagree, the line above is the correct one.
+:::
+
+## Contents
+
+- **[API](api/index.qmd)** — every documented class and function, grouped by theme.
+- **[Data files](data-files.qmd)** — the fixtures shipped with the package and the files it
+  downloads.
+
+The API pages are generated from the source docstrings. If a symbol is missing it has either
+not been added to the `contents:` list in `docs/_quarto.yml` or is recorded in
+`docs/_exclusions.yml` — see [CONTRIBUTING](https://github.com/int-brain-lab/iblatlas/blob/main/CONTRIBUTING.md).
