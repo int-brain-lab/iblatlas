@@ -128,6 +128,8 @@ website:
           - how-to/load-gene-expression-agea.ipynb
           - how-to/load-merfish.ipynb
           - how-to/load-mesoscale-connectivity.ipynb
+          - how-to/display-3d-meshes.qmd
+          - how-to/convert-allen-meshes-to-glb.qmd
       - text: "Reference"
         menu: []
       - text: "Explanation"

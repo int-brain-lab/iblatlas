@@ -1,0 +1,102 @@
+---
+title: "Display 3D region meshes"
+---
+
+The Allen region meshes are distributed as a single `meshes.glb` scene on IBL's S3 bucket, with
+one geometry per region. This page loads it and renders a few regions interactively.
+
+This is an **interactive desktop window**, not a figure embedded in a notebook. The code below
+is not executed when this site is built.
+
+## What you need
+
+```bash
+pip install trimesh datoviz
+```
+
+Plus `iblatlas` and a working ONE configuration, since the cache directory comes from ONE — see
+[Data downloads and caching](../explanation/data-downloads-and-caching.qmd).
+
+## Fetch the mesh scene
+
+The `.glb` is downloaded once into the atlas cache directory and reused after that.
+
+```python
+import numpy as np
+import trimesh
+import datoviz as dvz
+from iblatlas.atlas import AllenAtlas
+import one.remote.aws as aws
+
+ba = AllenAtlas()
+
+
+def download_glb_file():
+    file_path = AllenAtlas._get_cache_dir().joinpath('meshes.glb')
+    if not file_path.exists():
+        file_path.parent.mkdir(exist_ok=True, parents=True)
+        aws.s3_download_file(f'atlas/{file_path.name}', file_path)
+    return file_path
+
+
+file_glb = download_glb_file()
+scene = trimesh.load_scene(file_glb)
+```
+
+Each geometry in the scene is keyed by Allen id, as `'<id>.obj'`.
+
+## Render some regions
+
+This draws visual areas, hippocampal formation, thalamus and the brain outline:
+
+| Allen id | Acronym | Region |
+|---|---|---|
+| 669 | `VIS` | Visual areas |
+| 1089 | `HPF` | Hippocampal formation |
+| 549 | `TH` | Thalamus |
+| 997 | `root` | Whole brain outline |
+
+```python
+app = dvz.App(background='white')
+figure = app.figure(gui=True)
+panel = figure.panel()
+arcball = panel.arcball()
+
+region_idx = [669, 1089, 549, 997]
+for aid in region_idx:
+    mesh = scene.geometry[f'{aid}.obj']
+    mesh_pos = np.ascontiguousarray(mesh.vertices, dtype=np.float32)
+    mesh_idx = np.ascontiguousarray(mesh.faces.ravel(), dtype=np.uint32)
+    mesh_color = np.ascontiguousarray(mesh.visual.vertex_colors, dtype=np.uint8)
+
+    # Mesh vertices are in CCF order (AP, DV, ML) - convert to the IBL frame
+    mesh_pos = ba.ccf2xyz(mesh_pos, ccf_order='apdvml')
+    mesh_pos = np.ascontiguousarray(mesh_pos, dtype=np.float32)
+
+    mesh_color[:, 3] = 64          # semi-transparent so inner regions stay visible
+    if aid == 997:
+        mesh_color[:, 3] = 32      # the outline more transparent still
+    mesh_pos *= 200                # scale into a comfortable viewing range
+
+    visual = app.mesh(indexed=True, lighting=True, cull='back')
+    visual.set_data(position=mesh_pos, color=mesh_color,
+                    index=mesh_idx, compute_normals=True)
+    panel.add(visual)
+
+app.run()
+app.destroy()
+```
+
+Two details that matter if you adapt this:
+
+- **The meshes are in CCF order (AP, DV, ML)**, not the IBL coordinate order. `ba.ccf2xyz` with
+  `ccf_order='apdvml'` is what converts them; skip it and the brain renders rotated. See
+  [Coordinates and volumes](../explanation/coordinates-and-volumes.qmd).
+- **Transparency is set per-vertex** in the alpha channel. Drawing solid regions inside a solid
+  `root` shows you nothing but the outline.
+
+## Where the file comes from
+
+`meshes.glb` was built from the Allen Institute's per-region `.obj` files — see
+[Convert Allen meshes to GLB](convert-allen-meshes-to-glb.qmd). You only need that page if you
+want to rebuild the scene yourself.
