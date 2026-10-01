@@ -126,6 +126,7 @@ website:
           - how-to/plot-on-circular-flatmap.ipynb
           - how-to/work-with-cortical-streamlines.ipynb
           - how-to/load-gene-expression-agea.ipynb
+          - how-to/load-merfish.ipynb
           - how-to/load-mesoscale-connectivity.ipynb
       - text: "Reference"
         menu: []
