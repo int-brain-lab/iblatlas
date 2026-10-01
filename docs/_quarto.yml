@@ -122,6 +122,7 @@ website:
       - text: "Explanation"
         menu:
           - explanation/coordinates-and-volumes.qmd
+          - explanation/brain-region-hierarchy.qmd
 
 format:
   html:

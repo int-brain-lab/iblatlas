@@ -1,0 +1,80 @@
+---
+title: "The brain region hierarchy"
+---
+
+Brain regions in `iblatlas` are not a flat list. They form a tree, and a region can be referred
+to by three different identifiers that are easy to mistake for one another. Both facts cause
+confusion often enough to be worth stating plainly.
+
+## Regions form a tree
+
+Every region has a parent, up to the root. `BrainRegions` holds the whole structure tree, and
+`ancestors` walks it:
+
+```python
+from iblatlas.regions import BrainRegions
+
+br = BrainRegions()
+br.ancestors(985).acronym
+# array(['root', 'grey', 'CH', 'CTX', 'CTXpl', 'Isocortex', 'MO', 'MOp'], ...)
+```
+
+Primary motor area sits eight levels down, inside `MO`, inside `Isocortex`, and so on up to
+`root`. Depth is recorded in `br.level`, which runs 0 to 10.
+
+This is what makes granularity adjustable. A recording assigned to `MOp` is also, truthfully,
+in `Isocortex` and in `grey`. Choosing how coarsely to describe it is choosing a level of the
+tree — which is what the [mappings](brain-region-mappings.qmd) do systematically.
+
+## Three identifiers, and they are not interchangeable
+
+| Identifier | Example for primary motor area | What it is | Stable? |
+|---|---|---|---|
+| **Acronym** | `MOp` | Short human-readable label | Yes |
+| **Allen id** | `985` | The Allen Institute's region id | Yes |
+| **Index** | `19` | Row number in this `BrainRegions` object | **No** |
+
+The acronym and the Allen id are properties of the region and stay put. The **index** is a
+position in the arrays `BrainRegions` happens to hold, and it is the one people wrongly treat
+as an identity. Store acronyms or Allen ids; derive the index when you need it.
+
+Most functions that take a region accept the Allen id. Converting runs through the arrays
+directly:
+
+```python
+import numpy as np
+
+i = int(np.flatnonzero(br.acronym == 'MOp')[0])   # acronym -> index
+br.id[i]                                          # index   -> Allen id
+```
+
+## Left hemisphere regions have negative ids
+
+The object holds **2655** entries: one `void` entry with id `0`, then **1327** right-hemisphere
+regions with positive ids, then the same 1327 regions again for the left hemisphere with the
+**same acronym and the negated id**.
+
+```python
+br.n_lr          # 1327 — the number of regions per hemisphere
+br.id[19]        #  985  -> MOp, right
+br.id[19 + 1327] # -985  -> MOp, left
+br.acronym[19] == br.acronym[19 + 1327]   # True
+```
+
+So the sign of an Allen id carries the hemisphere, and `MOp` alone does not tell you which side
+of the brain you are on. Two consequences:
+
+- **Taking the absolute value merges hemispheres.** That is sometimes what you want and
+  sometimes a silent bug; it is never the default you should assume.
+- **A left-hemisphere region cannot be looked up by a positive id.** If your own data records
+  hemisphere separately, apply the sign before joining, or the left side will land on the
+  right.
+
+The left index is always the right index plus `br.n_lr`, which is the cheapest way to move
+between the two.
+
+## Where this shows up next
+
+The hierarchy is the machinery the mappings are built on, and the negative-id convention is
+what makes two-hemisphere plotting work — see
+[Brain region mappings](brain-region-mappings.qmd).
