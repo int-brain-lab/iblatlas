@@ -86,4 +86,5 @@ df_lipids['sex_zscore'] = (diff / pooled_std).median().values
 np.save(path_ibl.joinpath('lipid_volumes.npy'), volume)
 df_lipids.to_parquet(path_ibl.joinpath('lipids.pqt'))
 # the derived volumes are distributed under CC-BY 4.0 (approved by the authors), see README.md
-print(f'aws s3 cp --recursive --exclude "*" --include "lipid*" {path_ibl}/ s3://ibl-brain-wide-map-public/atlas/lipids/ --profile ibl --dryrun')
+print(f'aws s3 cp --recursive --exclude "*" --include "lipid_volumes.npy" --include "lipids.pqt"'
+      f' {path_ibl}/ s3://ibl-brain-wide-map-public/atlas/lipids/ --profile ibl --dryrun')
