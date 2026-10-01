@@ -116,24 +116,35 @@ website:
       - text: "Tutorial"
         menu:
           - tutorials/working-with-the-atlas.ipynb
+
       - text: "How-To"
         menu:
           - how-to/install.qmd
+          - text: "---"
           - how-to/remap-region-ids.ipynb
           - how-to/work-with-probe-insertions.qmd
+          - text: "---"
           - how-to/plot-values-on-slices.ipynb
           - how-to/plot-points-on-slices.ipynb
           - how-to/plot-on-swanson-flatmap.ipynb
           - how-to/plot-on-cortical-flatmap.ipynb
           - how-to/plot-on-circular-flatmap.ipynb
-          - how-to/work-with-cortical-streamlines.ipynb
+          - text: "---"
+          # The four repackaged external datasets group under their explanation page,
+          # which is what ties them together as one family.
+          - text: "External data in the common space"
+            href: explanation/external-data-in-the-common-space.qmd
           - how-to/load-gene-expression-agea.ipynb
           - how-to/load-merfish.ipynb
           - how-to/load-mesoscale-connectivity.ipynb
+          - how-to/work-with-cortical-streamlines.ipynb
+          - text: "---"
           - how-to/display-3d-meshes.qmd
           - how-to/convert-allen-meshes-to-glb.qmd
+
       - text: "Reference"
-        menu: []
+        href: reference/index.qmd
+
       - text: "Explanation"
         menu:
           - explanation/coordinates-and-volumes.qmd

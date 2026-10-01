@@ -2,6 +2,37 @@
 title: "iblatlas"
 ---
 
-`iblatlas` puts mouse brain anatomy, and the datasets registered to it, in one common
-reference space — so data from different modalities and different labs can be compared by
-coordinate or by region id without redoing the registration.
+`iblatlas` puts mouse brain anatomy — and the datasets other groups have registered to it — in
+**one common reference space**.
+
+That is the whole argument for the package. Two things follow from it:
+
+- **The registration work is already done.** Gene expression, cell types, connectivity and
+  cortical depth have each been put into the Allen reference space once, carefully. You join
+  them to your own data by a coordinate or an Allen region id, and nothing else.
+- **One set of tools works on all of it.** Remapping, the flat maps and the Swanson projection
+  operate on any per-region value, so whatever you can already plot for your own recordings you
+  can plot for any of these datasets.
+
+::: {.callout-note}
+These two are a provisional choice of what to lead with. If a different pair of advantages
+would land better with your audience, this is the paragraph to change.
+:::
+
+## Where to start
+
+| | |
+|---|---|
+| **[Tutorial](tutorials/working-with-the-atlas.ipynb)** | New to the package — start here |
+| **[How-To](how-to/install.qmd)** | Task recipes: installing, plotting, remapping, loading external data |
+| **[Reference](reference/index.qmd)** | The API, symbol by symbol |
+| **[Explanation](explanation/coordinates-and-volumes.qmd)** | Why things are the way they are |
+
+## Read these before you trust your coordinates
+
+Two conventions cause more trouble than everything else combined:
+
+- **[Coordinates and volumes](explanation/coordinates-and-volumes.qmd)** — metres, bregma-relative,
+  (ML, AP, DV); deeper is *more negative*; volumes are indexed (AP, ML, DV), not the same order.
+- **[Choosing an atlas](explanation/choosing-an-atlas.qmd)** — Allen, Needles and MRI Toronto are
+  one volume with different scalings, and they disagree by about 7% in depth.
