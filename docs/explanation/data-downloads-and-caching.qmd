@@ -1,0 +1,53 @@
+---
+title: "Data downloads and caching"
+---
+
+Instantiating an atlas downloads several gigabytes. Nothing in the API signals this, so it is
+worth knowing before you put `AllenAtlas()` inside a loop, a test, or a CI job.
+
+```python
+ba = AllenAtlas()   # first call: large download. Later calls: read from cache.
+```
+
+The download happens once per resolution and is cached on disk. Subsequent calls are cheap.
+
+## Where the data goes
+
+The cache directory is derived from ONE's `CACHE_DIR` parameter by
+`BrainAtlas._get_cache_dir`, which appends a fixed subpath:
+
+```
+<ONE CACHE_DIR>/histology/ATLAS/Needles/Allen
+```
+
+Note that `Needles` appears in the path regardless of which atlas you instantiate — it is part
+of the historical layout, not a statement about the scaling in use. See
+[Choosing an atlas](choosing-an-atlas.qmd).
+
+## Two remote sources
+
+- **The Allen Institute**, over HTTP, for the atlas volumes themselves
+  (`_download_atlas_allen`). The data is the Allen Mouse Brain Atlas (2015) with the 2017
+  region annotations.
+- **The `ibl-brain-wide-map-public` S3 bucket**, declared as `S3_BUCKET_IBL`, for the
+  IBL-repackaged resources — the flat maps, the genomics volumes, the connectivity tables and
+  the streamlines described in
+  [External data in the common space](external-data-in-the-common-space.qmd).
+
+## ONE is required, even without IBL data
+
+`_get_cache_dir` reads ONE's parameters, so **ONE must be installed and configured** before an
+atlas can be instantiated — including for users who never touch IBL experimental data and only
+want the anatomy.
+
+If `AllenAtlas()` fails on a fresh machine, an unconfigured ONE is the first thing to check:
+the cache path cannot be resolved without it.
+
+## Practical consequences
+
+- **Do not instantiate an atlas in a tight loop.** Build one and pass it in. Most functions
+  that need one accept a `brain_atlas` or `br` argument for exactly this reason.
+- **Resolution costs space.** The 10 µm volume is substantially larger than the 25 µm default;
+  take the default unless you need the detail.
+- **CI needs the cache warmed or the calls avoided.** This documentation site renders from a
+  committed freeze precisely so that building it downloads nothing.

@@ -125,6 +125,7 @@ website:
           - explanation/brain-region-hierarchy.qmd
           - explanation/brain-region-mappings.qmd
           - explanation/choosing-an-atlas.qmd
+          - explanation/data-downloads-and-caching.qmd
 
 format:
   html:
