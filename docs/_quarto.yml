@@ -120,6 +120,7 @@ website:
         menu:
           - how-to/install.qmd
           - how-to/remap-region-ids.ipynb
+          - how-to/work-with-probe-insertions.qmd
           - how-to/plot-values-on-slices.ipynb
           - how-to/plot-points-on-slices.ipynb
           - how-to/plot-on-swanson-flatmap.ipynb

@@ -1,0 +1,106 @@
+---
+title: "Work with probe insertions"
+---
+
+`Trajectory` and `Insertion` describe where a probe went. They are used across `ibllib`,
+`iblapps`, `iblrig` and other IBL tooling, so they are public API in practice even though they
+live in `iblatlas.atlas` alongside the volumes.
+
+The code on this page is not executed when the site is built.
+
+## Trajectory: a line in the brain
+
+A `Trajectory` is minimally a **vector** and a **point**. The usual way to get one is to fit it
+to a cloud of coordinates — the picked points of a histology track, for example:
+
+```python
+from iblatlas.atlas import Trajectory
+
+trj = Trajectory.fit(xyz)     # xyz: (n, 3) array of ML, AP, DV in metres
+```
+
+## Insertion: a probe, in stereotaxic terms
+
+An `Insertion` is the surgical description — an entry point plus angles and a depth:
+
+| Field | Meaning |
+|---|---|
+| `x`, `y`, `z` | Entry coordinate, metres, ML/AP/DV relative to bregma |
+| `phi` | Azimuth, degrees |
+| `theta` | Polar angle, degrees |
+| `depth` | Insertion depth |
+| `label` | Free-text name, default `''` |
+| `beta` | See below — undocumented, defaults to `0` |
+
+Do not construct one with `Insertion(...)` directly. Use the two static constructors.
+
+### From a histology track
+
+```python
+from iblatlas.atlas import AllenAtlas, Insertion
+
+ba = AllenAtlas()
+ins = Insertion.from_track(xyzs, brain_atlas=ba)
+```
+
+`from_track` fits a `Trajectory` to the points, projects the **deepest** point onto it to get
+the tip, intersects the trajectory with the brain surface to get the entry point, and converts
+the result to spherical coordinates.
+
+`brain_atlas` is **required** despite its `None` default — the surface intersection needs it,
+and omitting it raises `AssertionError` rather than a helpful error.
+
+### From a probes.description entry
+
+```python
+d = {'x': 544.0, 'y': 1285.0, 'z': 0.0,
+     'phi': 0.0, 'theta': 5.0, 'depth': 4501.0}
+ins = Insertion.from_dict(d, brain_atlas=ba)
+```
+
+::: {.callout-warning}
+## `from_dict` takes micrometres
+
+This is the one place in the API where coordinates are not in metres. The values come from
+`probes.description` files, which store micrometres, and the constructor divides by `1e6`.
+Everywhere else — including `from_track` and the `x`, `y`, `z` fields on the resulting object
+— is metres. See [Coordinates and volumes](../explanation/coordinates-and-volumes.qmd).
+:::
+
+`from_dict` also reads optional `beta` and `label` keys, defaulting to `0` and `''`.
+
+## Which structures does it pass through?
+
+An insertion exposes `entry`, `tip` and `xyz`, and region labels come from the atlas:
+
+```python
+ids = ba.get_labels(ins.xyz, mapping='Beryl')
+acronyms = ba.regions.id2acronym(ids)
+```
+
+Pick the mapping to suit the granularity you want — see
+[Brain region mappings](../explanation/brain-region-mappings.qmd). Use an `-lr` mapping if you
+need to distinguish hemispheres.
+
+::: {.callout-important}
+## Two gaps on this page
+
+**No worked example with real coordinates.** The entry coordinate, angles and the structures a
+probe actually passes through need an experimentalist to supply credible values. The dictionary
+above is the one from the `from_dict` docstring, not a real planned trajectory.
+
+**What `beta` means is unknown.** It is stored on every `Insertion`, read by `from_dict`, and
+defaults to `0`. It appears exactly twice in the package — the field declaration and that read
+— and is documented nowhere. If you know, please say.
+
+`Insertion.xyz`, `Insertion.entry` and `Insertion.tip` also carry no docstrings, so the API
+reference shows them bare.
+:::
+
+## Planning tools
+
+[Pinpoint](https://virtualbrainlab.org/pinpoint/in_vivo_alignment.html) is what many IBL users
+plan trajectories with. It applies a −5° pitch correction that `iblatlas` does not, and **it
+has not been confirmed that its transforms match the `iblatlas` scalings**. Record which tool
+produced a coordinate; do not assume an `Insertion` and a Pinpoint plan share a frame. See
+[Choosing an atlas](../explanation/choosing-an-atlas.qmd).
