@@ -117,7 +117,15 @@ website:
         menu:
           - tutorials/working-with-the-atlas.ipynb
       - text: "How-To"
-        menu: []
+        menu:
+          - how-to/plot-values-on-slices.ipynb
+          - how-to/plot-points-on-slices.ipynb
+          - how-to/plot-on-swanson-flatmap.ipynb
+          - how-to/plot-on-cortical-flatmap.ipynb
+          - how-to/plot-on-circular-flatmap.ipynb
+          - how-to/work-with-cortical-streamlines.ipynb
+          - how-to/load-gene-expression-agea.ipynb
+          - how-to/load-mesoscale-connectivity.ipynb
       - text: "Reference"
         menu: []
       - text: "Explanation"
