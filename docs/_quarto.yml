@@ -124,6 +124,7 @@ website:
           - explanation/coordinates-and-volumes.qmd
           - explanation/brain-region-hierarchy.qmd
           - explanation/brain-region-mappings.qmd
+          - explanation/choosing-an-atlas.qmd
 
 format:
   html:
