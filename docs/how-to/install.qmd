@@ -1,0 +1,46 @@
+---
+title: "Install iblatlas"
+---
+
+## Install
+
+```bash
+pip install iblatlas
+```
+
+**Python 3.10 or newer** is required.
+
+This pulls in `ONE-api`, `iblutil`, `pynrrd`, `numpy`, `matplotlib` and `scipy`.
+
+## Configure ONE
+
+`ONE-api` is a hard dependency, not an optional one, and it must be **configured** as well as
+installed — the atlas cache directory is derived from ONE's `CACHE_DIR` parameter.
+
+This applies even if you only want anatomy and will never touch IBL experimental data. If
+`AllenAtlas()` fails on a fresh machine, an unconfigured ONE is the first thing to check. See
+[Data downloads and caching](../explanation/data-downloads-and-caching.qmd).
+
+## First use downloads several gigabytes
+
+```python
+from iblatlas.atlas import AllenAtlas
+
+ba = AllenAtlas()   # first call downloads the atlas volume
+```
+
+The download happens once per resolution and is cached; later calls read from disk. Build one
+atlas object and pass it around rather than constructing one repeatedly — most functions that
+need an atlas accept it as an argument.
+
+The default resolution is 25 µm. The 10 µm volume is considerably larger; take the default
+unless you need the detail.
+
+## The `gui` extra
+
+```bash
+pip install "iblatlas[gui]"
+```
+
+This adds `pyqt5`, `qtpy` and `iblqt`, and provides an `atlas` command. The GUI is not covered
+by this documentation yet.
