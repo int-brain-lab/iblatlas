@@ -3,9 +3,11 @@ project:
   output-dir: _site
 
 execute:
-  # The committed docs/_freeze/ is authoritative: a render reuses it instead of
-  # executing notebooks, which would download multi-GB atlas data. Regenerate it
-  # deliberately after changing a notebook — see CONTRIBUTING.md.
+  # Inert for this site, and kept only in case a .qmd ever gains executable blocks.
+  # Quarto does not execute .ipynb on render regardless of this setting: it uses the
+  # outputs each notebook already carries, so no _freeze/ is produced and building the
+  # site downloads nothing. Figures come from committing an executed notebook — see
+  # CONTRIBUTING.md.
   freeze: auto
 
 quartodoc:
