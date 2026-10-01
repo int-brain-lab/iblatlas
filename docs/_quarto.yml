@@ -118,6 +118,7 @@ website:
           - tutorials/working-with-the-atlas.ipynb
       - text: "How-To"
         menu:
+          - how-to/remap-region-ids.ipynb
           - how-to/plot-values-on-slices.ipynb
           - how-to/plot-points-on-slices.ipynb
           - how-to/plot-on-swanson-flatmap.ipynb
