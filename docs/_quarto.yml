@@ -120,7 +120,8 @@ website:
       - text: "Reference"
         menu: []
       - text: "Explanation"
-        menu: []
+        menu:
+          - explanation/coordinates-and-volumes.qmd
 
 format:
   html:

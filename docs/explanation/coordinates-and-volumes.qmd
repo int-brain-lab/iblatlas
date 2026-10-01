@@ -1,0 +1,97 @@
+---
+title: "Coordinates and volumes"
+---
+
+Almost every mistake people make with `iblatlas` is a coordinate mistake: a sign flipped, a
+unit missed, or voxel indices used where real-world coordinates were meant. This page is the
+one place those conventions are written down.
+
+## The three axes
+
+| Axis | Position in a coordinate | Axis in a volume | Positive | Negative |
+|---|---|---|---|---|
+| **ML** (`x`) | 1st | 2nd | right | left |
+| **AP** (`y`) | 2nd | 1st | anterior to bregma | posterior to bregma |
+| **DV** (`z`) | 3rd | 3rd | dorsal to bregma | ventral to bregma — deeper is more negative |
+
+The DV row is the one to internalise. A probe driven into the brain travels towards **more
+negative** `z`. A target 4 mm below the brain surface has a `z` of roughly `-0.004`, not
+`+0.004`.
+
+::: {.callout-warning}
+## The package docstring states the DV convention incorrectly
+
+`iblatlas/__init__.py` reads "DV coordinates ventral to bregma are -ve; ventral +ve". The
+second clause should read *dorsal*. The table above is correct; the rendered API reference
+reproduces the docstring and is wrong on that one line. The docstring is left untouched
+deliberately — correcting it is a conversation with the package developers, not a
+documentation change.
+:::
+
+## Coordinates are in metres
+
+Coordinates are in **metres**, relative to bregma, in the order **(ML, AP, DV)**.
+
+Metres, not millimetres and not micrometres. A coordinate 2 mm anterior of bregma is `0.002`.
+This catches people out constantly, because stereotaxic surgery is planned in millimetres and
+the Allen atlas is distributed in micrometres.
+
+There is exactly one exception in the public API: **`Insertion.from_dict`** takes micrometres,
+because it reads the `probes.description` file, which stores them. Its own docstring says so —
+"The depth and xyz coordinates must be in um" — and internally it divides by `1e6`. Every other
+entry point takes metres.
+
+## Volumes are indexed (AP, ML, DV)
+
+Coordinates are ordered (ML, AP, DV), but the image volumes are ordered **(AP, ML, DV)** — the
+first two are swapped. With C-ordering this makes coronal slicing the cheapest operation, which
+is why it was chosen. The origin is the top-left corner of the image.
+
+So `volume[i, j, k]` is AP index `i`, ML index `j`, DV index `k`, while a coordinate
+`xyz = (x, y, z)` is ML, AP, DV. Converting between the two is what `BrainCoordinates` is for;
+do not index a volume with a coordinate triple directly.
+
+This ordering holds for the atlas volumes. It is **not** universal across the package: the
+genomics volumes are built with `dims2xyz=[0, 2, 1]` and axes (ML, DV, AP). If you are working
+with gene expression or MERFISH data, check the axis order for that dataset rather than
+assuming this one — see [External data in the common space](external-data-in-the-common-space.qmd).
+
+## Bregma is the origin
+
+Bregma sits at voxel `(5739, 5400, 332)` µm in the Allen volume, in ML, AP, DV order, exposed as
+`ALLEN_CCF_LANDMARKS_MLAPDV_UM['bregma']`. Subtracting it is what makes a coordinate
+bregma-relative, so bregma itself is `(0, 0, 0)`.
+
+It was determined by asking five experimentalists to pick the voxel containing bregma on the
+Allen volume and averaging their answers. It is a considered estimate, not a landmark the
+imaging recovers — worth remembering before treating sub-100 µm agreement between tools as
+meaningful.
+
+Note also that the midline is slightly off-centre in the Allen image volume, so ML `0` and the
+anatomical midline are not perfectly the same thing.
+
+## Index versus coordinate
+
+Two different things are easy to confuse:
+
+- an **index** is a position in the array — integer, resolution-dependent, origin at the corner
+  of the volume;
+- a **coordinate** is a position in the brain — float, in metres, origin at bregma.
+
+`BrainCoordinates` converts between them (`i2xyz`, `xyz2i` and relatives). A 25 µm atlas and a
+10 µm atlas give different indices for the same coordinate, which is the main reason to keep
+data in coordinates and convert late.
+
+## The atlas is pitched about 5° nose-down
+
+The Allen CCF is pitched down by about 5 degrees relative to a flat skull — the position where
+bregma and lambda sit at the same DV height — and **the package does not correct for this**.
+
+This matters whenever atlas coordinates meet a stereotaxic frame: an angle read off the atlas
+is not the angle to dial into a flat-skull-levelled manipulator. The package supplies
+`tilt_spherical(theta, phi, tilt_angle=-5)` to rotate angles between the two frames, but it is
+something you call deliberately, not something applied for you. A positive `tilt_angle` lifts
+the mouse's chin.
+
+See [Choosing an atlas](choosing-an-atlas.qmd) for how this interacts with the MRI-derived
+scalings and with external planning tools.
