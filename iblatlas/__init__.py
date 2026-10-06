@@ -85,6 +85,11 @@ Non-Allen mappings:
 
 3. Swanson - the brain atlas annotations from the Swansan rat brain flat map [9]_, mapped to the Allen atlas manually by Olivier
    Winter. See `Fixtures`_ for details.
+4. Ephys100 - 100 groups obtained by an optimal cut of the Allen ontology tree that minimises the within-group variance of the
+   brainwide ephys-atlas features.
+5. EphysCosmos - same procedure with 12 groups: a Cosmos-like parcellation where the pons and medulla are separated and the
+   hippocampal formation is split into hippocampal region and retrohippocampal region. The few voxels labelled with the
+   hippocampal formation parent itself are mapped to root.
 
 Each mapping includes both a lateralized (suffix '-lr') and non-laterized version. The lateralized mappings assign a different ID
 to structures in the right side of the brain. The Allen atlas IDs are kept intact but lateralized as follows: labels are

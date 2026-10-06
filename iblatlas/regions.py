@@ -589,7 +589,7 @@ class BrainRegions(_BrainRegions):
         brain IDs. In production, we use the MAPPING_FILES pqt to avoid recomputing at each
         instantiation as this take a few seconds to execute.
 
-        Currently there are 8 available mappings (Allen, Beryl, Cosmos, and Swanson), lateralized
+        Currently there are 12 available mappings (Allen, Beryl, Cosmos, Swanson, Ephys100 and EphysCosmos), lateralized
         (with suffix -lr) and non-lateralized. Each row contains the correspondence to the Allen
         CCF structure tree order (i.e. index) for each mapping.
 
@@ -603,6 +603,8 @@ class BrainRegions(_BrainRegions):
             beryl = np.load(Path(__file__).parent.joinpath('beryl.npy'))
             cosmos = np.load(Path(__file__).parent.joinpath('cosmos.npy'))
             swanson = np.load(Path(__file__).parent.joinpath('swanson_regions.npy'))
+            ephys100 = np.load(Path(__file__).parent.joinpath('ephys100.npy'))
+            ephys_cosmos = np.load(Path(__file__).parent.joinpath('ephys_cosmos.npy'))
             self.mappings = {
                 'Allen': self._mapping_from_regions_list(np.unique(np.abs(self.id)), lateralize=False),
                 'Allen-lr': np.arange(self.id.size),
@@ -612,6 +614,10 @@ class BrainRegions(_BrainRegions):
                 'Cosmos-lr': self._mapping_from_regions_list(cosmos, lateralize=True),
                 'Swanson': self._mapping_from_regions_list(swanson, lateralize=False),
                 'Swanson-lr': self._mapping_from_regions_list(swanson, lateralize=True),
+                'Ephys100': self._mapping_from_regions_list(ephys100, lateralize=False),
+                'Ephys100-lr': self._mapping_from_regions_list(ephys100, lateralize=True),
+                'EphysCosmos': self._mapping_from_regions_list(ephys_cosmos, lateralize=False),
+                'EphysCosmos-lr': self._mapping_from_regions_list(ephys_cosmos, lateralize=True),
             }
             pd.DataFrame(self.mappings).to_parquet(FILE_MAPPINGS)
         self.default_mapping = 'Allen'
