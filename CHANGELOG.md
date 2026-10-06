@@ -1,4 +1,4 @@
-## [Unreleased]
+## [1.3.0]
 ### Fixed
 - `merfish.load_volume(label='processed')` dropped the last 5 types at every taxonomy level instead of the
   non-neuronal ones: at the subclass level it removed the immune subclasses but kept 18 glial and vascular ones.
@@ -6,6 +6,7 @@
 ### Added
 - `merfish.load_volume(include_non_neuronal=True)` keeps the non-neuronal types in the processed volume,
   normalized as proportions among all cells instead of among neurons
+- `iblatlas.genomics.lipids.load_volume()` to load lipid volumes from the Lipid Brain Atlas (CC-BY 4.0)
 
 ## [1.2.1]
 ### Fixed
