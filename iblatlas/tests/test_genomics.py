@@ -8,6 +8,7 @@ import pandas as pd
 
 from iblatlas.genomics import agea
 from iblatlas.genomics import merfish
+from iblatlas.genomics import lipids
 
 
 class TestLoadAgea(unittest.TestCase):
@@ -160,3 +161,27 @@ class TestMerfishLoadVolume(unittest.TestCase):
             merfish.load_volume(level='not_a_level')
         with self.assertRaises(AssertionError):
             merfish.load_volume(label='not_a_label')
+
+
+class TestLipidsLoadVolume(unittest.TestCase):
+
+    def test_load_volume(self):
+        with tempfile.TemporaryDirectory() as folder_cache:
+            n_lipids, shape = 3, (4, 5, 6)
+            volume = np.random.RandomState(2).rand(n_lipids, *shape).astype(np.float32)
+            df_lipids = pd.DataFrame({'lipid': ['PC 38:6', 'SM 34:1;O2', 'PE 40:6'], 'reliability': [0.8, 0.3, 0.7]})
+            np.save(Path(folder_cache, 'lipid_volumes.npy'), volume)
+            df_lipids.to_parquet(Path(folder_cache, 'lipids.pqt'))
+            fake_atlas = unittest.mock.MagicMock(label=np.ones(shape))
+
+            with unittest.mock.patch('iblatlas.genomics.agea.load_atlas', return_value=fake_atlas):
+                vol, df, ba = lipids.load_volume(folder_cache=folder_cache)
+                np.testing.assert_array_equal(np.asarray(vol), volume)
+                pd.testing.assert_frame_equal(df, df_lipids)
+                self.assertIs(ba, fake_atlas)
+                # on windows we need to close the memmap for the tempdir to be deleted
+                vol._mmap.close()
+
+                vol, df, _ = lipids.load_volume(folder_cache=folder_cache, min_reliability=0.5)
+                np.testing.assert_array_equal(vol, volume[[0, 2]])
+                self.assertEqual(df['lipid'].tolist(), ['PC 38:6', 'PE 40:6'])
