@@ -3,7 +3,7 @@ title: "External data in the common space"
 ---
 
 Several groups have built mouse brain datasets that are not IBL's: gene expression, cell-type
-densities, connectivity, cortical depth. IBL has repackaged each of them into the atlas
+densities, lipids, connectivity, cortical depth. IBL has repackaged each of them into the atlas
 reference space and ships them through this package.
 
 That repackaging is the point of this page. These datasets are scattered across separate
@@ -25,10 +25,12 @@ so anything you can already plot for your own data, you can plot for these.
 
 **Downloads are versioned** with their source release recorded.
 
-Two limits belong in the same breath:
+Three limits belong in the same breath:
 
-- The genomics grids are **coarse** — 200 µm, against the atlas's 10–50 µm — and MERFISH is
-  interpolated between sections. These are not high-resolution volumes.
+- The genomics grids, lipids included, are **coarse** — 200 µm, against the atlas's 10–50 µm —
+  and MERFISH is interpolated between sections. These are not high-resolution volumes.
+- The lipid volumes **do not cover the whole brain**. The olfactory bulb and the most anterior
+  frontal cortex were not sampled, so those voxels — 9% of the brain — are NaN.
 - The connectivity tables have **no grid at all**. They are region-level, so there is nothing
   to overlay on a slice directly.
 
@@ -39,13 +41,14 @@ Two limits belong in the same breath:
 | Allen Gene Expression Atlas | Voxel grid, Allen CCF labels downsampled from 25 µm | 200 µm, shape 58×41×67, axes (ML, DV, AP) |
 | MERFISH volumes | The same 200 µm atlas object as gene expression | 200 µm, axes (ML, DV, AP) |
 | MERFISH cells | Allen CCF coordinates converted to bregma-relative x, y, z | Continuous coordinates |
+| Lipid Brain Atlas lipid volumes | The same 200 µm atlas object as gene expression | 200 µm, axes (ML, DV, AP) |
 | Oh/Knox mesoscale connectivity | Allen structure ids and acronyms, 291 summary structures | No grid; region table |
 | Harris cortico-thalamic hierarchy | Area acronyms, matching the connectivity table | No grid |
 | Allen streamlines | Depth values on the ordinary atlas grid, Isocortex only | 10, 25 or 50 µm |
 
 The gene expression volume is `(4345, 58, 41, 67)` — 4345 experiments by ML, DV, AP.
 
-## Two things that will trip you up
+## How the genomics volumes differ
 
 **The genomics volumes break the axis convention.** They are built with `dims2xyz=[0, 2, 1]`
 and ordered (ML, DV, AP), not the (AP, ML, DV) that
@@ -83,9 +86,3 @@ yourself.
 **How the gene expression volumes were registered to the CCF is not recorded.** The scraping
 scripts that built them do not state the method.
 :::
-
-## Coming: the lipid atlas
-
-A lipid atlas is expected to join this family. It is not yet merged into the package, so there
-is nothing to load and nothing documented here yet — this is a placeholder so you know it is
-on the way.

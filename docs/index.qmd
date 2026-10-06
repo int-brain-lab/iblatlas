@@ -17,9 +17,9 @@ With your own data, you can:
   [cortical flat map](how-to/plot-on-cortical-flatmap.ipynb) or the
   [Swanson flat map](how-to/plot-on-swanson-flatmap.ipynb).
 
-Gene expression, MERFISH cell types, mesoscale connectivity and cortical depth have already been
-registered to the same space, so they join to your data by a coordinate or an Allen region id,
-and the same plotting tools work on them. See
+Gene expression, MERFISH cell types, lipids, mesoscale connectivity and cortical depth have
+already been registered to the same space, so they join to your data by a coordinate or an Allen
+region id, and the same plotting tools work on them. See
 [external data in the common space](explanation/external-data-in-the-common-space.qmd).
 
 ## Getting started
