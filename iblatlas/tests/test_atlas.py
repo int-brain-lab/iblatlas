@@ -92,6 +92,16 @@ class TestBrainRegions(unittest.TestCase):
         inds_[0] = 0
         assert np.all(inds == inds_)
 
+    def test_ephys_mappings(self):
+        # number of groups, excluding void and root; the lateralized version has one group per hemisphere
+        for name, n_groups in (('Ephys100', 100), ('EphysCosmos', 12)):
+            assert np.unique(self.brs.mappings[name]).size == n_groups + 2
+            assert np.unique(self.brs.mappings[f'{name}-lr']).size == 2 * n_groups + 2
+        # the pons and medulla are separated in EphysCosmos, whereas Cosmos has a single hindbrain group
+        acronyms = np.array(['CA3', 'VM', 'PG', 'IRN'])
+        map_acronyms, _ = self.brs.acronym2index(acronyms, mapping='EphysCosmos')
+        np.testing.assert_equal(map_acronyms, ['HIP', 'TH', 'P', 'MY'])
+
     def test_remap(self):
         # Test mapping atlas ids from one map to another
         atlas_id = np.array([463, 685])  # CA3 and PO

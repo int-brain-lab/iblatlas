@@ -1,3 +1,7 @@
+## [Unreleased]
+### Added
+- `Ephys100` and `EphysCosmos` mappings (and `-lr` versions): optimal cuts of the ontology tree on ephys-atlas features, EphysCosmos separates pons and medulla
+
 ## [1.3.0]
 ### Fixed
 - `merfish.load_volume(label='processed')` dropped the last 5 types at every taxonomy level instead of the
