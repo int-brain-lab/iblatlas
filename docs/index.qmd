@@ -2,37 +2,39 @@
 title: "iblatlas"
 ---
 
-`iblatlas` puts mouse brain anatomy — and the datasets other groups have registered to it — in
-**one common reference space**.
+`iblatlas` is a Python package from the International Brain Laboratory for working with the
+mouse brain in the Allen Common Coordinate Framework: converting coordinates, navigating brain
+regions, and plotting results on slices and flat maps.
 
-That is the whole argument for the package. Two things follow from it:
+With your own data, you can:
 
-- **The registration work is already done.** Gene expression, cell types, connectivity and
-  cortical depth have each been put into the Allen reference space once, carefully. You join
-  them to your own data by a coordinate or an Allen region id, and nothing else.
-- **One set of tools works on all of it.** Remapping, the flat maps and the Swanson projection
-  operate on any per-region value, so whatever you can already plot for your own recordings you
-  can plot for any of these datasets.
+- **Place coordinates and probe insertions in atlas space** —
+  [work with probe insertions](how-to/work-with-probe-insertions.qmd),
+  [plot points on slices](how-to/plot-points-on-slices.ipynb).
+- **Look up brain regions and remap between Allen, Beryl and Cosmos** —
+  [remap region ids](how-to/remap-region-ids.ipynb).
+- **Plot per-region values** on [slices](how-to/plot-values-on-slices.ipynb), the
+  [cortical flat map](how-to/plot-on-cortical-flatmap.ipynb) or the
+  [Swanson flat map](how-to/plot-on-swanson-flatmap.ipynb).
 
-::: {.callout-note}
-These two are a provisional choice of what to lead with. If a different pair of advantages
-would land better with your audience, this is the paragraph to change.
+Gene expression, MERFISH cell types, mesoscale connectivity and cortical depth have already been
+registered to the same space, so they join to your data by a coordinate or an Allen region id,
+and the same plotting tools work on them. See
+[external data in the common space](explanation/external-data-in-the-common-space.qmd).
+
+## Getting started
+
+1. **[Install iblatlas](how-to/install.qmd)** — including configuring ONE, and the first-use
+   download of several gigabytes.
+2. **[Work through the tutorial](tutorials/working-with-the-atlas.ipynb)** — a tour of the atlas
+   object.
+
+::: {.callout-warning}
+## Two conventions to know
+
+Coordinates are in metres, relative to bregma, and depth is negative — see
+[coordinates and volumes](explanation/coordinates-and-volumes.qmd).
+
+The Needles and MRI Toronto scalings of the Allen atlas differ by about 7% in depth — see
+[choosing an atlas](explanation/choosing-an-atlas.qmd).
 :::
-
-## Where to start
-
-| | |
-|---|---|
-| **[Tutorial](tutorials/working-with-the-atlas.ipynb)** | New to the package — start here |
-| **[How-To](how-to/install.qmd)** | Task recipes: installing, plotting, remapping, loading external data |
-| **[Reference](reference/index.qmd)** | The API, symbol by symbol |
-| **[Explanation](explanation/coordinates-and-volumes.qmd)** | Why things are the way they are |
-
-## Read these before you trust your coordinates
-
-Two conventions cause more trouble than everything else combined:
-
-- **[Coordinates and volumes](explanation/coordinates-and-volumes.qmd)** — metres, bregma-relative,
-  (ML, AP, DV); deeper is *more negative*; volumes are indexed (AP, ML, DV), not the same order.
-- **[Choosing an atlas](explanation/choosing-an-atlas.qmd)** — Allen, Needles and MRI Toronto are
-  one volume with different scalings, and they disagree by about 7% in depth.
