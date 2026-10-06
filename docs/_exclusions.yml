@@ -16,6 +16,10 @@ exclusions:
     reason: One-off data-preparation code, not user-facing.
     date: 2026-09-29
 
+  - pattern: iblatlas/genomics/lipids_scrapping
+    reason: One-off data-preparation code, not user-facing.
+    date: 2026-10-06
+
   - pattern: iblatlas/connectivity/mesoscale_scrapping
     reason: One-off data-preparation code, not user-facing.
     date: 2026-09-29

@@ -56,6 +56,7 @@ code that did this is not in the repository** and its location is unrecorded.
 |---|---|
 | Allen gene expression (AGEA) | Allen Institute, repackaged to a 200 µm grid on the `ibl-brain-wide-map-public` S3 bucket |
 | MERFISH | Zhuang lab via an Allen release, on the same bucket under `atlas/merfish`. **No publication named** |
+| Lipid Brain Atlas | Fusar Bassini et al., *Nature* (2026), [doi:10.1038/s41586-026-11050-0](https://doi.org/10.1038/s41586-026-11050-0); source data [Zenodo 15379565](https://doi.org/10.5281/zenodo.15379565). Derived volumes under CC-BY 4.0, on the same bucket under `atlas/lipids` |
 | Mesoscale connectivity | Oh et al. / Knox et al., regionalized by IBL |
 | Cortico-thalamic hierarchy | Harris et al. |
 | Streamlines | Allen cortical depth data, converted onto the atlas grid |

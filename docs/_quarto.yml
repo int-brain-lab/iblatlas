@@ -94,8 +94,9 @@ quartodoc:
 
     - title: Genomics
       desc: >-
-        Allen gene expression (AGEA) and MERFISH. Note the loaders differ in default:
-        agea.load returns the raw volume, merfish.load_volume the denoised one.
+        Allen gene expression (AGEA), MERFISH and Lipid Brain Atlas lipids, all on the same
+        200 um grid. Note the loaders differ in default: agea.load returns the raw volume,
+        merfish.load_volume the denoised one.
       contents:
         - genomics.agea.load
         - genomics.agea.load_atlas
@@ -104,6 +105,7 @@ quartodoc:
         - genomics.merfish.denoise_volume
         - genomics.merfish.is_non_neuronal
         - genomics.merfish.int2rgb
+        - genomics.lipids.load_volume
 
     - title: Connectivity
       desc: Oh/Knox mesoscale connectivity and the Harris cortico-thalamic hierarchy.
