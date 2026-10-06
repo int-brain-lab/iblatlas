@@ -76,6 +76,11 @@ the others.
 
 ## Citations
 
+**Lipid Brain Atlas.** The lipid volumes are distributed under CC-BY 4.0, so any use must credit
+Fusar Bassini L. et al., "The lipidomic architecture of the mouse brain", *Nature* (2026),
+[doi:10.1038/s41586-026-11050-0](https://doi.org/10.1038/s41586-026-11050-0), and the source
+data, [doi:10.5281/zenodo.15379565](https://doi.org/10.5281/zenodo.15379565).
+
 ::: {.callout-note}
 ## Two source gaps
 
