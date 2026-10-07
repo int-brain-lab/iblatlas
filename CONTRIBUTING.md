@@ -75,11 +75,16 @@ with no figures.
 To add or refresh figures, run the notebook yourself and commit it **with outputs**:
 
 ```bash
-venv/bin/jupyter nbconvert --to notebook --execute --inplace docs/how-to/<page>.ipynb
+PYTHONWARNINGS=ignore venv/bin/jupyter nbconvert --to notebook --execute --inplace docs/how-to/<page>.ipynb
 ```
 
+`PYTHONWARNINGS=ignore` keeps Python warnings out of the stored outputs. A warning prints the
+full path of the file that raised it, so without this the page would show the local path of
+your checkout.
+
 This downloads atlas data — several gigabytes on a cold cache — so do it deliberately, on a
-machine where the data is already cached.
+machine where the data is already cached. Run it a second time once the data is cached: the
+first run stores the download progress bars in the outputs.
 
 Because nothing executes at build time, rendering the site downloads nothing.
 
