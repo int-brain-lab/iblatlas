@@ -115,6 +115,9 @@ quartodoc:
 
 website:
   title: "iblatlas"
+  # Drafts render, with a banner, in local builds. The deploy must set this to `gone`
+  # so that pages still marked `draft: true` stay off the public site.
+  draft-mode: visible
   navbar:
     left:
       - text: "Tutorial"
@@ -126,6 +129,7 @@ website:
           - how-to/install.qmd
           - text: "---"
           - how-to/remap-region-ids.ipynb
+          - how-to/explore-the-atlas-in-the-gui.qmd
           - how-to/work-with-probe-insertions.qmd
           - text: "---"
           - how-to/plot-values-on-slices.ipynb
