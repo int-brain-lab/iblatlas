@@ -9,7 +9,9 @@ reference space and ships them through this package.
 That repackaging is the point of this page. These datasets are scattered across separate
 how-tos and it is easy to miss that they are one family, built on one idea.
 
-## Why a common space is worth the trouble
+To cite any of these datasets, see [Citations](../citations.qmd).
+
+## Benefits of a common space
 
 **The registration work is already done.** Each dataset has been put into the Allen reference
 space once, carefully, by someone else. You are not aligning volumes.
@@ -25,15 +27,6 @@ so anything you can already plot for your own data, you can plot for these.
 
 **Downloads are versioned** with their source release recorded.
 
-Three limits belong in the same breath:
-
-- The genomics grids, lipids included, are **coarse** — 200 µm, against the atlas's 10–50 µm —
-  and MERFISH is interpolated between sections. These are not high-resolution volumes.
-- The lipid volumes **do not cover the whole brain**. The olfactory bulb and the most anterior
-  frontal cortex were not sampled, so those voxels — 9% of the brain — are NaN.
-- The connectivity tables have **no grid at all**. They are region-level, so there is nothing
-  to overlay on a slice directly.
-
 ## What is available
 
 | Dataset | Joined by | Grid and axes |
@@ -46,40 +39,84 @@ Three limits belong in the same breath:
 | Harris cortico-thalamic hierarchy | Area acronyms, matching the connectivity table | No grid |
 | Allen streamlines | Depth values on the ordinary atlas grid, Isocortex only | 10, 25 or 50 µm |
 
-The gene expression volume is `(4345, 58, 41, 67)` — 4345 experiments by ML, DV, AP.
+The gene expression volume is `(4345, 58, 41, 67)` — 4345 experiments by ML, DV, AP. The 4345
+experiments cover 4082 distinct genes, so a gene can have more than one volume. See
+[load the gene expression atlas](../how-to/load-gene-expression-agea.ipynb).
+
+## What to know about the datasets
+
+The datasets differ in what they cover and at what resolution:
+
+- The genomics grids, lipids included, are on a 200 µm grid, against the atlas's 10–50 µm, and
+  MERFISH is interpolated between sections.
+- The lipid volumes cover the brain except the olfactory bulb and the most anterior frontal
+  cortex, which were not sampled. Those voxels, 9% of the brain, are NaN.
+- The connectivity tables are region-level and have no grid, so there is nothing to overlay on a
+  slice directly. Use the region-based plotting tools for them.
 
 ## How the genomics volumes differ
 
-**The genomics volumes break the axis convention.** They are built with `dims2xyz=[0, 2, 1]`
-and ordered (ML, DV, AP), not the (AP, ML, DV) that
-[Coordinates and volumes](coordinates-and-volumes.qmd) teaches for the atlas volumes. Use the
+**The genomics volumes use a different axis order from the atlas volumes.** They are built with
+`dims2xyz=[0, 2, 1]` and ordered (ML, DV, AP), where
+[Coordinates and volumes](coordinates-and-volumes.qmd) describes (AP, ML, DV) for the atlas volumes. Use the
 atlas object the genomics module gives you rather than assuming the usual order.
 
-**The two loaders disagree on their default.** `agea.load` returns the **raw** volume
-(`label=''`). `merfish.load_volume` returns the **denoised** one — its default is
-`label='processed'`, meaning NaNs filled, Gaussian-smoothed and renormalised. Pass `label=''`
-to get the raw MERFISH volume. Note also that `load_volume` drops non-neuronal cell types
-unless you pass `include_non_neuronal=True`.
+**The two loaders have different defaults.** `agea.load` returns the **raw** volume
+(`label=''`); pass `label='processed'` for IBL's processed version, described below.
+`merfish.load_volume` returns the **denoised** one — its default is `label='processed'`, meaning
+NaNs filled, Gaussian-smoothed and renormalised. Pass `label=''` to get the raw MERFISH volume.
+Note also that `load_volume` drops non-neuronal cell types unless you pass
+`include_non_neuronal=True`.
 
-If you are comparing the two modalities voxel by voxel, you are comparing a raw volume against
-a smoothed one unless you say otherwise.
+To compare the two modalities voxel by voxel, set the same `label` on both so that you compare
+like with like.
+
+### Raw and processed gene expression
+
+`agea.load(label='processed')` is IBL's own processing of the Allen volumes. The script that
+builds it, `06-denoise-impute.py` in the package's `gene_expression_scrapping` folder, applies
+three steps, in this order:
+
+1. **Imputation.** Probabilistic PCA, with 50 components fitted across all genes, fills the
+   missing voxels inside the brain.
+2. **Merging the hemispheres.** Each volume is averaged with its mirror image across the
+   midline, ignoring missing voxels.
+3. **Curtaining correction.** Each coronal slice gets one multiplicative weight, between ½ and
+   2, chosen to minimise the slice-to-slice variation within each Cosmos region.
+
+Two consequences follow. The processed volume is symmetric across the midline by construction,
+so it cannot show differences between the hemispheres. And the slice weights change absolute
+values, so the overall level of a slice can differ between the two versions: compare values
+within one version, not across them.
+
+![Coronal slices of two genes from the raw volume (left) and the processed volume (right), each
+row on one colour scale. In the processed volume the two hemispheres match, and Calb1 is brighter
+overall.](images/agea-raw-vs-processed.png){fig-alt="Two rows of two coronal brain slices in colour. Left column is the raw gene expression volume and right column is the processed volume. The top row is Gfap, where the raw slice is stronger on the right and the processed slice is symmetric and fainter. The bottom row is Calb1, where the pattern is the same in both but the processed slice is brighter."}
+
+In the figure's slices, Gfap's raw left and right means are 2.25 and 3.33, and 2.01 on both sides
+once processed. Calb1's in-brain mean goes from 7.18 to 11.42.
+
+The raw volume also has missing voxels, stored as −1. The median experiment has 7% of its
+in-brain voxels missing. The front of the brain, about the first millimetre, is almost entirely
+missing, and whole coronal slices can be missing too. The processed volume fills these in, so
+values there are inferred, not measured.
+
+::: {.callout-note}
+## A citable description of the processing is not available yet
+
+The three steps above come from the script, which is the only record of the method in the
+package. There is no publication or note to cite for it, so the Citations page marks this as a
+gap (open question 10).
+:::
 
 ## Streamlines
 
 The Allen streamlines are cortical depth values converted onto the ordinary atlas grid, at 10,
 25 or 50 µm. They are **Isocortex only** — `xyz_to_depth` returns `nan` for coordinates
-outside it, rather than raising, so check for NaNs rather than assuming a failure would be
-loud.
+outside it, rather than raising, so check for NaNs.
 
 They sit in this family because they are Allen data repackaged onto the standard grid, like
 the others.
-
-## Citations
-
-**Lipid Brain Atlas.** The lipid volumes are distributed under CC-BY 4.0, so any use must credit
-Fusar Bassini L. et al., "The lipidomic architecture of the mouse brain", *Nature* (2026),
-[doi:10.1038/s41586-026-11050-0](https://doi.org/10.1038/s41586-026-11050-0), and the source
-data, [doi:10.5281/zenodo.15379565](https://doi.org/10.5281/zenodo.15379565).
 
 ::: {.callout-note}
 ## Two source gaps
