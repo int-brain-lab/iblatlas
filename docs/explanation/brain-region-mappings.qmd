@@ -29,7 +29,8 @@ Swanson-lr's 645.
 The package defines these mappings but records nothing about who drew them or on what basis.
 Allen is the Allen Institute parcellation and Swanson follows the Swanson flat map, but the
 provenance of Beryl and Cosmos is not stated anywhere in the code or the fixtures. Treat the
-names as IBL conventions until someone can source them.
+names as IBL conventions until someone can source them. For how Cosmos is credited, see
+[Citations](../citations.qmd).
 :::
 
 ## What a mapping actually stores
@@ -54,8 +55,8 @@ mapping people hit problems with. Three behaviours are worth knowing before you 
 ### Only Swanson regions, or their parents, can be plotted
 
 The flat map draws a fixed set of 319 regions. A region outside that set has nowhere to go.
-Passing one does not raise — it is silently filled with `empty_color` (`'silver'` by default),
-so a region quietly missing from your figure is the expected failure mode, not an error.
+Passing one does not raise an error: the region is filled with `empty_color` (`'silver'` by
+default), so a region outside the set appears in silver on the figure.
 
 ### A parent fills every Swanson region inside it
 
@@ -68,8 +69,8 @@ idx, vals = br.propagate_down(np.array(['Isocortex']), np.array([1.0]))
 len(idx)   # 374 descendants
 ```
 
-This is useful when you mean it and misleading when you do not. A coarse region painted across
-a wide area looks like 40 measurements rather than one.
+This is useful for painting a coarse region across a wide area. The plot shows 40 patches that
+share one underlying value.
 
 ### The mapping itself holds only one hemisphere
 
@@ -79,8 +80,8 @@ Only `Swanson-lr` carries both, with 322 negative entries.
 Consequently a two-hemisphere display needs **signed Allen ids**, not acronyms: an acronym
 such as `MOp` is identical on both sides and cannot express which one you mean. Note too that
 `plot_swanson_vector` takes the absolute value of negative ids when `hemisphere` is anything
-other than `'both'` — so passing signed ids with the wrong `hemisphere` argument silently
-merges the sides.
+other than `'both'` — so passing signed ids together with a `hemisphere` other than `'both'`
+merges the two sides.
 
 ## See also
 

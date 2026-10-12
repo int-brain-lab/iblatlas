@@ -166,6 +166,9 @@ website:
           - explanation/data-downloads-and-caching.qmd
           - explanation/external-data-in-the-common-space.qmd
 
+      - text: "Citations"
+        href: citations.qmd
+
 format:
   html:
     theme: cosmo
