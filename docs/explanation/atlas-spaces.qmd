@@ -19,7 +19,8 @@ origin is the corner of the volume; in the IBL frame it is bregma.](images/frame
 In the package, bregma sits at ML 5739, AP 5400, DV 332 µm in the CCF volume
 (`ALLEN_CCF_LANDMARKS_MLAPDV_UM`), and `AllenAtlas` uses it as the origin of its coordinates. The
 signs and units of the IBL frame are laid out on
-[Coordinates and volumes](coordinates-and-volumes.qmd).
+[Coordinates and volumes](coordinates-and-volumes.qmd). To convert points between the two frames,
+see [Convert your own coordinates to atlas space](../how-to/bring-your-own-coordinates.ipynb).
 
 ## The 5° pitch
 

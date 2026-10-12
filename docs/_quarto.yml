@@ -130,6 +130,7 @@ website:
           - text: "---"
           - how-to/remap-region-ids.ipynb
           - how-to/explore-the-atlas-in-the-gui.qmd
+          - how-to/bring-your-own-coordinates.ipynb
           - how-to/work-with-probe-insertions.qmd
           - text: "---"
           - how-to/plot-values-on-slices.ipynb
