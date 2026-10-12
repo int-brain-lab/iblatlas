@@ -14,7 +14,7 @@ Coordinates are ordered **(ML, AP, DV)**; the atlas image volumes are indexed **
 
 ::: {.callout-warning}
 The DV convention is stated incorrectly in the `iblatlas` module docstring, which the generated
-API pages reproduce verbatim. Where the two disagree, the line above is the correct one.
+API pages reproduce verbatim. Where the two differ, the line above is the correct one.
 :::
 
 ## Contents

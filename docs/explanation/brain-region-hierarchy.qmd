@@ -3,8 +3,8 @@ title: "The brain region hierarchy"
 ---
 
 Brain regions in `iblatlas` are not a flat list. They form a tree, and a region can be referred
-to by three different identifiers that are easy to mistake for one another. Both facts cause
-confusion often enough to be worth stating plainly.
+to by three different identifiers: the acronym, the Allen id and the index. This page covers the
+tree and how the three identifiers relate.
 
 ## Regions form a tree
 
@@ -35,8 +35,8 @@ tree — which is what the [mappings](brain-region-mappings.qmd) do systematical
 | **Index** | `19` | Row number in this `BrainRegions` object | **No** |
 
 The acronym and the Allen id are properties of the region and stay put. The **index** is a
-position in the arrays `BrainRegions` happens to hold, and it is the one people wrongly treat
-as an identity. Store acronyms or Allen ids; derive the index when you need it.
+position in the arrays `BrainRegions` happens to hold, so it is not a stable identity. Store
+acronyms or Allen ids; derive the index when you need it.
 
 Most functions that take a region accept the Allen id. Converting runs through the arrays
 directly:
@@ -64,8 +64,8 @@ br.acronym[19] == br.acronym[19 + 1327]   # True
 So the sign of an Allen id carries the hemisphere, and `MOp` alone does not tell you which side
 of the brain you are on. Two consequences:
 
-- **Taking the absolute value merges hemispheres.** That is sometimes what you want and
-  sometimes a silent bug; it is never the default you should assume.
+- **Taking the absolute value merges hemispheres.** That suits some analyses; choose it on
+  purpose rather than as a default.
 - **A left-hemisphere region cannot be looked up by a positive id.** If your own data records
   hemisphere separately, apply the sign before joining, or the left side will land on the
   right.
