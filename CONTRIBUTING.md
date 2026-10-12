@@ -88,6 +88,20 @@ first run stores the download progress bars in the outputs.
 
 Because nothing executes at build time, rendering the site downloads nothing.
 
+## Explanation figures
+
+The figures on the explanation pages are committed files in `docs/explanation/images/`. Three
+PNGs are drawn from atlas data by a script that you run by hand; the site build does not run it:
+
+```bash
+PYTHONWARNINGS=ignore venv/bin/python docs/figures/make_figures.py
+```
+
+It overwrites `pitch-overlay.png`, `scaling-overlay.png` and `agea-raw-vs-processed.png`, and
+downloads atlas data on first use. `frames-allen-vs-ibl.svg` is drawn by hand: edit its arrows
+and text directly. The script only refreshes the sagittal template slice embedded in it, as a
+data URI in the `<image id="brain">` element.
+
 ## What is not checked automatically
 
 This phase of the site has no CI. All of the following are manual:
