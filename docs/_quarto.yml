@@ -162,7 +162,7 @@ website:
           - explanation/coordinates-and-volumes.qmd
           - explanation/brain-region-hierarchy.qmd
           - explanation/brain-region-mappings.qmd
-          - explanation/choosing-an-atlas.qmd
+          - explanation/atlas-spaces.qmd
           - explanation/data-downloads-and-caching.qmd
           - explanation/external-data-in-the-common-space.qmd
 

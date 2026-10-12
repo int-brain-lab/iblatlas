@@ -36,5 +36,5 @@ Coordinates are in metres, relative to bregma, and depth is negative — see
 [coordinates and volumes](explanation/coordinates-and-volumes.qmd).
 
 The Needles and MRI Toronto scalings of the Allen atlas differ by about 7% in depth — see
-[choosing an atlas](explanation/choosing-an-atlas.qmd).
+[atlas spaces and transforms](explanation/atlas-spaces.qmd).
 :::

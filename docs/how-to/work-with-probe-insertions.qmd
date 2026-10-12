@@ -102,5 +102,5 @@ reference shows them bare.
 [Pinpoint](https://virtualbrainlab.org/pinpoint/in_vivo_alignment.html) is what many IBL users
 plan trajectories with. It applies a −5° pitch correction that `iblatlas` does not, and **it
 has not been confirmed that its transforms match the `iblatlas` scalings**. Record which tool
-produced a coordinate; do not assume an `Insertion` and a Pinpoint plan share a frame. See
-[Choosing an atlas](../explanation/choosing-an-atlas.qmd).
+produced a coordinate; check whether an `Insertion` and a Pinpoint plan share a frame. See
+[Atlas spaces and transforms](../explanation/atlas-spaces.qmd).

@@ -22,7 +22,7 @@ The cache directory is derived from ONE's `CACHE_DIR` parameter by
 
 Note that `Needles` appears in the path regardless of which atlas you instantiate — it is part
 of the historical layout, not a statement about the scaling in use. See
-[Choosing an atlas](choosing-an-atlas.qmd).
+[Atlas spaces and transforms](atlas-spaces.qmd).
 
 ## Two remote sources
 

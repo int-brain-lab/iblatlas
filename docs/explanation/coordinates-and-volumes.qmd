@@ -2,9 +2,9 @@
 title: "Coordinates and volumes"
 ---
 
-Almost every mistake people make with `iblatlas` is a coordinate mistake: a sign flipped, a
-unit missed, or voxel indices used where real-world coordinates were meant. This page is the
-one place those conventions are written down.
+Coordinates in `iblatlas` follow a few conventions: the sign of each axis, the units, and the
+difference between voxel indices and real-world coordinates. This page is the one place they are
+written down.
 
 ## The three axes
 
@@ -18,14 +18,13 @@ The DV row is the one to internalise. A probe driven into the brain travels towa
 negative** `z`. A target 4 mm below the brain surface has a `z` of roughly `-0.004`, not
 `+0.004`.
 
-::: {.callout-warning}
-## The package docstring states the DV convention incorrectly
+::: {.callout-note}
+## A note on the DV sign in the package docstring
 
 `iblatlas/__init__.py` reads "DV coordinates ventral to bregma are -ve; ventral +ve". The
-second clause should read *dorsal*. The table above is correct; the rendered API reference
-reproduces the docstring and is wrong on that one line. The docstring is left untouched
-deliberately — correcting it is a conversation with the package developers, not a
-documentation change.
+second clause should read *dorsal*. The table above gives the convention, and the API reference
+reproduces the docstring text on that one line. The docstring is unchanged; correcting it is for
+the package developers.
 :::
 
 ## Coordinates are in metres
@@ -72,7 +71,7 @@ anatomical midline are not perfectly the same thing.
 
 ## Index versus coordinate
 
-Two different things are easy to confuse:
+Indices and coordinates are two different things:
 
 - an **index** is a position in the array — integer, resolution-dependent, origin at the corner
   of the volume;
@@ -82,16 +81,7 @@ Two different things are easy to confuse:
 10 µm atlas give different indices for the same coordinate, which is the main reason to keep
 data in coordinates and convert late.
 
-## The atlas is pitched about 5° nose-down
+## The atlas is pitched
 
-The Allen CCF is pitched down by about 5 degrees relative to a flat skull — the position where
-bregma and lambda sit at the same DV height — and **the package does not correct for this**.
-
-This matters whenever atlas coordinates meet a stereotaxic frame: an angle read off the atlas
-is not the angle to dial into a flat-skull-levelled manipulator. The package supplies
-`tilt_spherical(theta, phi, tilt_angle=-5)` to rotate angles between the two frames, but it is
-something you call deliberately, not something applied for you. A positive `tilt_angle` lifts
-the mouse's chin.
-
-See [Choosing an atlas](choosing-an-atlas.qmd) for how this interacts with the MRI-derived
-scalings and with external planning tools.
+The Allen template is pitched about 5° nose-down relative to a flat skull, and the package does
+not correct for it. See [The 5° pitch](atlas-spaces.qmd#the-5-pitch).

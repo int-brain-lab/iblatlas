@@ -1,0 +1,159 @@
+---
+title: "Atlas spaces and transforms"
+---
+
+More than one atlas space is in use, and a coordinate means nothing without its space. A point
+at `(x, y, z)` is a place in the brain only once you know which atlas, which origin, which units
+and which scaling it was recorded in. This page lays out the spaces `iblatlas` works in and how
+they differ. To cite an atlas or a scaling, see [Citations](../citations.qmd).
+
+## The Allen CCF frame and the IBL frame
+
+The Allen Common Coordinate Framework (CCF) is a volume, and the IBL frame is a way of writing
+positions in that same volume. The two differ in where the origin is, what the units are, and
+which way each axis counts.
+
+![The Allen CCF frame beside the IBL frame, on the same sagittal template slice. In the CCF the
+origin is the corner of the volume; in the IBL frame it is bregma.](images/frames-allen-vs-ibl.svg){fig-alt="The same side view of the mouse brain twice, anterior on the left, inside the box that is the atlas volume. In the Allen CCF the origin is the anterior, dorsal, left corner, in micrometres, with AP increasing towards posterior and DV towards ventral. In the IBL frame the origin is bregma, in metres, with AP increasing towards anterior and DV towards dorsal."}
+
+In the package, bregma sits at ML 5739, AP 5400, DV 332 µm in the CCF volume
+(`ALLEN_CCF_LANDMARKS_MLAPDV_UM`), and `AllenAtlas` uses it as the origin of its coordinates. The
+signs and units of the IBL frame are laid out on
+[Coordinates and volumes](coordinates-and-volumes.qmd).
+
+## The 5° pitch
+
+The Allen CCF is pitched about 5° nose-down relative to a flat skull — the position where bregma
+and lambda sit at the same DV height. **Every atlas in the package carries this pitch, and none
+of them corrects for it.** `NeedlesAtlas` and `MRITorontoAtlas` are the same volume with
+different scalings, and scaling stretches the brain along each axis without rotating it, so they
+inherit the pitch of the CCF.
+
+![The midline sagittal slice of the Allen volume. The blue line is the atlas horizontal and the
+red line is the flat-skull horizontal, 5° to it, with the angle shaded. Lambda is not defined in
+the package, so the red line is drawn from the stated angle.](images/pitch-overlay.png){fig-alt="A midline sagittal slice of the mouse brain with two lines through bregma: a level blue line, the atlas horizontal, and a red line rising towards the front of the brain, the flat-skull horizontal. A shaded wedge marks the 5 degree angle between them."}
+
+The package supplies `tilt_spherical(theta, phi, tilt_angle=-5)`, which rotates a pair of angles
+between the two frames. It rotates angles only; nothing in the package rotates coordinates. A
+positive `tilt_angle` lifts the mouse's chin. You call it deliberately: it is not applied for
+you.
+
+### When this matters
+
+The pitch matters when an angle or a depth read from the atlas is used outside the atlas:
+
+- an angle from the atlas going to a manipulator that is levelled against a flat skull;
+- a coordinate being compared with a tool that corrects for the pitch, such as Pinpoint, which
+  applies a −5° correction (see [Planning tools](#planning-tools)).
+
+It does not matter when you stay inside atlas coordinates, for example when assigning points to
+regions or plotting values on slices: the labels and the coordinates share one frame.
+
+## The four atlases
+
+`iblatlas` offers four atlases, but they are not four independent volumes. Three of them are
+the Allen CCF with different linear scalings applied, and one is a genuinely different
+parcellation.
+
+| Atlas | What it is | Resolution |
+|---|---|---|
+| `AllenAtlas` | The Allen CCF, unscaled | 10, 25 or 50 µm (default 25) |
+| `NeedlesAtlas` | Allen CCF, scaled from the Dorr 2008 MRI atlas | as Allen |
+| `MRITorontoAtlas` | Allen CCF, scaled from the Qiu 2018 MRI atlas | as Allen |
+| `FranklinPaxinosAtlas` | Franklin–Paxinos, matched to the CCF by Chon et al. | (10, 100, 10) µm |
+
+Start with `AllenAtlas` unless you have a specific reason not to. The annotations IBL uses are
+the 2017 (CCFv2) version.
+
+::: {.callout-note}
+## `NeedlesAtlas` and `MRITorontoAtlas` are functions, not classes
+
+Both are factory functions that return a scaled `AllenAtlas`. They are not subclasses, so an
+`isinstance` check against them raises a `TypeError`:
+
+```python
+isinstance(ba, NeedlesAtlas)
+# TypeError: isinstance() arg 2 must be a type, a tuple of types, or a union
+```
+
+Test with `isinstance(ba, AllenAtlas)` and inspect the scaling if you need to tell them apart.
+:::
+
+### The two MRI scalings, and in vivo versus ex vivo
+
+This is the distinction people ask about most, partly because the literature and the code use
+different names for the same things. "Qiu 2018" is `MRITorontoAtlas`. "Dorr 2008" and "DSURQE"
+are `NeedlesAtlas`.
+
+| | Source | Acquisition | Subjects | ML | AP | DV |
+|---|---|---|---|---|---|---|
+| `NeedlesAtlas` | Dorr 2008 DSURQE | post-mortem, brain in skull | 40 C57BL/6J, p84 | 1 | 1.087 | 0.952 |
+| `MRITorontoAtlas` | Qiu 2018 | ***in vivo*** | 12, p65 | 0.952 | 1.031 | 0.885 |
+
+Four things follow from that table.
+
+**Both are scalings on one volume.** Neither is a separate image or a separate label set. The
+region boundaries and the region ids are identical to the Allen CCF; only the mapping from
+coordinates to voxels changes. Switching atlas does not change what a region *is*.
+
+**There is no in vivo / ex vivo switch.** You cannot ask the package for "the in vivo version"
+of an atlas. The distinction is a property of how each source MRI was acquired, which is then
+baked into that atlas's three scaling factors — and nothing else. Needles was imaged
+post-mortem with the brain still inside the skull; Qiu 2018 imaged living animals.
+
+**They differ most in depth.** The DV factors are 0.952 and 0.885 — roughly a 7%
+difference in predicted depth. At 4 mm that is about 270 µm, which is more than enough to put
+a probe tip in the wrong structure. The ML factors differ too: Needles applies none at all.
+
+**The Allen CCF is neither.** With scaling `(1, 1, 1)` it is not an in vivo frame, nor the
+ex vivo MRI frame — it is a serial two-photon average of fixed, extracted tissue, with its own
+distortions.
+
+![Brain outlines of the Allen, Needles and MRI Toronto atlases on a coronal slice at AP −2 mm and
+the midline sagittal slice, in metres from bregma. The slices are taken at the same coordinate in
+each atlas, so they cut slightly different anatomy; the depth difference is largest.](images/scaling-overlay.png){fig-alt="Two panels of brain outlines in black, blue and red for the Allen, Needles and MRI Toronto atlases. The outlines share the dorsal surface at bregma and move apart towards the ventral side, with the MRI Toronto outline the shallowest."}
+
+::: {.callout-note}
+## Which scaling to use for in vivo targeting
+
+The package expresses no preference and neither docstring advises one. The acquisition argues
+for `MRITorontoAtlas`, since it was imaged in living animals. IBL practice, and the fact that
+the default atlas cache path is `histology/ATLAS/Needles/Allen`, point towards `NeedlesAtlas`.
+
+This documentation deliberately does not recommend one. Ask an experimentalist in your group
+what your lab uses, and record the answer with your coordinates.
+:::
+
+### Franklin–Paxinos is the different one
+
+`FranklinPaxinosAtlas` is a different parcellation, not a scaled CCF — the Mouse Brain in
+Stereotaxic Coordinates, 4th edition, matched onto the CCF by Chon et al. Its resolution is
+anisotropic: 10 µm in ML and DV, but **100 µm in AP**. If you are slicing coronally and the
+result looks coarse, that is why.
+
+It also has its own bregma landmark, distinct from the Allen one.
+
+## Planned versus actual insertions
+
+Probes planned in one atlas space and then placed in vivo land systematically away from their
+planned targets. That is how the difference between the spaces on this page was found. The
+comparison is in International Brain Laboratory et al. (2022), *Reproducibility of in-vivo
+electrophysiological measurements in mice*, cited on [Citations](../citations.qmd).
+
+::: {.callout-note}
+## An updated planned-versus-actual figure is not included yet
+
+A comparison from a larger dataset exists, and its figure is not on this page. The page cites the
+2022 paper until the figure can be added (Open question 9).
+:::
+
+## Planning tools
+
+[Pinpoint](https://virtualbrainlab.org/pinpoint/in_vivo_alignment.html) is the tool many IBL
+users plan in vivo trajectories with. It offers CCF, Qiu 2018, Dorr 2008 and a legacy IBL Dorr
+transform, and it applies a −5° pitch correction that `iblatlas` does not
+(see [The 5° pitch](#the-5-pitch)).
+
+Those names overlap with the ones above, but **it has not been confirmed that the transforms
+are the same**. Check that an `Insertion` and a Pinpoint plan are expressed in the same
+frame before comparing them. State which tool produced a coordinate when you record it.
