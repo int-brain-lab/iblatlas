@@ -1,17 +1,18 @@
 ---
-title: "Explore the atlas in the GUI"
+title: "Explore the atlas in the IBL Atlas GUI"
 draft: true
 ---
 
-The atlas GUI shows the brain in linked windows: a view from above, coronal, sagittal and
-horizontal slices, and the full region hierarchy as a tree. It is a quick way to browse the
-hierarchy, scroll through slices, and see where a region sits in the brain.
+The IBL Atlas GUI is a desktop application for browsing the atlas. It shows the brain in linked
+windows: a view from above, coronal, sagittal and horizontal slices, and the full region
+hierarchy as a tree. It is a quick way to browse the hierarchy, scroll through slices, and see
+where a region sits in the brain.
 
 The code on this page is not executed when the site is built.
 
 ## Install
 
-The GUI needs the `gui` extra:
+The IBL Atlas GUI needs the `gui` extra:
 
 ```bash
 pip install "iblatlas[gui]"
@@ -19,7 +20,7 @@ pip install "iblatlas[gui]"
 
 ONE must be configured as for any other use of the atlas; see [Install iblatlas](install.qmd).
 
-## Open the GUI
+## Open the IBL Atlas GUI
 
 To browse the atlas, run the `atlas` command in a terminal:
 

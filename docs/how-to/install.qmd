@@ -42,5 +42,5 @@ unless you need the detail.
 pip install "iblatlas[gui]"
 ```
 
-This adds `pyqt5`, `qtpy` and `iblqt`, and provides an `atlas` command. The GUI is not covered
-by this documentation yet.
+This adds `pyqt5`, `qtpy` and `iblqt`, and provides the IBL Atlas GUI, opened with the `atlas`
+command. The GUI is not covered by this documentation yet.
