@@ -13,6 +13,7 @@ execute:
 quartodoc:
   package: iblatlas
   dir: reference/api
+  title: API reference
   sidebar: reference/api/_sidebar.yml
   options:
     # Mandatory. Without it a subclass page shows only members defined on that class:
@@ -135,6 +136,7 @@ website:
           - text: "---"
           - how-to/plot-values-on-slices.ipynb
           - how-to/plot-points-on-slices.ipynb
+          - how-to/plot-volumes-on-slices.ipynb
           - how-to/plot-on-swanson-flatmap.ipynb
           - how-to/plot-on-cortical-flatmap.ipynb
           - how-to/plot-on-circular-flatmap.ipynb
@@ -152,11 +154,8 @@ website:
           - how-to/display-3d-meshes.qmd
           - how-to/convert-allen-meshes-to-glb.qmd
 
-      - text: "Reference"
-        menu:
-          - reference/index.qmd
-          - reference/api/index.qmd
-          - reference/data-files.qmd
+      - text: "API reference"
+        href: reference/api/index.qmd
 
       - text: "Explanation"
         menu:
@@ -165,6 +164,7 @@ website:
           - explanation/brain-region-mappings.qmd
           - explanation/atlas-spaces.qmd
           - explanation/data-downloads-and-caching.qmd
+          - explanation/data-files.qmd
           - explanation/external-data-in-the-common-space.qmd
 
       - text: "Citations"
@@ -173,4 +173,5 @@ website:
 format:
   html:
     theme: cosmo
+    css: styles.css
     toc: true

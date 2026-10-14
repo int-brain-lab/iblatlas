@@ -6,7 +6,7 @@ What ships inside the package, and what it downloads. Written against the files 
 where the package does not record a file's provenance, that is marked rather than guessed.
 
 Downloads land in the atlas cache — see
-[Data downloads and caching](../explanation/data-downloads-and-caching.qmd).
+[Data downloads and caching](data-downloads-and-caching.qmd).
 
 ## Files shipped with the package
 
@@ -44,7 +44,7 @@ mapping names, the `-lr` suffix marking the lateralised variants.
 
 Note the annotation volumes store the region **index** — the position in the flattened
 structure tree — not the Allen id. See
-[The brain region hierarchy](../explanation/brain-region-hierarchy.qmd).
+[The brain region hierarchy](brain-region-hierarchy.qmd).
 
 `swansonpaths.json` was traced from the BM3 rat flatmap foldout in Swanson (2004) *Brain Maps*,
 3rd ed., using MATLAB's contour function, then simplified with Ramer–Douglas–Peucker. **The
