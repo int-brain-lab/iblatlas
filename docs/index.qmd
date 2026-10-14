@@ -17,7 +17,7 @@ regions, and plotting results on slices and flat maps.
 
 ::: {.note}
 The tutorial tours the atlas object: the image and label volumes, brain regions and the
-hierarchy, and the coordinate systems. The first use downloads several gigabytes of atlas data.
+hierarchy, and the coordinate systems.
 :::
 :::
 
