@@ -2,45 +2,75 @@
 title: "Install iblatlas"
 ---
 
-## Install
+`iblatlas` is a Python package. It needs **Python 3.10 or newer**. We recommend
+installing it with `pip` into a virtual environment.
+
+## Create an environment and install
+
+A virtual environment keeps the packages for one project separate from your other Python
+projects. `venv` is Python's built-in tool for creating one:
 
 ```bash
-pip install iblatlas
+cd path/to/your/project        # move to the directory you will work from
+python -m venv .venv           # create the environment in a folder called .venv
+source .venv/bin/activate      # activate it; on Windows: .venv\Scripts\activate
+pip install iblatlas           # install iblatlas into it
 ```
 
-**Python 3.10 or newer** is required.
-
-This pulls in `ONE-api`, `iblutil`, `pynrrd`, `numpy`, `matplotlib` and `scipy`.
-
-## Configure ONE
-
-`ONE-api` is a hard dependency, not an optional one, and it must be **configured** as well as
-installed — the atlas cache directory is derived from ONE's `CACHE_DIR` parameter.
-
-This applies even if you only want anatomy and will never touch IBL experimental data. If
-`AllenAtlas()` fails on a fresh machine, an unconfigured ONE is the first thing to check. See
-[Data downloads and caching](../explanation/data-downloads-and-caching.qmd).
-
-## First use downloads several gigabytes
-
-```python
-from iblatlas.atlas import AllenAtlas
-
-ba = AllenAtlas()   # first call downloads the atlas volume
-```
-
-The download happens once per resolution and is cached; later calls read from disk. Build one
-atlas object and pass it around rather than constructing one repeatedly — most functions that
-need an atlas accept it as an argument.
-
-The default resolution is 25 µm. The 10 µm volume is considerably larger; take the default
-unless you need the detail.
-
-## The `gui` extra
+The environment is only active in the terminal where you activated it. Each time you open a new
+terminal, activate it again before using `iblatlas`, otherwise Python will not find it:
 
 ```bash
-pip install "iblatlas[gui]"
+cd path/to/your/project
+source .venv/bin/activate      # on Windows: .venv\Scripts\activate
 ```
 
-This adds `pyqt5`, `qtpy` and `iblqt`, and provides the IBL Atlas GUI, opened with the `atlas`
-command. The GUI is not covered by this documentation yet.
+To leave the environment, run `deactivate`.
+
+If you prefer [uv](https://docs.astral.sh/uv/) or [conda](https://docs.conda.io/), create the
+environment with their own commands, then run `pip install iblatlas` with it active.
+
+## Check the installation worked
+
+With the environment active, run:
+
+```bash
+python -c "import iblatlas; print(iblatlas.__version__)"
+```
+
+This should print a version number. If `pip` says it cannot find a matching version, or the
+import fails, check which Python the active environment uses:
+
+```bash
+python --version
+```
+
+It needs to be 3.10 or newer. If it is older, install a newer Python from
+[python.org](https://www.python.org/downloads/) and create the environment again.
+
+## Atlas data downloads automatically
+
+Installing `iblatlas` does not download the atlas. There is nothing extra to run: the first time
+your code or the GUI loads an atlas, the data downloads and is saved to your Downloads folder,
+and later runs reuse it. For where the files go, how large they are and how to save them
+somewhere else, see [Data downloads and caching](../explanation/data-downloads-and-caching.qmd).
+
+## The IBL Atlas GUI
+
+The IBL Atlas GUI is a desktop application for browsing the atlas. It needs extra packages that
+draw its windows (`PyQt5`, `qtpy` and `iblqt`), which you install into the same environment:
+
+```bash
+pip install "iblatlas[gui]"      # with uv: uv pip install "iblatlas[gui]"
+```
+
+To open it, activate the environment and run:
+
+```bash
+atlas
+```
+
+A window opens with a view of the brain from above. The first time, it downloads the atlas if
+you have not used it before. The `atlas` command only exists in the environment where you
+installed the extra, so activate that environment first. For what the windows show and how to
+use them, see [Explore the atlas in the IBL Atlas GUI](explore-the-atlas-in-the-gui.qmd).

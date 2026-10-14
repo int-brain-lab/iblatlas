@@ -2,14 +2,23 @@
 title: "Data downloads and caching"
 ---
 
-Instantiating an atlas downloads several gigabytes. Nothing in the API signals this, so it is
-worth knowing before you put `AllenAtlas()` inside a loop, a test, or a CI job.
+The first time you create an atlas, `iblatlas` downloads its data, which is about 40 MB at the
+default 25 µm resolution. The extra datasets download only when you load them, and are larger.
 
 ```python
-ba = AllenAtlas()   # first call: large download. Later calls: read from cache.
+ba = AllenAtlas()   # first call: downloads about 40 MB. Later calls: read from cache.
 ```
 
 The download happens once per resolution and is cached on disk. Subsequent calls are cheap.
+
+| Data | Approximate size |
+|---|---|
+| Atlas at 25 µm (default) | 40 MB |
+| Gene expression (AGEA) | 2.6 GB |
+| MERFISH | 630 MB |
+| Depths | 350 MB |
+| Lipids | 105 MB |
+| Flat maps | 30 MB |
 
 ## Where the data goes
 
@@ -19,6 +28,8 @@ The cache directory is derived from ONE's `CACHE_DIR` parameter by
 ```
 <ONE CACHE_DIR>/histology/ATLAS/Needles/Allen
 ```
+
+`CACHE_DIR` defaults to `~/Downloads/ONE/openalyx.internationalbrainlab.org`.
 
 Note that `Needles` appears in the path regardless of which atlas you instantiate — it is part
 of the historical layout, not a statement about the scaling in use. See
@@ -34,14 +45,26 @@ of the historical layout, not a statement about the scaling in use. See
   the streamlines described in
   [External data in the common space](external-data-in-the-common-space.qmd).
 
-## ONE is required, even without IBL data
+## Changing where files are saved
 
-`_get_cache_dir` reads ONE's parameters, so **ONE must be installed and configured** before an
-atlas can be instantiated — including for users who never touch IBL experimental data and only
-want the anatomy.
+`_get_cache_dir` reads the cache location from ONE, the IBL data-access package that
+`iblatlas` installs and uses for downloading. ONE needs no setup: with its default settings the
+cache is `~/Downloads/ONE/openalyx.internationalbrainlab.org`, and no account, login or
+credentials are involved. The S3 bucket is read without credentials too.
 
-If `AllenAtlas()` fails on a fresh machine, an unconfigured ONE is the first thing to check:
-the cache path cannot be resolved without it.
+To save files somewhere else, set the ONE cache directory once, before first use:
+
+```python
+from one.params import setup
+
+setup(silent=True, cache_dir='/path/to/cache')
+```
+
+The new location starts empty, so the next load downloads the data again, and the copy in your
+Downloads folder is left unused. To avoid downloading again, move or copy the existing
+`histology` folder into the new cache directory so that
+`<new cache dir>/histology/ATLAS/Needles/Allen/` holds the files. `iblatlas` only checks that each
+file exists at that path, so files moved without that folder structure are not found.
 
 ## Practical consequences
 
@@ -49,5 +72,3 @@ the cache path cannot be resolved without it.
   that need one accept a `brain_atlas` or `br` argument for exactly this reason.
 - **Resolution costs space.** The 10 µm volume is substantially larger than the 25 µm default;
   take the default unless you need the detail.
-- **CI needs the cache warmed or the calls avoided.** This documentation site renders from a
-  committed freeze precisely so that building it downloads nothing.
