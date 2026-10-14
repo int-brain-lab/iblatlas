@@ -11,27 +11,25 @@ regions; almost no analysis wants that many. A mapping picks a level of the
 | Mapping | Regions | Use it when |
 |---|---|---|
 | **Allen** | 1328 | You want the full Allen parcellation; the default |
-| **Beryl** | 308 | A middle granularity, the usual choice for brain-wide summaries |
-| **Cosmos** | 12 | Coarse, major divisions only |
-| **Swanson** | 319 | You are plotting on the Swanson flat map |
+| **Beryl** | 308 | A middle granularity, the usual choice for brain-wide summaries (IBL) |
+| **Cosmos** | 12 | Coarse, major divisions only (IBL) |
+| **Swanson** | 323 | You are plotting on the Swanson flat map |
 
-Cosmos is short enough to print in full: `void`, `root`, `Isocortex`, `OLF`, `HPF`, `CTXsp`,
-`CNU`, `TH`, `HY`, `MB`, `HB`, `CB`.
+![The Allen, Beryl and Cosmos mappings on one coronal slice (AP −1.6 mm), and the Swanson mapping as the flat map, since Swanson regions have no 3D position. Every voxel takes the Allen colour of its mapped target, so coarser mappings give fewer, larger patches. The counts are regions present on this slice, not the totals in the table.](images/mappings-coronal.png)
 
-Each has an `-lr` lateralised twin, so `br.mappings` holds eight keys in all. The plain
-variant merges hemispheres; the `-lr` variant keeps them apart using the negative-id
-convention. Allen has 1328 targets against Allen-lr's 2655; Swanson has 319 against
-Swanson-lr's 645.
+## Beryl and Cosmos
 
-::: {.callout-note}
-## Where Beryl and Cosmos come from is not documented
+Beryl and Cosmos are coarser mappings developed by the IBL in consultation with the Steinmetz
+lab. Each is defined as a list of Allen region ids (`beryl.npy` and `cosmos.npy`, see
+[Data files](data-files.qmd)); every region below one of those ids is collapsed into it.
 
-The package defines these mappings but records nothing about who drew them or on what basis.
-Allen is the Allen Institute parcellation and Swanson follows the Swanson flat map, but the
-provenance of Beryl and Cosmos is not stated anywhere in the code or the fixtures. Treat the
-names as IBL conventions until someone can source them. For how Cosmos is credited, see
-[Citations](../citations.qmd).
-:::
+- **Beryl** keeps 308 regions, a middle granularity between the full Allen parcellation and
+  the major divisions. It is the usual choice for summarising results across the whole brain.
+- **Cosmos** keeps 12, the major divisions of the brain. Use it when you want
+  one value per large area, such as isocortex, thalamus or cerebellum.
+
+To apply either one to your own region ids, see
+[Remap region ids](../how-to/remap-region-ids.ipynb).
 
 ## What a mapping actually stores
 
@@ -47,43 +45,52 @@ So mapping is not lookup, it is collapse: `MOp1`, `MOp2/3`, `MOp5` and `MOp6a` a
 whatever ancestor the mapping terminates at. Nothing is lost from the tree itself — the
 mapping is a view over it.
 
-## Swanson behaves differently, in three ways that catch people
+Each mapping has an `-lr` lateralised twin, so `br.mappings` holds eight keys in all. The plain
+variant merges hemispheres; the `-lr` variant keeps them apart using the negative-id
+convention. Allen has 1328 targets against Allen-lr's 2655; Swanson has 323 against
+Swanson-lr's 645.
 
-The Swanson flat map is the signature figure of the brain-wide map papers, and it is the
-mapping people hit problems with. Three behaviours are worth knowing before you plot.
+## The Swanson mapping
 
-### Only Swanson regions, or their parents, can be plotted
+The Swanson mapping belongs to the Swanson flat map, a two-dimensional drawing of the brain's
+regions that comes from Hahn et al. (2021); see [Citations](../citations.qmd). The mapping has
+323 targets, of which the flat map draws 319. Unlike the other
+mappings it has no spatial position: a region maps to a patch on the flat map, not to voxels.
 
-The flat map draws a fixed set of 319 regions. A region outside that set has nowhere to go.
-Passing one does not raise an error: the region is filled with `empty_color` (`'silver'` by
-default), so a region outside the set appears in silver on the figure.
+To plot on the flat map, see [Plotting brain region values on the Swanson flat map](../how-to/plot-on-swanson-flatmap.ipynb).
 
-### A parent fills every Swanson region inside it
+### Which regions can be plotted
 
-Pass a parent and its value propagates down to all its descendants, via
+A region can be plotted if it is one of the drawn Swanson regions, or an ancestor of one. A
+region outside that set has no patch to fill. Passing one does not raise an error: the
+region is filled with `empty_color` (`'silver'` by default), so it appears in silver on the
+figure.
+
+### Plotting a parent region
+
+A value passed for a parent region propagates down to all its descendants, via
 `BrainRegions.propagate_down`. `Isocortex` has 374 descendants, 40 of which are Swanson
-regions — so one value for `Isocortex` colours 40 separate patches identically:
+regions, so one value for `Isocortex` colours 40 separate patches identically:
 
 ```python
 idx, vals = br.propagate_down(np.array(['Isocortex']), np.array([1.0]))
 len(idx)   # 374 descendants
 ```
 
-This is useful for painting a coarse region across a wide area. The plot shows 40 patches that
-share one underlying value.
+This paints a coarse region across a wide area. The plot shows 40 patches that share one
+underlying value.
 
-### The mapping itself holds only one hemisphere
+### Hemispheres
 
-`br.mappings['Swanson']` contains **no negative ids at all** — it is a single hemisphere.
-Only `Swanson-lr` carries both, with 322 negative entries.
+`br.mappings['Swanson']` holds a single hemisphere and contains no negative ids. Only
+`Swanson-lr` carries both, with 322 negative entries.
 
-Consequently a two-hemisphere display needs **signed Allen ids**, not acronyms: an acronym
-such as `MOp` is identical on both sides and cannot express which one you mean. Note too that
+To show the two hemispheres differently, pass signed Allen ids rather than acronyms: an
+acronym such as `MOp` is identical on both sides and cannot say which one you mean.
 `plot_swanson_vector` takes the absolute value of negative ids when `hemisphere` is anything
-other than `'both'` — so passing signed ids together with a `hemisphere` other than `'both'`
-merges the two sides.
+other than `'both'`, so signed ids passed with another `hemisphere` setting merge the two
+sides.
 
 ## See also
 
 - [The brain region hierarchy](brain-region-hierarchy.qmd) — the tree these mappings collapse.
-- The Swanson how-to, for the plotting calls themselves.
