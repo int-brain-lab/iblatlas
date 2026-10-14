@@ -14,7 +14,7 @@ is not executed when this site is built.
 pip install trimesh datoviz
 ```
 
-Plus `iblatlas` and a working ONE configuration, since the cache directory comes from ONE — see
+Plus `iblatlas`. The mesh scene is downloaded into the atlas cache directory — see
 [Data downloads and caching](../explanation/data-downloads-and-caching.qmd).
 
 ## Fetch the mesh scene

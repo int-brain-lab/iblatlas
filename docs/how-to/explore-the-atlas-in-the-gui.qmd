@@ -18,7 +18,7 @@ The IBL Atlas GUI needs the `gui` extra:
 pip install "iblatlas[gui]"
 ```
 
-ONE must be configured as for any other use of the atlas; see [Install iblatlas](install.qmd).
+The data is downloaded and stored as for any other use of the atlas; see [Install iblatlas](install.qmd).
 
 ## Open the IBL Atlas GUI
 

@@ -18,7 +18,6 @@ regions, and plotting results on slices and flat maps.
 ::: {.note}
 The tutorial tours the atlas object: the image and label volumes, brain regions and the
 hierarchy, and the coordinate systems. The first use downloads several gigabytes of atlas data.
-[Installation covers configuring ONE](how-to/install.qmd).
 :::
 :::
 
@@ -139,7 +138,7 @@ regions from the tree, without writing code.
 
 :::
 
-## Before you start
+## Core concepts
 
 ::: {.grid}
 
@@ -147,7 +146,7 @@ regions from the tree, without writing code.
 ::: {.tile}
 [Coordinates and volumes](explanation/coordinates-and-volumes.qmd)
 
-Units, origin, axis order and signs.
+Metres, a bregma origin, axis order and signs.
 :::
 :::
 
@@ -175,10 +174,4 @@ Where the atlas data is stored and when it is downloaded.
 :::
 :::
 
-:::
-
-::: {.callout-note}
-## Coordinate convention
-
-Coordinates are in metres, relative to bregma, and depth is negative.
 :::

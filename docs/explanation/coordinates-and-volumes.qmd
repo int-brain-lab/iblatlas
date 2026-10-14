@@ -3,8 +3,7 @@ title: "Coordinates and volumes"
 ---
 
 Coordinates in `iblatlas` follow a few conventions: the sign of each axis, the units, and the
-difference between voxel indices and real-world coordinates. This page is the one place they are
-written down.
+difference between voxel indices and real-world coordinates. 
 
 ## The three axes
 
