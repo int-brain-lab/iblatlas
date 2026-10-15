@@ -121,7 +121,7 @@ website:
     left:
       - text: "Tutorial"
         menu:
-          - tutorials/working-with-the-atlas.ipynb
+          - tutorials/from-coordinates-to-a-brain-figure.ipynb
 
       - text: "How-To"
         menu:

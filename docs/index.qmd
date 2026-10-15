@@ -16,7 +16,7 @@ regions.
 :::
 
 [Install iblatlas](how-to/install.qmd){.btn .btn-primary .btn-lg}
-[Get started](tutorials/working-with-the-atlas.ipynb){.btn .btn-outline-primary .btn-lg}
+[Get started](tutorials/from-coordinates-to-a-brain-figure.ipynb){.btn .btn-outline-primary .btn-lg}
 :::
 
 ## Start from what you have
