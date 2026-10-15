@@ -28,3 +28,13 @@ exclusions:
   - pattern: iblatlas/streamlines/streamlines_scraping
     reason: One-off data-preparation code, not user-facing.
     date: 2026-09-29
+
+  - pattern: iblatlas/atlas.py::FranklinPaxinosAtlas
+    reason: >-
+      A different parcellation (Franklin–Paxinos, matched to the CCF by Chon et al.), not a
+      scaled CCF. The documentation covers the Allen CCF and its scalings only.
+    date: 2026-10-15
+
+  - pattern: iblatlas/regions.py::FranklinPaxinosRegions
+    reason: The region tree for FranklinPaxinosAtlas, left out with it.
+    date: 2026-10-15

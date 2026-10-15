@@ -43,7 +43,6 @@ quartodoc:
         - atlas.AllenAtlas
         - atlas.NeedlesAtlas
         - atlas.MRITorontoAtlas
-        - atlas.FranklinPaxinosAtlas
 
     - title: Probe insertions
       desc: Planning and describing probe trajectories in the atlas frame.
@@ -55,7 +54,6 @@ quartodoc:
       desc: The region hierarchy and the Allen, Beryl, Cosmos and Swanson mappings.
       contents:
         - regions.BrainRegions
-        - regions.FranklinPaxinosRegions
         - regions.regions_from_allen_csv
 
     - title: Plotting

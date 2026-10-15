@@ -13,7 +13,6 @@ Downloads land in the atlas cache — see
 | File | Shape / dtype | What it is |
 |---|---|---|
 | `allen_structure_tree.csv` | table | The Allen structure tree |
-| `franklin_paxinos_structure_tree.csv` | table | From Supplementary Data 2 of Chon et al. |
 | `beryl.npy` | (306, 1) int32 | Allen ids defining the Beryl mapping, generated in MATLAB |
 | `cosmos.npy` | (10, 1) int32 | Allen ids defining the Cosmos mapping, generated in MATLAB |
 | `swanson_regions.npy` | (323,) int64 | Allen ids present in the Swanson flat map |
@@ -34,8 +33,6 @@ mapping names, the `-lr` suffix marking the lateralised variants.
 | `annotation_<res_um>.nrrd` | Region **indices** (not ids) per voxel, uint16, at the given isometric spacing |
 | `average_template_<res_um>.nrrd` | The template image volume |
 | `annotation_<res_um>_lut_<LUT_VERSION>.npz` | Lookup table |
-| `FranklinPaxinos/annotation_<res_um>.npz` | Franklin–Paxinos region indices |
-| `FranklinPaxinos/average_template_<res_um>.npz` | Allen DWI slices matching those annotations |
 | `swansonpaths.json` | Vectorised Swanson flat map paths |
 | `swanson2allen.npz` | — |
 | `<flatmap_name>_<res_um>.nrrd` | — |

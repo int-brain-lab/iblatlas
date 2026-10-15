@@ -50,18 +50,16 @@ The pitch matters when an angle or a depth read from the atlas is used outside t
 It does not matter when you stay inside atlas coordinates, for example when assigning points to
 regions or plotting values on slices: the labels and the coordinates share one frame.
 
-## The four atlases
+## The three atlases
 
-`iblatlas` offers four atlases, but they are not four independent volumes. Three of them are
-the Allen CCF with different linear scalings applied, and one is a genuinely different
-parcellation.
+`iblatlas` offers three atlases, but they are not three independent volumes: all three are the
+Allen CCF, two of them with a linear scaling applied.
 
 | Atlas | What it is | Resolution |
 |---|---|---|
 | `AllenAtlas` | The Allen CCF, unscaled | 10, 25 or 50 µm (default 25) |
 | `NeedlesAtlas` | Allen CCF, scaled from the Dorr 2008 MRI atlas | as Allen |
 | `MRITorontoAtlas` | Allen CCF, scaled from the Qiu 2018 MRI atlas | as Allen |
-| `FranklinPaxinosAtlas` | Franklin–Paxinos, matched to the CCF by Chon et al. | (10, 100, 10) µm |
 
 Start with `AllenAtlas` unless you have a specific reason not to. The annotations IBL uses are
 the 2017 (CCFv2) version.
@@ -124,15 +122,6 @@ the default atlas cache path is `histology/ATLAS/Needles/Allen`, point towards `
 This documentation deliberately does not recommend one. Ask an experimentalist in your group
 what your lab uses, and record the answer with your coordinates.
 :::
-
-### Franklin–Paxinos is the different one
-
-`FranklinPaxinosAtlas` is a different parcellation, not a scaled CCF — the Mouse Brain in
-Stereotaxic Coordinates, 4th edition, matched onto the CCF by Chon et al. Its resolution is
-anisotropic: 10 µm in ML and DV, but **100 µm in AP**. If you are slicing coronally and the
-result looks coarse, that is why.
-
-It also has its own bregma landmark, distinct from the Allen one.
 
 ## Planned versus actual insertions
 
