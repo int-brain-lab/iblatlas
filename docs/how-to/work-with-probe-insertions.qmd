@@ -47,8 +47,9 @@ ins = Insertion.from_track(xyzs, brain_atlas=ba)
 the tip, intersects the trajectory with the brain surface to get the entry point, and converts
 the result to spherical coordinates.
 
-`brain_atlas` is **required** despite its `None` default — the surface intersection needs it,
-and omitting it raises `AssertionError` rather than a helpful error.
+Both constructors, `from_track` and `from_dict`, **require** `brain_atlas` despite its `None`
+default — the surface intersection needs it, and omitting it raises `AssertionError` rather than
+a helpful error.
 
 ### From a probes.description entry
 
@@ -71,12 +72,22 @@ Everywhere else — including `from_track` and the `x`, `y`, `z` fields on the r
 
 ## Which structures does it pass through?
 
-An insertion exposes `entry`, `tip` and `xyz`, and region labels come from the atlas:
+An insertion exposes `entry`, `tip` and `xyz`, but `ins.xyz` holds only the entry and the tip,
+so labelling it gives two regions. To list every region the probe passes through, sample points
+along the track between the entry and the tip, label them, and keep each region once in the order
+it is crossed:
 
 ```python
-ids = ba.get_labels(ins.xyz, mapping='Beryl')
-acronyms = ba.regions.id2acronym(ids)
+import numpy as np
+
+xyz = ins.trajectory.eval_z(np.linspace(ins.entry[2], ins.tip[2], 500))
+acronyms = ba.regions.id2acronym(ba.get_labels(xyz, mapping='Beryl'))
+regions = acronyms[np.r_[True, acronyms[1:] != acronyms[:-1]]]
 ```
+
+For the insertion above, `regions` is `MOs, ACAd, ACAv, root, LSr, root, LSr, root`, from the
+surface to the tip. `root` marks fibre tracts and ventricles, which the Beryl mapping does not
+name.
 
 Pick the mapping to suit the granularity you want — see
 [Brain region mappings](../explanation/brain-region-mappings.qmd). Use an `-lr` mapping if you
