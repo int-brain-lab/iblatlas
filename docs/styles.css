@@ -16,12 +16,6 @@
   text-decoration: none;
 }
 
-.hero .note {
-  margin-top: 0.75rem;
-  font-size: 0.9rem;
-  color: var(--bs-secondary-color, #6c757d);
-}
-
 .workflow-card,
 .tile {
   position: relative;

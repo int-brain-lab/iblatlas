@@ -7,38 +7,35 @@ grid:
 
 ::: {.hero}
 ::: {.tagline}
-`iblatlas` is a Python package from the International Brain Laboratory for working with the
-mouse brain in the Allen Common Coordinate Framework: converting coordinates, navigating brain
-regions, and plotting results on slices and flat maps.
+`iblatlas` is a Python package from the International Brain Laboratory for working with the Allen
+mouse brain atlas. Give it coordinates and it tells you which brain region each one is in. Give it
+a value per region and it draws it on slices, flat maps or the Swanson map. Because gene
+expression, MERFISH cell types, lipids and mesoscale connectivity are already registered to the
+same space, any result you have per region can be compared directly with what's known about those
+regions.
 :::
 
 [Install iblatlas](how-to/install.qmd){.btn .btn-primary .btn-lg}
-[Start the tutorial](tutorials/working-with-the-atlas.ipynb){.btn .btn-outline-primary .btn-lg}
-
-::: {.note}
-The tutorial tours the atlas object: the image and label volumes, brain regions and the
-hierarchy, and the coordinate systems.
-:::
+[Get started](tutorials/working-with-the-atlas.ipynb){.btn .btn-outline-primary .btn-lg}
 :::
 
-## What you can do
+## Start from what you have
 
 ::: {.grid}
 
 ::: {.g-col-12 .g-col-md-6 .g-col-lg-4}
 ::: {.workflow-card}
 ::: {.card-img}
-![](images/landing/probes.png){fig-alt="A probe track plotted on a sagittal slice"}
+![](images/landing/points.png){fig-alt="Points scattered on a coronal slice, each dot coloured by the brain region it falls in"}
 :::
 ::: {.card-body}
-### Probes and points
+### 1. I have points
 
-Convert your coordinates to atlas space, look up the region at each point, and plot probes and
-clusters on slices, coloured by a value.
+Cells, probe channels or injection sites. Which brain region is each one in?
 
 - [Convert your own coordinates to atlas space](how-to/bring-your-own-coordinates.ipynb)
-- [Work with probe insertions](how-to/work-with-probe-insertions.qmd)
-- [Plot points on slices](how-to/plot-points-on-slices.ipynb)
+- [Find how deep a point sits in cortex](how-to/work-with-cortical-streamlines.ipynb)
+- [Coordinates and volumes](explanation/coordinates-and-volumes.qmd)
 :::
 :::
 :::
@@ -46,54 +43,17 @@ clusters on slices, coloured by a value.
 ::: {.g-col-12 .g-col-md-6 .g-col-lg-4}
 ::: {.workflow-card}
 ::: {.card-img}
-![](images/landing/region-values.png){fig-alt="Brain regions coloured by value on a coronal slice"}
+![](images/landing/mappings.png){fig-alt="One coronal slice drawn with the Allen mapping above the coarser Cosmos mapping"}
 :::
 ::: {.card-body}
-### Region values
+### 2. I have region names or ids
 
-Colour regions by a value, one per region, on slices or on the cortical, Swanson and circular
-flat maps.
-
-- [Plot values on slices](how-to/plot-values-on-slices.ipynb)
-- [Plot on the cortical flat map](how-to/plot-on-cortical-flatmap.ipynb)
-- [Plot on the Swanson flat map](how-to/plot-on-swanson-flatmap.ipynb)
-- [Plot on the circular flat map](how-to/plot-on-circular-flatmap.ipynb)
-:::
-:::
-:::
-
-::: {.g-col-12 .g-col-md-6 .g-col-lg-4}
-::: {.workflow-card}
-::: {.card-img}
-![](images/landing/volumes.png){fig-alt="A volume plotted on a coronal slice"}
-:::
-::: {.card-body}
-### Volumes and 3D meshes
-
-Plot a volume with one value per voxel on coronal, sagittal and horizontal slices, at any atlas
-resolution, or display the region meshes in 3D.
-
-- [Plot a volume on slices](how-to/plot-volumes-on-slices.ipynb)
-- [Display 3D region meshes](how-to/display-3d-meshes.qmd)
-- [Convert Allen meshes to GLB](how-to/convert-allen-meshes-to-glb.qmd)
-:::
-:::
-:::
-
-::: {.g-col-12 .g-col-md-6 .g-col-lg-4}
-::: {.workflow-card}
-::: {.card-img}
-![](images/landing/mappings.png){fig-alt="One coronal slice drawn with the Allen, Beryl and Cosmos mappings"}
-:::
-::: {.card-body}
-### Regions, mappings and atlas spaces
-
-Look up regions in the Allen hierarchy, remap them to the coarser Beryl and Cosmos mappings, and
-move coordinates between atlas spaces.
+How do they fit in the hierarchy, and how do I group them into coarser regions such as Beryl or
+Cosmos?
 
 - [Remap region ids](how-to/remap-region-ids.ipynb)
+- [The brain region hierarchy](explanation/brain-region-hierarchy.qmd)
 - [Brain region mappings](explanation/brain-region-mappings.qmd)
-- [Atlas spaces and transforms](explanation/atlas-spaces.qmd)
 :::
 :::
 :::
@@ -101,20 +61,39 @@ move coordinates between atlas spaces.
 ::: {.g-col-12 .g-col-md-6 .g-col-lg-4}
 ::: {.workflow-card}
 ::: {.card-img}
-![](images/landing/external-data.png){fig-alt="Lipid volume data on coronal and sagittal slices"}
+![](images/landing/region-values.png){fig-alt="Brain regions coloured by value on a coronal slice and on the Swanson flat map"}
 :::
 ::: {.card-body}
-### External data in the common space
+### 3. I have results per region
 
-Gene expression, MERFISH cell types, lipids, mesoscale connectivity and cortical streamlines
-are registered to the same space, so they join to your data by a coordinate or an Allen region
-id.
+How do I show them? Colour regions on slices or flat maps, draw values per cell or per voxel, or
+browse them in the GUI.
+
+- [Plot values on slices](how-to/plot-values-on-slices.ipynb)
+- [Plot on the Swanson flat map](how-to/plot-on-swanson-flatmap.ipynb)
+- [Plot on the cortical flat map](how-to/plot-on-cortical-flatmap.ipynb)
+- [Plot points on slices](how-to/plot-points-on-slices.ipynb)
+- [Plot a volume on slices](how-to/plot-volumes-on-slices.ipynb)
+- [Explore the atlas in the IBL Atlas GUI](how-to/explore-the-atlas-in-the-gui.qmd)
+:::
+:::
+:::
+
+::: {.g-col-12 .g-col-md-6 .g-col-lg-4}
+::: {.workflow-card}
+::: {.card-img}
+![](images/landing/external-data.png){fig-alt="One MERFISH section with each cell coloured by its cell class"}
+:::
+::: {.card-body}
+### 4. I have a region of interest
+
+What is already known about it? Gene expression, cell types, lipids and connectivity are
+registered to the same space as your data, so they join to it by a coordinate or a region id.
 
 - [Gene expression](how-to/load-gene-expression-agea.ipynb)
-- [MERFISH](how-to/load-merfish.ipynb)
+- [MERFISH cell types](how-to/load-merfish.ipynb)
 - [Lipids](how-to/load-lipids.ipynb)
 - [Mesoscale connectivity](how-to/load-mesoscale-connectivity.ipynb)
-- [Cortical streamlines](how-to/work-with-cortical-streamlines.ipynb)
 - [External data in the common space](explanation/external-data-in-the-common-space.qmd)
 :::
 :::
@@ -123,15 +102,15 @@ id.
 ::: {.g-col-12 .g-col-md-6 .g-col-lg-4}
 ::: {.workflow-card}
 ::: {.card-img}
-![](images/landing/gui.png){fig-alt="The IBL Atlas GUI showing a coronal slice with a region tooltip"}
+![](images/landing/probe-track.png){fig-alt="A tilted probe track on a coronal slice, crossing cortex, hippocampus and thalamus"}
 :::
 ::: {.card-body}
-### Explore the atlas in the GUI
+### 5. I want to record from a region
 
-Browse the atlas in coronal, sagittal and horizontal slices, hover for region names and pick
-regions from the tree, without writing code.
+Where does the probe go in, what will it pass through, and where did it end up?
 
-- [Explore the atlas in the IBL Atlas GUI](how-to/explore-the-atlas-in-the-gui.qmd)
+- [Work with probe insertions](how-to/work-with-probe-insertions.qmd)
+- [Atlas spaces and transforms](explanation/atlas-spaces.qmd)
 :::
 :::
 :::
