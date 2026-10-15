@@ -29,7 +29,7 @@ every region below one of those ids is collapsed into it.
   one value per large area, such as isocortex, thalamus or cerebellum.
 
 To apply either one to your own region ids, see
-[Remap region ids](../how-to/remap-region-ids.ipynb).
+[Convert region ids between mappings](../how-to/remap-region-ids.ipynb).
 
 ## What a mapping actually stores
 
@@ -57,7 +57,7 @@ regions that comes from Hahn et al. (2021); see [Citations](../citations.qmd). T
 323 targets, of which the flat map draws 319. Unlike the other
 mappings it has no spatial position: a region maps to a patch on the flat map, not to voxels.
 
-To plot on the flat map, see [Plotting brain region values on the Swanson flat map](../how-to/plot-on-swanson-flatmap.ipynb).
+To plot on the flat map, see [Show one value per region on the Swanson map](../how-to/plot-on-swanson-flatmap.ipynb).
 
 ### Which regions can be plotted
 

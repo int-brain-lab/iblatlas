@@ -33,8 +33,8 @@ regions.
 
 Cells, probe channels or injection sites. Which brain region is each one in?
 
-- [Convert your own coordinates to atlas space](how-to/bring-your-own-coordinates.ipynb)
-- [Find how deep a point sits in cortex](how-to/work-with-cortical-streamlines.ipynb)
+- [Convert coordinates from the Allen CCF or a registration tool](how-to/bring-your-own-coordinates.ipynb)
+- [Find cortical depth and project onto the flat map](how-to/work-with-cortical-streamlines.ipynb)
 - [Coordinates and volumes](explanation/coordinates-and-volumes.qmd)
 :::
 :::
@@ -51,7 +51,7 @@ Cells, probe channels or injection sites. Which brain region is each one in?
 How do they fit in the hierarchy, and how do I group them into coarser regions such as Beryl or
 Cosmos?
 
-- [Remap region ids](how-to/remap-region-ids.ipynb)
+- [Convert region ids between mappings](how-to/remap-region-ids.ipynb)
 - [The brain region hierarchy](explanation/brain-region-hierarchy.qmd)
 - [Brain region mappings](explanation/brain-region-mappings.qmd)
 :::
@@ -69,11 +69,11 @@ Cosmos?
 How do I show them? Colour regions on slices or flat maps, draw values per cell or per voxel, or
 browse them in the GUI.
 
-- [Plot values on slices](how-to/plot-values-on-slices.ipynb)
-- [Plot on the Swanson flat map](how-to/plot-on-swanson-flatmap.ipynb)
-- [Plot on the cortical flat map](how-to/plot-on-cortical-flatmap.ipynb)
-- [Plot points on slices](how-to/plot-points-on-slices.ipynb)
-- [Plot a volume on slices](how-to/plot-volumes-on-slices.ipynb)
+- [Show one value per region on slices](how-to/plot-values-on-slices.ipynb)
+- [Show one value per region on the Swanson map](how-to/plot-on-swanson-flatmap.ipynb)
+- [Show one value per region on the dorsal cortex flat map](how-to/plot-on-cortical-flatmap.ipynb)
+- [Show values per point or cell on slices](how-to/plot-points-on-slices.ipynb)
+- [Show a 3D volume on slices](how-to/plot-volumes-on-slices.ipynb)
 - [Explore the atlas in the IBL Atlas GUI](how-to/explore-the-atlas-in-the-gui.qmd)
 :::
 :::
@@ -90,10 +90,10 @@ browse them in the GUI.
 What is already known about it? Gene expression, cell types, lipids and connectivity are
 registered to the same space as your data, so they join to it by a coordinate or a region id.
 
-- [Gene expression](how-to/load-gene-expression-agea.ipynb)
-- [MERFISH cell types](how-to/load-merfish.ipynb)
-- [Lipids](how-to/load-lipids.ipynb)
-- [Mesoscale connectivity](how-to/load-mesoscale-connectivity.ipynb)
+- [Load gene expression volumes](how-to/load-gene-expression-agea.ipynb)
+- [Load MERFISH cell types](how-to/load-merfish.ipynb)
+- [Load lipid volumes](how-to/load-lipids.ipynb)
+- [Load mesoscale connectivity and the cortico-thalamic hierarchy](how-to/load-mesoscale-connectivity.ipynb)
 - [External data in the common space](explanation/external-data-in-the-common-space.qmd)
 :::
 :::
@@ -109,7 +109,7 @@ registered to the same space as your data, so they join to it by a coordinate or
 
 Where does the probe go in, what will it pass through, and where did it end up?
 
-- [Work with probe insertions](how-to/work-with-probe-insertions.qmd)
+- [Describe a probe insertion and list the regions it crosses](how-to/work-with-probe-insertions.qmd)
 - [Atlas spaces and transforms](explanation/atlas-spaces.qmd)
 :::
 :::

@@ -126,4 +126,4 @@ av.set_volume(volume, levels=np.nanpercentile(volume, [0.5, 99.5]))
 (`'magma'` by default) and `levels`, the display range; without `levels` it uses the 0.5th and
 99.5th percentiles. Hover still reports the region, and `v` now reads from your volume.
 
-See [Loading the gene expression atlas](load-gene-expression-agea.ipynb) for the data itself.
+See [Load gene expression volumes](load-gene-expression-agea.ipynb) for the data itself.

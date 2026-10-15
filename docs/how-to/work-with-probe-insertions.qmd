@@ -1,5 +1,5 @@
 ---
-title: "Work with probe insertions"
+title: "Describe a probe insertion and list the regions it crosses"
 ---
 
 `Trajectory` and `Insertion` describe where a probe went. They are used across `ibllib`,
