@@ -19,9 +19,9 @@ regions; almost no analysis wants that many. A mapping picks a level of the
 
 ## Beryl and Cosmos
 
-Beryl and Cosmos are coarser mappings developed by the IBL in consultation with the Steinmetz
-lab. Each is defined as a list of Allen region ids (`beryl.npy` and `cosmos.npy`, see
-[Data files](data-files.qmd)); every region below one of those ids is collapsed into it.
+Beryl and Cosmos are coarser mappings developed by the IBL and collaborators. Each is defined as
+a list of Allen region ids (`beryl.npy` and `cosmos.npy`, see [Data files](data-files.qmd));
+every region below one of those ids is collapsed into it.
 
 - **Beryl** keeps 308 regions, a middle granularity between the full Allen parcellation and
   the major divisions. It is the usual choice for summarising results across the whole brain.

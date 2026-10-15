@@ -16,7 +16,8 @@ no source to cite.
 | Planned versus actual insertions | International Brain Laboratory et al. (2022), "Reproducibility of in-vivo electrophysiological measurements in mice", bioRxiv | [10.1101/2022.05.09.491042](https://doi.org/10.1101/2022.05.09.491042) |
 | The Swanson flat map | Hahn JD et al. (2021), "An open access mouse brain flatmap and upgraded rat and human brain flatmaps based on current reference atlases", *J Comp Neurol* 529(3). Swanson LW (2018), "Brain maps 4.0", *J Comp Neurol* | [10.1002/cne.24966](https://doi.org/10.1002/cne.24966), [10.1002/cne.24381](https://doi.org/10.1002/cne.24381) |
 | The cortical flat map and the streamlines | Wang Q et al. (2020), as for the Allen CCF above | [10.1016/j.cell.2020.04.007](https://doi.org/10.1016/j.cell.2020.04.007) |
-| The Beryl and Cosmos mappings | — | — |
+| The Beryl mapping | International Brain Laboratory et al. (2025), "A brain-wide map of neural activity during complex behaviour", *Nature* 645, 177–191 | [10.1038/s41586-025-09235-0](https://doi.org/10.1038/s41586-025-09235-0) |
+| The Cosmos mapping | — | — |
 | Gene expression (AGEA) | — | — |
 | MERFISH cell types | — | — |
 | Lipids | Fusar Bassini L et al. (2026), "The lipidomic architecture of the mouse brain", *Nature*. Source data on Zenodo. The volumes are a derivative distributed under CC-BY 4.0, so any use must credit the original work | [10.1038/s41586-026-11050-0](https://doi.org/10.1038/s41586-026-11050-0), [10.5281/zenodo.15379565](https://doi.org/10.5281/zenodo.15379565) |
