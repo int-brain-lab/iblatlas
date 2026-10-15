@@ -148,9 +148,6 @@ website:
           - how-to/load-mesoscale-connectivity.ipynb
           - how-to/work-with-cortical-streamlines.ipynb
 
-      - text: "API reference"
-        href: reference/api/index.qmd
-
       - text: "Explanation"
         menu:
           - explanation/coordinates-and-volumes.qmd
@@ -163,6 +160,9 @@ website:
 
       - text: "Citations"
         href: citations.qmd
+
+      - text: "API reference"
+        href: reference/api/index.qmd
 
 format:
   html:
