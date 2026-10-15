@@ -35,6 +35,23 @@ Note that `Needles` appears in the path regardless of which atlas you instantiat
 of the historical layout, not a statement about the scaling in use. See
 [Atlas spaces and transforms](atlas-spaces.qmd).
 
+## Files downloaded on demand
+
+| File | What it is |
+|---|---|
+| `annotation_<res_um>.nrrd` | Region **indices** (not ids) per voxel, uint16, at the given isometric spacing |
+| `average_template_<res_um>.nrrd` | The template image volume |
+| `annotation_<res_um>_lut_<LUT_VERSION>.npz` | Lookup table |
+| `swansonpaths.json` | Vectorised Swanson flat map paths |
+| `swanson2allen.npz` | — |
+| `<flatmap_name>_<res_um>.nrrd` | — |
+| `connectivity/allen_mouse_regionalized_connectivity.pqt` | Oh / Knox mesoscale connectivity, regionalized onto 291 Allen summary structures |
+| `connectivity/allen_mouse_hierarchy_scores.pqt` | Harris cortico-thalamic hierarchy scores, 61 cortical and thalamic areas |
+
+Note the annotation volumes store the region **index** — the position in the flattened
+structure tree — not the Allen id. See
+[The brain region hierarchy](brain-region-hierarchy.qmd).
+
 ## Two remote sources
 
 - **The Allen Institute**, over HTTP, for the atlas volumes themselves

@@ -155,7 +155,6 @@ website:
           - explanation/brain-region-mappings.qmd
           - explanation/atlas-spaces.qmd
           - explanation/data-downloads-and-caching.qmd
-          - explanation/data-files.qmd
           - explanation/external-data-in-the-common-space.qmd
 
       - text: "Citations"
