@@ -60,7 +60,6 @@ code that did this is not in the repository** and its location is unrecorded.
 | Mesoscale connectivity | Oh et al. / Knox et al., regionalized by IBL |
 | Cortico-thalamic hierarchy | Harris et al. |
 | Streamlines | Allen cortical depth data, converted onto the atlas grid |
-| Region meshes (`meshes.glb`) | Built from the Allen per-region `.obj` files — see [Convert Allen meshes to GLB](../how-to/convert-allen-meshes-to-glb.qmd) |
 
 ::: {.callout-note}
 ## Seven undocumented items

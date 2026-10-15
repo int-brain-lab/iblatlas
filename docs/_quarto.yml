@@ -139,7 +139,6 @@ website:
           - how-to/plot-volumes-on-slices.ipynb
           - how-to/plot-on-swanson-flatmap.ipynb
           - how-to/plot-on-cortical-flatmap.ipynb
-          - how-to/plot-on-circular-flatmap.ipynb
           - text: "---"
           # The repackaged external datasets group under their explanation page,
           # which is what ties them together as one family.
@@ -150,9 +149,6 @@ website:
           - how-to/load-lipids.ipynb
           - how-to/load-mesoscale-connectivity.ipynb
           - how-to/work-with-cortical-streamlines.ipynb
-          - text: "---"
-          - how-to/display-3d-meshes.qmd
-          - how-to/convert-allen-meshes-to-glb.qmd
 
       - text: "API reference"
         href: reference/api/index.qmd
