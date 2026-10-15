@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "iblatlas"
-description = "IBL atlas module"
+description = "iblatlas puts your data and the mouse brain in one coordinate system, so you can find which region anything is in, summarise and plot results by region, and compare them with gene expression, cell types, lipids and connectivity already mapped to the same space."
 readme = "README.md"
 requires-python = ">=3.10"
 license = {file = "LICENSE"}
