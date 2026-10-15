@@ -2,9 +2,9 @@
 title: "Brain region mappings"
 ---
 
-A mapping is a choice of how finely to describe anatomy. The Allen hierarchy has thousands of
-regions; almost no analysis wants that many. A mapping picks a level of the
-[structure tree](brain-region-hierarchy.qmd) and collapses everything below it.
+A mapping is a choice of how finely to describe anatomy. It groups the Allen regions into fewer,
+larger ones by picking a level of the [structure tree](brain-region-hierarchy.qmd) and collapsing
+everything below it. Pick the level that suits your analysis.
 
 ## The four mappings
 

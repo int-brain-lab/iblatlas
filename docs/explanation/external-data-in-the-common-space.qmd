@@ -6,8 +6,8 @@ Several groups have built mouse brain datasets that are not IBL's: gene expressi
 densities, lipids, connectivity, cortical depth. IBL has repackaged each of them into the atlas
 reference space and ships them through this package.
 
-That repackaging is the point of this page. These datasets are scattered across separate
-how-tos and it is easy to miss that they are one family, built on one idea.
+This page gives more detail than the individual how-tos: what each dataset contains, how it was
+repackaged, and how the volumes differ from the atlas.
 
 To cite any of these datasets, see [Citations](../citations.qmd).
 
