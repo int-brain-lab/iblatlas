@@ -101,14 +101,6 @@ in-brain voxels missing. The front of the brain, about the first millimetre, is 
 missing, and whole coronal slices can be missing too. The processed volume fills these in, so
 values there are inferred, not measured.
 
-::: {.callout-note}
-## A citable description of the processing is not available yet
-
-The three steps above come from the script, which is the only record of the method in the
-package. There is no publication or note to cite for it, so the Citations page marks this as a
-gap (open question 10).
-:::
-
 ## Streamlines
 
 The Allen streamlines are cortical depth values converted onto the ordinary atlas grid, at 10,
@@ -117,14 +109,3 @@ outside it, rather than raising, so check for NaNs.
 
 They sit in this family because they are Allen data repackaged onto the standard grid, like
 the others.
-
-::: {.callout-note}
-## Two source gaps
-
-**The MERFISH publication is not named.** The code attributes the data to the Zhuang lab and
-an Allen release, but cites no paper. If you publish using it, track down the citation
-yourself.
-
-**How the gene expression volumes were registered to the CCF is not recorded.** The scraping
-scripts that built them do not state the method.
-:::

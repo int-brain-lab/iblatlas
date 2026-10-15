@@ -141,13 +141,6 @@ planned targets. That is how the difference between the spaces on this page was 
 comparison is in International Brain Laboratory et al. (2022), *Reproducibility of in-vivo
 electrophysiological measurements in mice*, cited on [Citations](../citations.qmd).
 
-::: {.callout-note}
-## An updated planned-versus-actual figure is not included yet
-
-A comparison from a larger dataset exists, and its figure is not on this page. The page cites the
-2022 paper until the figure can be added (Open question 9).
-:::
-
 ## Planning tools
 
 [Pinpoint](https://virtualbrainlab.org/pinpoint/in_vivo_alignment.html) is the tool many IBL
@@ -155,6 +148,5 @@ users plan in vivo trajectories with. It offers CCF, Qiu 2018, Dorr 2008 and a l
 transform, and it applies a −5° pitch correction that `iblatlas` does not
 (see [The 5° pitch](#the-5-pitch)).
 
-Those names overlap with the ones above, but **it has not been confirmed that the transforms
-are the same**. Check that an `Insertion` and a Pinpoint plan are expressed in the same
-frame before comparing them. State which tool produced a coordinate when you record it.
+Check that an `Insertion` and a Pinpoint plan are expressed in the same frame before comparing
+them. State which tool produced a coordinate when you record it.

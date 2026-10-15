@@ -30,7 +30,7 @@ An `Insertion` is the surgical description — an entry point plus angles and a 
 | `theta` | Polar angle, degrees |
 | `depth` | Insertion depth |
 | `label` | Free-text name, default `''` |
-| `beta` | See below — undocumented, defaults to `0` |
+| `beta` | Defaults to `0` |
 
 Do not construct one with `Insertion(...)` directly. Use the two static constructors.
 
@@ -82,25 +82,10 @@ Pick the mapping to suit the granularity you want — see
 [Brain region mappings](../explanation/brain-region-mappings.qmd). Use an `-lr` mapping if you
 need to distinguish hemispheres.
 
-::: {.callout-important}
-## Two gaps on this page
-
-**No worked example with real coordinates.** The entry coordinate, angles and the structures a
-probe actually passes through need an experimentalist to supply credible values. The dictionary
-above is the one from the `from_dict` docstring, not a real planned trajectory.
-
-**What `beta` means is unknown.** It is stored on every `Insertion`, read by `from_dict`, and
-defaults to `0`. It appears exactly twice in the package — the field declaration and that read
-— and is documented nowhere. If you know, please say.
-
-`Insertion.xyz`, `Insertion.entry` and `Insertion.tip` also carry no docstrings, so the API
-reference shows them bare.
-:::
-
 ## Planning tools
 
 [Pinpoint](https://virtualbrainlab.org/pinpoint/in_vivo_alignment.html) is what many IBL users
-plan trajectories with. It applies a −5° pitch correction that `iblatlas` does not, and **it
-has not been confirmed that its transforms match the `iblatlas` scalings**. Record which tool
-produced a coordinate; check whether an `Insertion` and a Pinpoint plan share a frame. See
+plan trajectories with. It applies a −5° pitch correction that `iblatlas` does not. Record which
+tool produced a coordinate, and check that an `Insertion` and a Pinpoint plan are in the same
+frame before comparing them. See
 [Atlas spaces and transforms](../explanation/atlas-spaces.qmd).
