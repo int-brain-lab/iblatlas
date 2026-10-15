@@ -122,6 +122,7 @@ website:
       - text: "Tutorial"
         menu:
           - tutorials/from-coordinates-to-a-brain-figure.ipynb
+          - tutorials/from-your-results-to-whats-known.ipynb
 
       - text: "How-To"
         menu:

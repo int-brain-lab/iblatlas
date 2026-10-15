@@ -91,6 +91,7 @@ browse them in the GUI.
 What is already known about it? Gene expression, cell types, lipids and connectivity are
 registered to the same space as your data, so they join to it by a coordinate or a region id.
 
+- [From your results to what's known](tutorials/from-your-results-to-whats-known.ipynb)
 - [Load gene expression volumes](how-to/load-gene-expression-agea.ipynb)
 - [Load MERFISH cell types](how-to/load-merfish.ipynb)
 - [Load lipid volumes](how-to/load-lipids.ipynb)
