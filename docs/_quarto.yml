@@ -128,6 +128,7 @@ website:
           - how-to/install.qmd
           - text: "---"
           - how-to/remap-region-ids.ipynb
+          - how-to/navigate-the-region-hierarchy.ipynb
           - how-to/explore-the-atlas-in-the-gui.qmd
           - how-to/bring-your-own-coordinates.ipynb
           - how-to/work-with-probe-insertions.qmd

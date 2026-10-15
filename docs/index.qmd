@@ -52,6 +52,7 @@ How do they fit in the hierarchy, and how do I group them into coarser regions s
 Cosmos?
 
 - [Convert region ids between mappings](how-to/remap-region-ids.ipynb)
+- [Navigate the brain region hierarchy](how-to/navigate-the-region-hierarchy.ipynb)
 - [The brain region hierarchy](explanation/brain-region-hierarchy.qmd)
 - [Brain region mappings](explanation/brain-region-mappings.qmd)
 :::
