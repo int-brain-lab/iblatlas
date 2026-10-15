@@ -26,7 +26,7 @@ regions.
 ::: {.g-col-12 .g-col-md-6 .g-col-lg-4}
 ::: {.workflow-card}
 ::: {.card-img}
-![](images/landing/points.png){fig-alt="Points scattered on a coronal slice, each dot coloured by the brain region it falls in"}
+![](images/landing/points.png){fig-alt="A probe on a coronal slice, each channel coloured by the brain region it is in, with the top channels above the brain in grey"}
 :::
 ::: {.card-body}
 ### 1. I have points

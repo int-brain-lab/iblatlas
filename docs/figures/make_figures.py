@@ -28,7 +28,7 @@ OUTLINE_COLOURS = {'AllenAtlas': 'k', 'NeedlesAtlas': 'tab:blue', 'MRITorontoAtl
 # Slices with no missing voxels: Gfap's raw volume is left/right asymmetric here, and Calb1's
 # overall level changes in the processed volume.
 AGEA_EXAMPLES = (('Gfap', -0.0016), ('Calb1', -0.0004))
-POINTS_AP = -0.002  # m; the coronal slice the points card is drawn on
+POINTS_AP = -0.0015  # m; the coronal plane of the points card's probe, as in the tutorial
 PROBE_AP = -0.002  # m; the coronal plane the probe track lies in
 ATLAS_FACTORIES = {'AllenAtlas': AllenAtlas, 'NeedlesAtlas': NeedlesAtlas,
                    'MRITorontoAtlas': MRITorontoAtlas}
@@ -264,36 +264,41 @@ def landing_region_values(atlas: AllenAtlas) -> plt.Figure:
     return fig
 
 
-def landing_points(atlas: AllenAtlas, n_points: int = 300) -> plt.Figure:
+def landing_points(atlas: AllenAtlas, tip_ml: float = -0.0012, tip_dv: float = -0.0036,
+                   n_channels: int = 384, length: float = 0.00384) -> plt.Figure:
     """
-    Random points on one coronal slice, each dot coloured by the region it falls in.
+    The tutorial's stand-in probe on a coronal slice, each channel coloured by its region.
 
-    The points are synthetic: drawn uniformly over the slice with a fixed seed, keeping only those
-    inside the brain. The image illustrates looking up the region of each point, not a recording.
+    A vertical probe at ``POINTS_AP`` with ``n_channels`` evenly spaced over ``length`` metres
+    upward from the tip, as in the "From coordinates to a brain figure" tutorial. Its top channels
+    sit above the brain and are drawn grey. The data are synthetic: the image illustrates looking
+    up the region of each point, not a recording.
 
     Parameters
     ----------
     atlas : AllenAtlas
         Atlas used both for the region lookup and the annotation slice.
-    n_points : int
-        Number of points drawn, all inside the brain.
+    tip_ml, tip_dv : float
+        Tip position in metres from bregma.
+    n_channels : int
+        Number of channels.
+    length : float
+        Distance from the tip to the top channel, in metres.
 
     Returns
     -------
     matplotlib.figure.Figure
         One axis in micrometres, ML on x and DV on y, on the shared landing canvas.
     """
-    rng = np.random.default_rng(0)
-    n_candidates = 3 * n_points  # about half the slice is outside the brain
-    xyz = np.c_[rng.uniform(*atlas.bc.xlim, n_candidates), np.full(n_candidates, POINTS_AP),
-                rng.uniform(*np.sort(atlas.bc.zlim), n_candidates)]
+    dv = np.linspace(tip_dv + length, tip_dv, n_channels)
+    xyz = np.c_[np.full(n_channels, tip_ml), np.full(n_channels, POINTS_AP), dv]
     ids = atlas.get_labels(xyz)
-    xyz, ids = xyz[ids != 0][:n_points], ids[ids != 0][:n_points]
+    colours = atlas.regions.get(ids)['rgb'] / 255
+    colours[ids == 0] = 0.6  # channels above the brain, in grey
     fig, axs = _landing_axes()
     atlas.plot_cslice(POINTS_AP, volume='annotation', ax=axs[0], alpha=0.35)
     _clear_void(axs[0], atlas, POINTS_AP)
-    axs[0].scatter(xyz[:, 0] * 1e6, xyz[:, 2] * 1e6, c=atlas.regions.get(ids)['rgb'] / 255, s=14,
-                   edgecolors='k', linewidths=0.4)
+    axs[0].scatter(xyz[:, 0] * 1e6, xyz[:, 2] * 1e6, c=colours, s=10)
     return fig
 
 
