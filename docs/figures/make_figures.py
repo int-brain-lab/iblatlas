@@ -15,22 +15,21 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.patches import Arc
-from PIL import Image
 
 from iblatlas.atlas import AllenAtlas, MRITorontoAtlas, NeedlesAtlas
-from iblatlas.genomics import agea, lipids, merfish
-from iblatlas.plots import (plot_points_on_slice, plot_scalar_on_slice, plot_swanson,
-                            plot_swanson_vector)
+from iblatlas.genomics import agea, merfish
+from iblatlas.plots import plot_scalar_on_slice, plot_swanson, plot_swanson_vector
 
 IMAGES_DIR = Path(__file__).resolve().parents[1] / 'explanation' / 'images'
 LANDING_DIR = Path(__file__).resolve().parents[1] / 'images' / 'landing'
-GUI_SCREENSHOT = Path(__file__).resolve().parents[1] / 'how-to' / 'images' / 'gui-hover.png'
 LANDING_SIZE = (5, 3.75)  # inches; every landing image shares this 4:3 canvas so the cards line up
 TILT_DEG = 5  # the pitch stated on the coordinates page; lambda is not defined in the package
 OUTLINE_COLOURS = {'AllenAtlas': 'k', 'NeedlesAtlas': 'tab:blue', 'MRITorontoAtlas': 'tab:red'}
 # Slices with no missing voxels: Gfap's raw volume is left/right asymmetric here, and Calb1's
 # overall level changes in the processed volume.
 AGEA_EXAMPLES = (('Gfap', -0.0016), ('Calb1', -0.0004))
+POINTS_AP = -0.002  # m; the coronal slice the points card is drawn on
+PROBE_AP = -0.002  # m; the coronal plane the probe track lies in
 ATLAS_FACTORIES = {'AllenAtlas': AllenAtlas, 'NeedlesAtlas': NeedlesAtlas,
                    'MRITorontoAtlas': MRITorontoAtlas}
 
@@ -265,27 +264,74 @@ def landing_region_values(atlas: AllenAtlas) -> plt.Figure:
     return fig
 
 
-def landing_volumes() -> plt.Figure:
-    """A coronal slice of the most reliable lipid volume, which is one value per voxel."""
-    volume, df_lipids, atlas = lipids.load_volume(min_reliability=0.6)
+def landing_points(atlas: AllenAtlas, n_points: int = 300) -> plt.Figure:
+    """
+    Random points on one coronal slice, each dot coloured by the region it falls in.
+
+    The points are synthetic: drawn uniformly over the slice with a fixed seed, keeping only those
+    inside the brain. The image illustrates looking up the region of each point, not a recording.
+
+    Parameters
+    ----------
+    atlas : AllenAtlas
+        Atlas used both for the region lookup and the annotation slice.
+    n_points : int
+        Number of points drawn, all inside the brain.
+
+    Returns
+    -------
+    matplotlib.figure.Figure
+        One axis in micrometres, ML on x and DV on y, on the shared landing canvas.
+    """
+    rng = np.random.default_rng(0)
+    n_candidates = 3 * n_points  # about half the slice is outside the brain
+    xyz = np.c_[rng.uniform(*atlas.bc.xlim, n_candidates), np.full(n_candidates, POINTS_AP),
+                rng.uniform(*np.sort(atlas.bc.zlim), n_candidates)]
+    ids = atlas.get_labels(xyz)
+    xyz, ids = xyz[ids != 0][:n_points], ids[ids != 0][:n_points]
     fig, axs = _landing_axes()
-    atlas.plot_cslice(-0.002, ax=axs[0], volume=volume[df_lipids['reliability'].idxmax()],
-                      cmap='viridis')
+    atlas.plot_cslice(POINTS_AP, volume='annotation', ax=axs[0], alpha=0.35)
+    _clear_void(axs[0], atlas, POINTS_AP)
+    axs[0].scatter(xyz[:, 0] * 1e6, xyz[:, 2] * 1e6, c=atlas.regions.get(ids)['rgb'] / 255, s=14,
+                   edgecolors='k', linewidths=0.4)
     return fig
 
 
-def landing_probes(atlas: AllenAtlas) -> plt.Figure:
-    """A synthetic probe track, 120 channels coloured by value, on a sagittal slice.
-
-    The track is a straight line and the values a sine wave: the image illustrates the plotting
-    call, not a recording.
+def landing_probe_track(atlas: AllenAtlas, target_ml: float = -0.0015, target_dv: float = -0.0035,
+                        tilt_deg: float = 15) -> plt.Figure:
     """
-    t = np.linspace(0, 1, 120)
-    xyz = np.c_[np.full(120, -0.0010), 0.0005 - 0.0006 * t, -0.0005 - 0.0035 * t]
+    A straight probe track on a coronal annotation slice, from the brain surface to a target.
+
+    The track lies in the coronal plane at ``PROBE_AP`` and is tilted ``tilt_deg`` from vertical,
+    entering lateral to the target. Its entry is the last in-brain sample walking up the line from
+    the target. The default target is in posterior thalamus, so the track crosses cortex,
+    hippocampus and thalamus.
+
+    Parameters
+    ----------
+    atlas : AllenAtlas
+        Atlas used for the slice and to find where the track meets the brain surface.
+    target_ml, target_dv : float
+        Tip position in metres from bregma.
+    tilt_deg : float
+        Angle from vertical, in degrees.
+
+    Returns
+    -------
+    matplotlib.figure.Figure
+        One axis in micrometres, ML on x and DV on y, on the shared landing canvas.
+    """
+    tilt = np.deg2rad(tilt_deg)
+    distance = np.arange(0, 0.006, 1e-5)  # m, from the tip up the track
+    xyz = np.c_[target_ml - distance * np.sin(tilt), np.full(distance.size, PROBE_AP),
+                target_dv + distance * np.cos(tilt)]
+    in_brain = atlas.get_labels(xyz, mode='clip') != 0
+    entry = xyz[np.argmin(in_brain) - 1]  # last sample before the first one outside the brain
     fig, axs = _landing_axes()
-    plot_points_on_slice(xyz, values=1 + np.sin(t * 14) ** 2 * 4, coord=-1000, slice='sagittal',
-                         mapping='Allen', background='boundary', cmap='Reds', aggr='mean',
-                         fwhm=150, brain_atlas=atlas, ax=axs[0])
+    atlas.plot_cslice(PROBE_AP, volume='annotation', ax=axs[0])
+    _clear_void(axs[0], atlas, PROBE_AP)
+    axs[0].plot([entry[0] * 1e6, target_ml * 1e6], [entry[2] * 1e6, target_dv * 1e6], color='k',
+                lw=2.5, solid_capstyle='round', marker='o', markevery=[1], markersize=6)
     return fig
 
 
@@ -310,26 +356,17 @@ def landing_external_data() -> plt.Figure:
     return fig
 
 
-def landing_gui(out_dir: Path) -> None:
-    """The GUI hover screenshot from the GUI how-to, cropped to the slice and its tooltip."""
-    im = Image.open(GUI_SCREENSHOT).convert('RGB')
-    width, height = im.size
-    height = int(height * 0.93)  # drop the status line under the slice
-    left = width - round(height * LANDING_SIZE[0] / LANDING_SIZE[1])  # keep the right edge, 4:3
-    im.crop((left, 0, width, height)).save(out_dir / 'gui.png')
-
-
 def landing_images(out_dir: Path = LANDING_DIR) -> None:
-    """Write the six landing-page card images into ``out_dir``."""
+    """Write the five landing-page card images into ``out_dir``."""
     out_dir.mkdir(parents=True, exist_ok=True)
     atlas = AllenAtlas(25)
-    figures = {'region-values': landing_region_values(atlas), 'volumes': landing_volumes(),
-               'probes': landing_probes(atlas), 'mappings': landing_mappings(atlas),
-               'external-data': landing_external_data()}
+    figures = {'points': landing_points(atlas), 'mappings': landing_mappings(atlas),
+               'region-values': landing_region_values(atlas),
+               'external-data': landing_external_data(),
+               'probe-track': landing_probe_track(atlas)}
     for name, fig in figures.items():
         fig.savefig(out_dir / f'{name}.png', dpi=110, facecolor='white')
         plt.close(fig)
-    landing_gui(out_dir)
 
 
 def main(out_dir: Path = IMAGES_DIR) -> None:
