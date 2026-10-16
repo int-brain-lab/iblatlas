@@ -109,6 +109,7 @@ registered to the same space as your data, so they join to it by a coordinate or
 
 Where does the probe go in, what will it pass through, and where did it end up?
 
+- [From a target to a probe track](tutorials/from-a-target-to-a-probe-track.ipynb)
 - [Describe a probe insertion and list the regions it crosses](how-to/work-with-probe-insertions.qmd)
 - [Atlas spaces and transforms](explanation/atlas-spaces.qmd)
 :::

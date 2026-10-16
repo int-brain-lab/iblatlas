@@ -123,6 +123,7 @@ website:
         menu:
           - tutorials/from-coordinates-to-a-brain-figure.ipynb
           - tutorials/from-your-results-to-whats-known.ipynb
+          - tutorials/from-a-target-to-a-probe-track.ipynb
 
       - text: "How-To"
         menu:

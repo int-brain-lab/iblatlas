@@ -6,7 +6,8 @@ title: "Describe a probe insertion and list the regions it crosses"
 `iblapps`, `iblrig` and other IBL tooling, so they are public API in practice even though they
 live in `iblatlas.atlas` alongside the volumes.
 
-The code on this page is not executed when the site is built.
+The code on this page is not executed when the site is built. For a worked example from a target
+to a reconstructed track, see the tutorial [From a target to a probe track](../tutorials/from-a-target-to-a-probe-track.ipynb).
 
 ## Trajectory: a line in the brain
 
@@ -26,11 +27,15 @@ An `Insertion` is the surgical description — an entry point plus angles and a 
 | Field | Meaning |
 |---|---|
 | `x`, `y`, `z` | Entry coordinate, metres, ML/AP/DV relative to bregma |
-| `phi` | Azimuth, degrees |
-| `theta` | Polar angle, degrees |
+| `phi` | Azimuth, degrees; 0 or 180 keeps the probe in a coronal plane |
+| `theta` | Polar angle from vertical, degrees |
 | `depth` | Insertion depth |
 | `label` | Free-text name, default `''` |
-| `beta` | Defaults to `0` |
+| `beta` | Tilt: rotation of the probe about its own axis, degrees; 0 when the electrode side faces up, sign by the right-hand rule with the thumb towards the tip. Defaults to `0` |
+
+The angles follow the IBL recording protocol: International Brain Laboratory (2022), *Appendix 2:
+IBL protocol for electrophysiology recording using Neuropixels probe*,
+[doi:10.6084/m9.figshare.19697896.v2](https://doi.org/10.6084/m9.figshare.19697896.v2).
 
 Do not construct one with `Insertion(...)` directly. Use the two static constructors.
 
