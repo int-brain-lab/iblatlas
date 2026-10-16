@@ -135,6 +135,7 @@ website:
           - how-to/find-the-region-of-a-point.ipynb
           - how-to/bring-your-own-coordinates.ipynb
           - how-to/get-the-voxels-in-a-region.ipynb
+          - how-to/measure-the-volume-of-a-region.ipynb
           - how-to/tell-left-from-right-hemisphere.ipynb
           - how-to/work-with-cortical-streamlines.ipynb
           - text: "---"
