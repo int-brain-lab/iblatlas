@@ -35,6 +35,7 @@ Cells, probe channels or injection sites. Which brain region is each one in?
 
 - [Find which brain region a coordinate is in](how-to/find-the-region-of-a-point.ipynb)
 - [Convert coordinates from the Allen CCF or a registration tool](how-to/bring-your-own-coordinates.ipynb)
+- [Tell left from right hemisphere](how-to/tell-left-from-right-hemisphere.ipynb)
 - [Coordinates and volumes](explanation/coordinates-and-volumes.qmd)
 :::
 :::

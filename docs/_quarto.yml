@@ -134,6 +134,7 @@ website:
           - text: "I have points"
           - how-to/find-the-region-of-a-point.ipynb
           - how-to/bring-your-own-coordinates.ipynb
+          - how-to/tell-left-from-right-hemisphere.ipynb
           - how-to/work-with-cortical-streamlines.ipynb
           - text: "---"
           - text: "I have region names or ids"
