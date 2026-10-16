@@ -29,7 +29,7 @@ regions.
 ![](images/landing/points.png){fig-alt="A probe on a coronal slice, each channel coloured by the brain region it is in, with the top channels above the brain in grey"}
 :::
 ::: {.card-body}
-### 1. I have points
+### I have points
 
 Cells, probe channels or injection sites. Which brain region is each one in?
 
@@ -46,7 +46,7 @@ Cells, probe channels or injection sites. Which brain region is each one in?
 ![](images/landing/mappings.png){fig-alt="One coronal slice drawn with the Allen mapping above the coarser Cosmos mapping"}
 :::
 ::: {.card-body}
-### 2. I have region names or ids
+### I have region names or ids
 
 How do they fit in the hierarchy, and how do I group them into coarser regions such as Beryl or
 Cosmos?
@@ -65,7 +65,7 @@ Cosmos?
 ![](images/landing/region-values.png){fig-alt="Brain regions coloured by value on a coronal slice and on the Swanson flat map"}
 :::
 ::: {.card-body}
-### 3. I have results per region
+### I have results per region
 
 How do I show them? Colour regions on slices or flat maps, or draw values per cell or per voxel.
 
@@ -84,7 +84,7 @@ How do I show them? Colour regions on slices or flat maps, or draw values per ce
 ![](images/landing/external-data.png){fig-alt="One MERFISH section with each cell coloured by its cell class"}
 :::
 ::: {.card-body}
-### 4. I have a region of interest
+### I have a region of interest
 
 What is already known about it? Gene expression, cell types, lipids and connectivity are
 registered to the same space as your data, so they join to it by a coordinate or a region id.
@@ -105,7 +105,7 @@ registered to the same space as your data, so they join to it by a coordinate or
 ![](images/landing/probe-track.png){fig-alt="A tilted probe track on a coronal slice, crossing cortex, hippocampus and thalamus"}
 :::
 ::: {.card-body}
-### 5. I want to record from a region
+### I want to record from a region
 
 Where does the probe go in, what will it pass through, and where did it end up?
 
@@ -121,7 +121,7 @@ Where does the probe go in, what will it pass through, and where did it end up?
 ![](images/landing/gui.png){fig-alt="The IBL Atlas GUI's coronal view, with hippocampus outlined and crosshairs marking the other slice positions"}
 :::
 ::: {.card-body}
-### 6. I want to browse the atlas
+### I want to browse the atlas
 
 Scroll through slices, search the region tree, and see which region is under the cursor, in a
 desktop application.

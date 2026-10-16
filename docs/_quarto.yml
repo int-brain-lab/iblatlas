@@ -157,7 +157,7 @@ website:
           - text: "I want to browse the atlas"
           - how-to/explore-the-atlas-in-the-gui.qmd
 
-      - text: "Explanation"
+      - text: "Concepts"
         menu:
           - explanation/coordinates-and-volumes.qmd
           - explanation/brain-region-hierarchy.qmd

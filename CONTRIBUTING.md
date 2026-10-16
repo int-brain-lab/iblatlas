@@ -44,12 +44,13 @@ Pick the quadrant by what the reader is doing, not by subject matter:
 | **Tutorial** | Learning the package for the first time, guided | `docs/tutorials/` |
 | **How-To** | Accomplishing a specific task they already have | `docs/how-to/` |
 | **Reference** | Looking up what a symbol does | generated — see below |
-| **Explanation** | Understanding why something works as it does | `docs/explanation/` |
+| **Explanation** (the Concepts menu) | Understanding why something works as it does | `docs/explanation/` |
 
 The commonest mistake is writing an explanation inside a how-to. If a paragraph starts
 explaining *why*, it probably belongs in the Explanation quadrant with a link from the how-to.
 
-Add the page to the `navbar` in `docs/_quarto.yml`, or nothing links to it.
+Add the page to the `navbar` in `docs/_quarto.yml`, or nothing links to it. A how-to goes
+under the group heading that matches its home page card in `docs/index.qmd`.
 
 ## Adding a citation
 
