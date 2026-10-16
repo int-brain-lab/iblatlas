@@ -132,6 +132,7 @@ website:
           # the home page cards. An item with text and no href renders as a group heading.
           - text: "---"
           - text: "I have points"
+          - how-to/find-the-region-of-a-point.ipynb
           - how-to/bring-your-own-coordinates.ipynb
           - how-to/work-with-cortical-streamlines.ipynb
           - text: "---"
