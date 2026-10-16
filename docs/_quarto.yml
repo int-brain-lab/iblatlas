@@ -127,28 +127,35 @@ website:
       - text: "How-To"
         menu:
           - how-to/install.qmd
+          # Grouped by what the reader has, under the same headings and in the same order as
+          # the home page cards. An item with text and no href renders as a group heading.
           - text: "---"
+          - text: "I have points"
+          - how-to/bring-your-own-coordinates.ipynb
+          - how-to/work-with-cortical-streamlines.ipynb
+          - text: "---"
+          - text: "I have region names or ids"
           - how-to/remap-region-ids.ipynb
           - how-to/navigate-the-region-hierarchy.ipynb
-          - how-to/explore-the-atlas-in-the-gui.qmd
-          - how-to/bring-your-own-coordinates.ipynb
-          - how-to/work-with-probe-insertions.qmd
           - text: "---"
+          - text: "I have results per region"
           - how-to/plot-values-on-slices.ipynb
-          - how-to/plot-points-on-slices.ipynb
-          - how-to/plot-volumes-on-slices.ipynb
           - how-to/plot-on-swanson-flatmap.ipynb
           - how-to/plot-on-cortical-flatmap.ipynb
+          - how-to/plot-points-on-slices.ipynb
+          - how-to/plot-volumes-on-slices.ipynb
           - text: "---"
-          # The repackaged external datasets group under their explanation page,
-          # which is what ties them together as one family.
-          - text: "External data in the common space"
-            href: explanation/external-data-in-the-common-space.qmd
+          - text: "I have a region of interest"
           - how-to/load-gene-expression-agea.ipynb
           - how-to/load-merfish.ipynb
           - how-to/load-lipids.ipynb
           - how-to/load-mesoscale-connectivity.ipynb
-          - how-to/work-with-cortical-streamlines.ipynb
+          - text: "---"
+          - text: "I want to record from a region"
+          - how-to/work-with-probe-insertions.qmd
+          - text: "---"
+          - text: "I want to browse the atlas"
+          - how-to/explore-the-atlas-in-the-gui.qmd
 
       - text: "Explanation"
         menu:

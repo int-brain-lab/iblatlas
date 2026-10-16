@@ -22,6 +22,7 @@ from iblatlas.plots import plot_scalar_on_slice, plot_swanson, plot_swanson_vect
 
 IMAGES_DIR = Path(__file__).resolve().parents[1] / 'explanation' / 'images'
 LANDING_DIR = Path(__file__).resolve().parents[1] / 'images' / 'landing'
+GUI_SCREENSHOT = Path(__file__).resolve().parents[1] / 'how-to' / 'images' / 'gui-region-highlight.png'
 LANDING_SIZE = (5, 3.75)  # inches; every landing image shares this 4:3 canvas so the cards line up
 TILT_DEG = 5  # the pitch stated on the coordinates page; lambda is not defined in the package
 OUTLINE_COLOURS = {'AllenAtlas': 'k', 'NeedlesAtlas': 'tab:blue', 'MRITorontoAtlas': 'tab:red'}
@@ -361,14 +362,40 @@ def landing_external_data() -> plt.Figure:
     return fig
 
 
+def landing_gui(screenshot: Path = GUI_SCREENSHOT, box: tuple = (212, 22, 1069, 665)) -> plt.Figure:
+    """
+    The GUI's coronal view with hippocampus highlighted, cropped from the how-to's screenshot.
+
+    The GUI needs a display and a Qt install, so the card reuses the screenshot on the GUI how-to
+    page rather than drawing the GUI here.
+
+    Parameters
+    ----------
+    screenshot : Path
+        PNG of the GUI's coronal view.
+    box : tuple
+        ``(left, top, right, bottom)`` crop in pixels: the slice image without the side panel or
+        axis labels, centred on the midline, in the 4:3 shape of the landing canvas.
+
+    Returns
+    -------
+    matplotlib.figure.Figure
+        One axis on the shared landing canvas.
+    """
+    left, top, right, bottom = box
+    fig, axs = _landing_axes()
+    axs[0].imshow(plt.imread(screenshot)[top:bottom, left:right])
+    return fig
+
+
 def landing_images(out_dir: Path = LANDING_DIR) -> None:
-    """Write the five landing-page card images into ``out_dir``."""
+    """Write the six landing-page card images into ``out_dir``."""
     out_dir.mkdir(parents=True, exist_ok=True)
     atlas = AllenAtlas(25)
     figures = {'points': landing_points(atlas), 'mappings': landing_mappings(atlas),
                'region-values': landing_region_values(atlas),
                'external-data': landing_external_data(),
-               'probe-track': landing_probe_track(atlas)}
+               'probe-track': landing_probe_track(atlas), 'gui': landing_gui()}
     for name, fig in figures.items():
         fig.savefig(out_dir / f'{name}.png', dpi=110, facecolor='white')
         plt.close(fig)

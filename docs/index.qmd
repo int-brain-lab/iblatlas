@@ -67,15 +67,13 @@ Cosmos?
 ::: {.card-body}
 ### 3. I have results per region
 
-How do I show them? Colour regions on slices or flat maps, draw values per cell or per voxel, or
-browse them in the GUI.
+How do I show them? Colour regions on slices or flat maps, or draw values per cell or per voxel.
 
 - [Show one value per region on slices](how-to/plot-values-on-slices.ipynb)
 - [Show one value per region on the Swanson map](how-to/plot-on-swanson-flatmap.ipynb)
 - [Show one value per region on the dorsal cortex flat map](how-to/plot-on-cortical-flatmap.ipynb)
 - [Show values per point or cell on slices](how-to/plot-points-on-slices.ipynb)
 - [Show a 3D volume on slices](how-to/plot-volumes-on-slices.ipynb)
-- [Explore the atlas in the IBL Atlas GUI](how-to/explore-the-atlas-in-the-gui.qmd)
 :::
 :::
 :::
@@ -113,6 +111,22 @@ Where does the probe go in, what will it pass through, and where did it end up?
 
 - [Describe a probe insertion and list the regions it crosses](how-to/work-with-probe-insertions.qmd)
 - [Atlas spaces and transforms](explanation/atlas-spaces.qmd)
+:::
+:::
+:::
+
+::: {.g-col-12 .g-col-md-6 .g-col-lg-4}
+::: {.workflow-card}
+::: {.card-img}
+![](images/landing/gui.png){fig-alt="The IBL Atlas GUI's coronal view, with hippocampus outlined and crosshairs marking the other slice positions"}
+:::
+::: {.card-body}
+### 6. I want to browse the atlas
+
+Scroll through slices, search the region tree, and see which region is under the cursor, in a
+desktop application.
+
+- [Explore the atlas in the IBL Atlas GUI](how-to/explore-the-atlas-in-the-gui.qmd)
 :::
 :::
 :::
