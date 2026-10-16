@@ -119,7 +119,7 @@ website:
   draft-mode: visible
   navbar:
     left:
-      - text: "Tutorial"
+      - text: "Tutorials"
         menu:
           - tutorials/from-coordinates-to-a-brain-figure.ipynb
           - tutorials/from-your-results-to-whats-known.ipynb
