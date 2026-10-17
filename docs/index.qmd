@@ -55,6 +55,7 @@ Cosmos?
 
 - [Convert region ids between mappings](how-to/remap-region-ids.ipynb)
 - [Navigate the brain region hierarchy](how-to/navigate-the-region-hierarchy.ipynb)
+- [Make a region list plottable on the Swanson map](how-to/make-regions-plottable-on-swanson.ipynb)
 - [The brain region hierarchy](explanation/brain-region-hierarchy.qmd)
 - [Brain region mappings](explanation/brain-region-mappings.qmd)
 :::

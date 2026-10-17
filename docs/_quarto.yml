@@ -143,6 +143,7 @@ website:
           - text: "I have region names or ids"
           - how-to/remap-region-ids.ipynb
           - how-to/navigate-the-region-hierarchy.ipynb
+          - how-to/make-regions-plottable-on-swanson.ipynb
           - text: "---"
           - text: "I have results per region"
           - how-to/plot-values-on-slices.ipynb
