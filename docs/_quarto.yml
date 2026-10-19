@@ -146,6 +146,7 @@ website:
           - how-to/make-regions-plottable-on-swanson.ipynb
           - text: "---"
           - text: "I have results per region"
+          - how-to/show-one-value-per-region.ipynb
           - how-to/plot-values-on-slices.ipynb
           - how-to/plot-on-swanson-flatmap.ipynb
           - how-to/plot-on-cortical-flatmap.ipynb

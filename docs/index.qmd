@@ -72,9 +72,7 @@ Cosmos?
 
 How do I show them? Colour regions on slices or flat maps, or draw values per cell or per voxel.
 
-- [Show one value per region on slices](how-to/plot-values-on-slices.ipynb)
-- [Show one value per region on the Swanson map](how-to/plot-on-swanson-flatmap.ipynb)
-- [Show one value per region on the dorsal cortex flat map](how-to/plot-on-cortical-flatmap.ipynb)
+- [Show one value per region: choose a view](how-to/show-one-value-per-region.ipynb)
 - [Show different values in each hemisphere](how-to/show-different-values-in-each-hemisphere.ipynb)
 - [Show values per point or cell on slices](how-to/plot-points-on-slices.ipynb)
 - [Show a 3D volume on slices](how-to/plot-volumes-on-slices.ipynb)
