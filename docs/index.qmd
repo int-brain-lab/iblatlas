@@ -94,7 +94,7 @@ registered to the same space as your data, so they join to it by a coordinate or
 
 - [From your results to what's known](tutorials/from-your-results-to-whats-known.ipynb)
 - [Which genes are expressed in my region?](how-to/load-gene-expression-agea.ipynb)
-- [Load MERFISH cell types](how-to/load-merfish.ipynb)
+- [Which cell types are in my region?](how-to/load-merfish.ipynb)
 - [Load lipid volumes](how-to/load-lipids.ipynb)
 - [Load mesoscale connectivity and the cortico-thalamic hierarchy](how-to/load-mesoscale-connectivity.ipynb)
 - [External data in the common space](explanation/external-data-in-the-common-space.qmd)
