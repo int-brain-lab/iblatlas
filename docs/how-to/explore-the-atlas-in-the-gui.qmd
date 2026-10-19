@@ -1,6 +1,5 @@
 ---
 title: "Explore the atlas in the IBL Atlas GUI"
-draft: true
 ---
 
 The IBL Atlas GUI is a desktop application for browsing the atlas. It shows the brain in linked
