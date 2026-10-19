@@ -169,9 +169,9 @@ Allen, Beryl, Cosmos and Swanson.
 
 ::: {.g-col-12 .g-col-md-6 .g-col-lg-3}
 ::: {.tile}
-[Data downloads and caching](explanation/data-downloads-and-caching.qmd)
+[External data in the common space](explanation/external-data-in-the-common-space.qmd)
 
-Where the atlas data is stored and when it is downloaded.
+Gene expression, cell types, lipids and connectivity in the atlas space.
 :::
 :::
 
