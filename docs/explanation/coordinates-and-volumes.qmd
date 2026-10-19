@@ -1,0 +1,52 @@
+---
+title: "Coordinates and volumes"
+---
+
+The IBL atlas describes a position in the brain in one of two ways: as a coordinate in metres
+relative to bregma, or as an index into an image volume. Coordinates are in the IBL frame; for
+how it relates to the Allen CCF, see [Atlas spaces and transforms](atlas-spaces.qmd). This page
+explains the axes, units and origin of coordinates and indices, and how the two differ.
+
+## The three axes
+
+| Axis | Position in a coordinate | Axis in a volume | Positive | Negative |
+|---|---|---|---|---|
+| **ML** (`x`) | 1st | 2nd | right | left |
+| **AP** (`y`) | 2nd | 1st | anterior to bregma | posterior to bregma |
+| **DV** (`z`) | 3rd | 3rd | dorsal to bregma | ventral to bregma |
+
+Deeper is more negative on the DV axis. A probe driven into the brain moves towards more
+negative `z`, so a point 4 mm below bregma has a `z` of `-0.004`.
+
+## Coordinates are in metres
+
+Coordinates are in metres, relative to bregma, in the order (ML, AP, DV). A point 2 mm anterior
+of bregma has an AP coordinate of `0.002`.
+
+## Volumes are ordered (AP, ML, DV)
+
+The image volumes order their axes (AP, ML, DV): the first two are swapped relative to a
+coordinate. Under C-ordering, this layout makes coronal slices the fastest to read. The origin
+of a volume is the top-left corner of the image.
+
+So `volume[i, j, k]` is AP index `i`, ML index `j` and DV index `k`, while a coordinate
+`(x, y, z)` is ML, AP, DV.
+
+The gene-expression volumes use a different order, (ML, DV, AP) — see
+[External data in the common space](external-data-in-the-common-space.qmd).
+
+## Bregma is the origin
+
+Bregma is at voxel `(5739, 5400, 332)` µm in the Allen volume, in (ML, AP, DV) order. Coordinates
+are measured from this point, so bregma itself is `(0, 0, 0)`.
+
+## Indices and coordinates
+
+An index and a coordinate describe a position in different ways:
+
+- an **index** is a position in the array: an integer, which depends on the volume's
+  resolution, counted from the corner of the volume;
+- a **coordinate** is a position in the brain: a float, in metres, measured from bregma.
+
+A coordinate is the same at every resolution. Its index is not: the same point has different
+indices in a 10 µm volume and in a 25 µm volume.

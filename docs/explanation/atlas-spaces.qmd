@@ -1,0 +1,57 @@
+---
+title: "Atlas spaces and transforms"
+---
+
+A coordinate names a place in the brain only together with its space: the atlas, the origin,
+the units and the scaling it was recorded in. This page explains the spaces of the IBL atlas
+and how they relate. To cite an atlas or a scaling, see [Citations](../citations.qmd).
+
+## The Allen CCF frame and the IBL frame
+
+The Allen Common Coordinate Framework (CCF) is a volume, and the IBL frame is a way of writing
+positions in that same volume. Every coordinate in the IBL atlas is in the IBL frame. The two
+frames differ in where the origin is, what the units are, and which way each axis counts.
+
+![The Allen CCF frame beside the IBL frame, on the same sagittal template slice. In the CCF the
+origin is the corner of the volume; in the IBL frame it is bregma.](images/frames-allen-vs-ibl.svg){fig-alt="The same side view of the mouse brain twice, anterior on the left, inside the box that is the atlas volume. In the Allen CCF the origin is the anterior, dorsal, left corner, in micrometres, with AP increasing towards posterior and DV towards ventral. In the IBL frame the origin is bregma, in metres, with AP increasing towards anterior and DV towards dorsal."}
+
+Bregma sits at ML 5739, AP 5400, DV 332 µm in the CCF volume. The signs and units of the IBL
+frame are on [Coordinates and volumes](coordinates-and-volumes.qmd).
+
+## The three atlases
+
+Which atlas fits depends on where your coordinates come from.
+
+| Your coordinates | Atlas |
+|---|---|
+| Histology, or a tool that registers data to the Allen CCF | **Allen** |
+| A planned probe insertion, or stereotaxic coordinates on a live mouse | **Needles** or **MRI Toronto** |
+
+## Coordinates from histology: the Allen atlas
+
+The Allen atlas is the Allen CCF, an average of 1,675 mouse brains imaged by serial two-photon
+tomography. Histology and registration tools place data in the CCF, so their coordinates are in
+the Allen atlas. Its region annotations are the Allen 2017 release.
+
+## Planning an insertion: the Needles and MRI Toronto atlases
+
+Stereotaxic coordinates are measured from bregma with the brain inside the skull. The Needles
+and MRI Toronto atlases stretch the Allen CCF along each axis to fit an MRI atlas of the brain
+in the skull, so their coordinates are closer to those used in surgery.
+
+| Atlas | Source | Acquisition | Subjects | ML | AP | DV |
+|---|---|---|---|---|---|---|
+| **Needles** | Dorr 2008 (DSURQE) | Post-mortem, brain in skull | 40 C57BL/6J, p84 | 1 | 1.087 | 0.952 |
+| **MRI Toronto** | Qiu 2018 | In vivo | 12, p65 | 0.952 | 1.031 | 0.885 |
+
+The regions and their labels are the same in all three atlases; the scaling changes only where
+a coordinate falls in the brain.
+
+![Brain outlines of the Allen, Needles and MRI Toronto atlases on a coronal slice at AP −2 mm and
+the midline sagittal slice, in metres from bregma. The slices are taken at the same coordinate in
+each atlas, so they cut slightly different anatomy; the depth difference is largest.](images/scaling-overlay.png){fig-alt="Two panels of brain outlines in black, blue and red for the Allen, Needles and MRI Toronto atlases. The outlines share the dorsal surface at bregma and move apart towards the ventral side, with the MRI Toronto outline the shallowest."}
+
+## Next
+
+To convert points between the CCF and the IBL frame, see
+[Convert coordinates from the Allen CCF or a registration tool](../how-to/bring-your-own-coordinates.ipynb).

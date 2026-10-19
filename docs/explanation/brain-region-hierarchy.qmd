@@ -1,0 +1,46 @@
+---
+title: "The brain region hierarchy"
+---
+
+Brain regions in the IBL atlas form a tree, and each region has more than one identifier. This
+page explains the tree, the identifiers and how they encode the hemisphere.
+
+## Regions form a tree
+
+Every region has a parent, up to `root`. Primary motor area, `MOp`, sits inside `MO`, inside
+`Isocortex`, and so on up the tree:
+
+`root` → `grey` → `CH` → `CTX` → `CTXpl` → `Isocortex` → `MO` → `MOp`
+
+The tree has 11 levels, from `root` at level 0 to the finest regions at level 10. You can browse
+it in the
+[Allen Brain Atlas viewer](https://atlas.brain-map.org/atlas?atlas=602630314#atlas=602630314&plate=576989940&structure=549&x=5280.261048274253&y=3744.2747201492534&zoom=-3&resolution=11.93&z=3).
+
+A point in `MOp` is also in `Isocortex` and in `grey`. Describing a region more coarsely means
+choosing a higher level of the tree, which is what the
+[brain region mappings](brain-region-mappings.qmd) do.
+
+## Three identifiers
+
+| Identifier | Example for primary motor area | What it is |
+|---|---|---|
+| **Acronym** | `MOp` | Short human-readable label |
+| **Allen id** | `985` | The Allen Institute's region id |
+| **Index** | `19` | Position of the region in the atlas's table of regions |
+
+The acronym and the Allen id identify the region itself. The index is a position in the table
+of regions, and it is what the atlas label volume stores for each voxel.
+
+## The sign of the id gives the hemisphere
+
+The table of regions holds every region twice, once for each hemisphere. Both entries share the
+same acronym; the right-hemisphere entry has a positive Allen id and the left-hemisphere entry
+has the negated id. `MOp` on the right is `985`, and `MOp` on the left is `-985`.
+
+With the `void` entry, id `0`, for space outside the brain, the table has 2655 entries: 1327
+regions per hemisphere.
+
+## Next
+
+The hierarchy is the basis of the mappings, and the hemisphere sign is what lets a mapping
+treat the two sides separately — see [Brain region mappings](brain-region-mappings.qmd).

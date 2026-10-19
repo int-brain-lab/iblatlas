@@ -1,0 +1,40 @@
+# Symbols and modules deliberately left out of the documentation.
+# Nothing reads this file in the build phase; it is the record of what was omitted and
+# why, and the input the deferred coverage check will use.
+exclusions:
+  - pattern: iblatlas/gui/*
+    reason: >-
+      The GUI is documented as a how-to, how-to/explore-the-atlas-in-the-gui.qmd. Its API
+      stays out of the reference because 28 of its 41 public members have no docstring and
+      the module has defects reported to its developers.
+    date: 2026-10-07
+
+  - pattern: iblatlas/genomics/gene_expression_scrapping
+    reason: One-off data-preparation code, not user-facing.
+    date: 2026-09-29
+
+  - pattern: iblatlas/genomics/merfish_scrapping
+    reason: One-off data-preparation code, not user-facing.
+    date: 2026-09-29
+
+  - pattern: iblatlas/genomics/lipids_scrapping
+    reason: One-off data-preparation code, not user-facing.
+    date: 2026-10-06
+
+  - pattern: iblatlas/connectivity/mesoscale_scrapping
+    reason: One-off data-preparation code, not user-facing.
+    date: 2026-09-29
+
+  - pattern: iblatlas/streamlines/streamlines_scraping
+    reason: One-off data-preparation code, not user-facing.
+    date: 2026-09-29
+
+  - pattern: iblatlas/atlas.py::FranklinPaxinosAtlas
+    reason: >-
+      A different parcellation (Franklin–Paxinos, matched to the CCF by Chon et al.), not a
+      scaled CCF. The documentation covers the Allen CCF and its scalings only.
+    date: 2026-10-15
+
+  - pattern: iblatlas/regions.py::FranklinPaxinosRegions
+    reason: The region tree for FranklinPaxinosAtlas, left out with it.
+    date: 2026-10-15

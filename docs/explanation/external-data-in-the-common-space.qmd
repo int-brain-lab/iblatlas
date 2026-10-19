@@ -1,0 +1,68 @@
+---
+title: "External data in the common space"
+---
+
+Several groups have built mouse brain datasets: gene expression, cell types, lipids,
+connectivity and cortical depth. The IBL has placed each of them in the atlas reference space,
+so they share coordinates and region ids with the atlas and with each other. To cite any of
+these datasets, see [Citations](../citations.qmd).
+
+## Benefits of a common space
+
+- **The registration is already done.** Each dataset has been aligned to the Allen reference
+  space.
+- **Each dataset joins to your data by one key:** a coordinate or an Allen region id.
+- **Datasets compare directly.** Values from different modalities are matched through the same
+  atlas, region by region or voxel by voxel.
+
+## Available datasets
+
+| Dataset | Joined by | Grid and axes |
+|---|---|---|
+| Allen Gene Expression Atlas | Voxel grid with Allen CCF labels | 200 µm, axes (ML, DV, AP) |
+| MERFISH volumes | The same 200 µm grid as gene expression | 200 µm, axes (ML, DV, AP) |
+| MERFISH cells | Coordinates relative to bregma | Continuous coordinates |
+| Lipid Brain Atlas | The same 200 µm grid as gene expression | 200 µm, axes (ML, DV, AP) |
+| Oh/Knox mesoscale connectivity | Allen region ids and acronyms, 291 summary structures | Region table |
+| Harris cortico-thalamic hierarchy | Area acronyms, matching the connectivity table | Region table |
+| Allen streamlines | Depth values on the atlas grid, Isocortex | 10, 25 or 50 µm |
+
+The gene expression atlas holds 4345 experiments covering 4082 genes, so a gene can have more
+than one volume. The lipid volumes cover the brain except the olfactory bulb and the most
+anterior frontal cortex.
+
+## How the genomics volumes differ
+
+The gene expression, MERFISH and lipid volumes share their own 200 µm grid, with its own region
+labels. Their axes are ordered (ML, DV, AP), where the atlas volumes are ordered (AP, ML, DV);
+see [Coordinates and volumes](coordinates-and-volumes.qmd).
+
+### Raw and processed gene expression
+
+The gene expression atlas comes in two versions: the raw Allen volumes, and a version processed
+by the IBL. The processing applies three steps, in this order:
+
+1. **Imputation.** Probabilistic PCA, with 50 components fitted across all genes, fills the
+   voxels inside the brain that have no measurement.
+2. **Merging the hemispheres.** Each volume is averaged with its mirror image across the
+   midline.
+3. **Curtaining correction.** Each coronal section was imaged separately, so the overall
+   brightness can shift from one slice to the next. Each slice is scaled by one weight, between
+   ½ and 2, chosen so that expression within each brain region varies as little as possible from
+   slice to slice. The regions used are those of the [Cosmos mapping](brain-region-mappings.qmd).
+
+![Coronal slices of two genes from the raw volume (left) and the processed volume (right), each
+row on one colour scale. In the processed volume the two hemispheres match, and Calb1 is brighter
+overall.](images/agea-raw-vs-processed.png){fig-alt="Two rows of two coronal brain slices in colour. Left column is the raw gene expression volume and right column is the processed volume. The top row is Gfap, where the raw slice is stronger on the right and the processed slice is symmetric and fainter. The bottom row is Calb1, where the pattern is the same in both but the processed slice is brighter."}
+
+### Raw and processed MERFISH
+
+The MERFISH volumes hold one cell-type density volume per cell type, and also come in raw and
+processed versions. The processing fills voxels with no measurement, smooths each volume with a
+Gaussian filter, and renormalises so that the cell-type proportions in each voxel inside the
+brain sum to 1.
+
+## Next
+
+To load a dataset, see the how-to for it, starting with
+[Which genes are expressed in my region?](../how-to/load-gene-expression-agea.ipynb)

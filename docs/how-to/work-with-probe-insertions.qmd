@@ -1,0 +1,106 @@
+---
+title: "Describe a probe insertion and list the regions it crosses"
+---
+
+`Trajectory` and `Insertion` describe where a probe went. They are used across `ibllib`,
+`iblapps`, `iblrig` and other IBL tooling, so they are public API in practice even though they
+live in `iblatlas.atlas` alongside the volumes.
+
+The code on this page is not executed when the site is built. For a worked example from a target
+to a reconstructed track, see the tutorial [From a target to a probe track](../tutorials/from-a-target-to-a-probe-track.ipynb).
+
+## Trajectory: a line in the brain
+
+A `Trajectory` is minimally a **vector** and a **point**. The usual way to get one is to fit it
+to a cloud of coordinates — the picked points of a histology track, for example:
+
+```python
+from iblatlas.atlas import Trajectory
+
+trj = Trajectory.fit(xyz)     # xyz: (n, 3) array of ML, AP, DV in metres
+```
+
+## Insertion: a probe, in stereotaxic terms
+
+An `Insertion` is the surgical description — an entry point plus angles and a depth:
+
+| Field | Meaning |
+|---|---|
+| `x`, `y`, `z` | Entry coordinate, metres, ML/AP/DV relative to bregma |
+| `phi` | Azimuth, degrees; 0 or 180 keeps the probe in a coronal plane |
+| `theta` | Polar angle from vertical, degrees |
+| `depth` | Insertion depth |
+| `label` | Free-text name, default `''` |
+| `beta` | Tilt: rotation of the probe about its own axis, degrees; 0 when the electrode side faces up, sign by the right-hand rule with the thumb towards the tip. Defaults to `0` |
+
+The angles follow the IBL recording protocol: International Brain Laboratory (2022), *Appendix 2:
+IBL protocol for electrophysiology recording using Neuropixels probe*,
+[doi:10.6084/m9.figshare.19697896.v2](https://doi.org/10.6084/m9.figshare.19697896.v2).
+
+Do not construct one with `Insertion(...)` directly. Use the two static constructors.
+
+### From a histology track
+
+```python
+from iblatlas.atlas import AllenAtlas, Insertion
+
+ba = AllenAtlas()
+ins = Insertion.from_track(xyzs, brain_atlas=ba)
+```
+
+`from_track` fits a `Trajectory` to the points, projects the **deepest** point onto it to get
+the tip, intersects the trajectory with the brain surface to get the entry point, and converts
+the result to spherical coordinates.
+
+Both constructors, `from_track` and `from_dict`, **require** `brain_atlas` despite its `None`
+default — the surface intersection needs it, and omitting it raises `AssertionError` rather than
+a helpful error.
+
+### From a probes.description entry
+
+```python
+d = {'x': 544.0, 'y': 1285.0, 'z': 0.0,
+     'phi': 0.0, 'theta': 5.0, 'depth': 4501.0}
+ins = Insertion.from_dict(d, brain_atlas=ba)
+```
+
+::: {.callout-warning}
+## `from_dict` takes micrometres
+
+This is the one place in the API where coordinates are not in metres. The values come from
+`probes.description` files, which store micrometres, and the constructor divides by `1e6`.
+Everywhere else — including `from_track` and the `x`, `y`, `z` fields on the resulting object
+— is metres. See [Coordinates and volumes](../explanation/coordinates-and-volumes.qmd).
+:::
+
+`from_dict` also reads optional `beta` and `label` keys, defaulting to `0` and `''`.
+
+## Which structures does it pass through?
+
+An insertion exposes `entry`, `tip` and `xyz`, but `ins.xyz` holds only the entry and the tip,
+so labelling it gives two regions. To list every region the probe passes through, sample points
+along the track between the entry and the tip, label them, and keep each region once in the order
+it is crossed:
+
+```python
+import numpy as np
+
+xyz = ins.trajectory.eval_z(np.linspace(ins.entry[2], ins.tip[2], 500))
+acronyms = ba.regions.id2acronym(ba.get_labels(xyz, mapping='Beryl'))
+regions = acronyms[np.r_[True, acronyms[1:] != acronyms[:-1]]]
+```
+
+For the insertion above, `regions` is `MOs, ACAd, ACAv, root, LSr, root, LSr, root`, from the
+surface to the tip. `root` marks fibre tracts and ventricles, which the Beryl mapping does not
+name.
+
+Pick the mapping to suit the granularity you want — see
+[Brain region mappings](../explanation/brain-region-mappings.qmd). Use an `-lr` mapping if you
+need to distinguish hemispheres.
+
+## Planning tools
+
+[Pinpoint](https://virtualbrainlab.org/pinpoint/in_vivo_alignment.html) is what many IBL users
+plan trajectories with. Record which tool produced a coordinate, and check that an `Insertion`
+and a Pinpoint plan are in the same frame before comparing them. See
+[Atlas spaces and transforms](../explanation/atlas-spaces.qmd).

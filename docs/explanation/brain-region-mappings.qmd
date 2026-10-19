@@ -1,0 +1,57 @@
+---
+title: "Brain region mappings"
+---
+
+A mapping sets how finely anatomy is described. It groups the Allen regions into fewer, larger
+regions by choosing nodes of the [structure tree](brain-region-hierarchy.qmd) and collapsing
+everything below each one into it.
+
+## Available mappings
+
+| Mapping | Regions | Granularity |
+|---|---|---|
+| **Allen** | 1328 | The full Allen parcellation |
+| **Beryl** | 308 | Intermediate, for brain-wide summaries (IBL) |
+| **Cosmos** | 12 | The major divisions of the brain (IBL) |
+| **Swanson** | 323 | The regions drawn on the Swanson flat map |
+
+![The Allen, Beryl and Cosmos mappings on one coronal slice (AP −1.6 mm), and the Swanson mapping shown on the flat map. Every voxel takes the Allen colour of its mapped target, so coarser mappings give fewer, larger patches. The counts are regions present on this slice, not the totals in the table.](images/mappings-coronal.png)
+
+## How a mapping collapses regions
+
+Each region maps to one of its ancestors in the tree, and takes that ancestor's identity. Under
+Beryl, `MOp1`, `MOp2/3`, `MOp5` and `MOp6a` all become `MOp`. The tree itself is unchanged; a
+mapping is a view over it.
+
+Beryl and Cosmos were developed by the IBL and collaborators. Beryl keeps 308 regions, between
+the full Allen parcellation and the major divisions. Cosmos keeps 12, such as isocortex,
+thalamus and cerebellum.
+
+## Hemispheres
+
+Each mapping also has a lateralised version, marked `-lr`, which keeps the two hemispheres apart
+using the sign of the region id. The plain version treats left and right as one region.
+
+| Mapping | Regions | Lateralised regions |
+|---|---|---|
+| Allen | 1328 | 2655 |
+| Beryl | 308 | 614 |
+| Cosmos | 12 | 22 |
+| Swanson | 323 | 645 |
+
+## The Swanson flat map
+
+The Swanson flat map is a two-dimensional drawing of one hemisphere of the brain, from Hahn et
+al. (2021); see [Citations](../citations.qmd). Its regions are the regions of the Swanson
+mapping, each drawn as a patch.
+
+The flat map shows the Swanson regions and any region that contains one of them. A value given
+for a parent region fills the patches of all its descendants.
+
+To plot on the flat map, see
+[Show one value per region on the Swanson map](../how-to/plot-on-swanson-flatmap.ipynb).
+
+## Next
+
+To apply a mapping to your own region ids, see
+[Convert region ids between mappings](../how-to/remap-region-ids.ipynb).

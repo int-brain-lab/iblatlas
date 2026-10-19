@@ -1,0 +1,191 @@
+project:
+  type: website
+  output-dir: _site
+
+execute:
+  # Inert for this site, and kept only in case a .qmd ever gains executable blocks.
+  # Quarto does not execute .ipynb on render regardless of this setting: it uses the
+  # outputs each notebook already carries, so no _freeze/ is produced and building the
+  # site downloads nothing. Figures come from committing an executed notebook — see
+  # README.md.
+  freeze: auto
+
+quartodoc:
+  package: iblatlas
+  dir: reference/api
+  title: API reference
+  sidebar: reference/api/_sidebar.yml
+  options:
+    # Mandatory. Without it a subclass page shows only members defined on that class:
+    # AllenAtlas renders 5 members instead of 18, losing plot_cslice, plot_sslice,
+    # get_labels, slice, plot_top and compute_surface, all inherited from BrainAtlas.
+    include_inherited: true
+  # Grouped by theme rather than by module. quartodoc has no auto-discovery, so this
+  # list is the documented API: a new public symbol must be added here or recorded in
+  # docs/_exclusions.yml.
+  sections:
+    - title: Coordinates and geometry
+      desc: Converting between coordinates, voxel indices and angles.
+      contents:
+        - atlas.BrainCoordinates
+        - atlas.get_bc
+        - atlas.cart2sph
+        - atlas.sph2cart
+        - atlas.rodrigues_rotation
+        - atlas.tilt_spherical
+
+    - title: Atlases
+      desc: >-
+        The atlas volumes. NeedlesAtlas and MRITorontoAtlas are factory functions
+        returning a scaled AllenAtlas, not subclasses.
+      contents:
+        - atlas.BrainAtlas
+        - atlas.AllenAtlas
+        - atlas.NeedlesAtlas
+        - atlas.MRITorontoAtlas
+
+    - title: Probe insertions
+      desc: Planning and describing probe trajectories in the atlas frame.
+      contents:
+        - atlas.Trajectory
+        - atlas.Insertion
+
+    - title: Brain regions and mappings
+      desc: The region hierarchy and the Allen, Beryl, Cosmos and Swanson mappings.
+      contents:
+        - regions.BrainRegions
+        - regions.regions_from_allen_csv
+
+    - title: Plotting
+      desc: Plotting values and points on slices, flat maps and bar plots.
+      contents:
+        - plots.plot_scalar_on_slice
+        - plots.plot_points_on_slice
+        - plots.plot_volume_on_slice
+        - plots.plot_scalar_on_flatmap
+        - plots.plot_scalar_on_barplot
+        - plots.plot_swanson
+        - plots.plot_swanson_vector
+        - plots.annotate_swanson
+        - plots.plot_polygon
+        - plots.plot_polygon_with_hole
+        - plots.coords_for_poly_hole
+        - plots.compute_volume_from_points
+        - plots.load_slice_files
+        - plots.prepare_lr_data
+        - plots.reorder_data
+
+    - title: Flat maps
+      desc: Cortical and Swanson flat map projections.
+      contents:
+        - flatmaps.FlatMap
+        - flatmaps.swanson
+        - flatmaps.swanson_json
+
+    - title: Streamlines
+      desc: Allen cortical depth data, Isocortex only, at 10, 25 or 50 um.
+      contents:
+        - streamlines.utils.xyz_to_depth
+        - streamlines.utils.project_points_onto_flatmap
+        - streamlines.utils.project_volume_onto_flatmap
+        - streamlines.utils.get_mask
+        - streamlines.utils.validate_aggr
+
+    - title: Genomics
+      desc: >-
+        Allen gene expression (AGEA), MERFISH and Lipid Brain Atlas lipids, all on the same
+        200 um grid. Note the loaders differ in default: agea.load returns the raw volume,
+        merfish.load_volume the denoised one.
+      contents:
+        - genomics.agea.load
+        - genomics.agea.load_atlas
+        - genomics.merfish.load
+        - genomics.merfish.load_volume
+        - genomics.merfish.denoise_volume
+        - genomics.merfish.is_non_neuronal
+        - genomics.merfish.int2rgb
+        - genomics.lipids.load_volume
+
+    - title: Connectivity
+      desc: Oh/Knox mesoscale connectivity and the Harris cortico-thalamic hierarchy.
+      contents:
+        - connectivity.mesoscale.load
+        - connectivity.mesoscale.load_hierarchy
+
+website:
+  title: "iblatlas"
+  # Drafts render, with a banner, in local builds. The deploy must set this to `gone`
+  # so that pages still marked `draft: true` stay off the public site.
+  draft-mode: visible
+  navbar:
+    left:
+      - text: "Tutorials"
+        menu:
+          - tutorials/from-coordinates-to-a-brain-figure.ipynb
+          - tutorials/from-your-results-to-whats-known.ipynb
+          - tutorials/from-a-target-to-a-probe-track.ipynb
+
+      - text: "How-To"
+        menu:
+          - how-to/install.qmd
+          # Grouped by what the reader has, under the same headings and in the same order as
+          # the home page cards. An item with text and no href renders as a group heading.
+          - text: "---"
+          - text: "I have points"
+          - how-to/find-the-region-of-a-point.ipynb
+          - how-to/find-the-regions-around-a-point.ipynb
+          - how-to/bring-your-own-coordinates.ipynb
+          - how-to/get-the-voxels-in-a-region.ipynb
+          - how-to/measure-the-volume-of-a-region.ipynb
+          - how-to/tell-left-from-right-hemisphere.ipynb
+          - how-to/find-cortical-depth-of-a-point.ipynb
+          - text: "---"
+          - text: "I have region names or ids"
+          - how-to/convert-region-names-and-ids.ipynb
+          - how-to/remap-region-ids.ipynb
+          - how-to/navigate-the-region-hierarchy.ipynb
+          - how-to/make-regions-plottable-on-swanson.ipynb
+          - text: "---"
+          - text: "I have results per region"
+          - how-to/show-one-value-per-region.ipynb
+          - how-to/plot-values-on-slices.ipynb
+          - how-to/plot-on-swanson-flatmap.ipynb
+          - how-to/plot-on-cortical-flatmap.ipynb
+          - how-to/show-different-values-in-each-hemisphere.ipynb
+          - how-to/plot-points-on-slices.ipynb
+          - how-to/plot-volumes-on-slices.ipynb
+          - text: "---"
+          - text: "I have a region of interest"
+          - how-to/load-gene-expression-agea.ipynb
+          - how-to/load-merfish.ipynb
+          - how-to/load-lipids.ipynb
+          - how-to/load-mesoscale-connectivity.ipynb
+          - text: "---"
+          - text: "I want to record from a region"
+          - how-to/work-with-probe-insertions.qmd
+          - how-to/show-the-slice-along-a-probe.ipynb
+          - how-to/find-cell-distances-to-a-probe.ipynb
+          - text: "---"
+          - text: "I want to browse the atlas"
+          - how-to/explore-the-atlas-in-the-gui.qmd
+
+      - text: "Concepts"
+        menu:
+          - explanation/coordinates-and-volumes.qmd
+          - explanation/brain-region-hierarchy.qmd
+          - explanation/brain-region-mappings.qmd
+          - explanation/atlas-spaces.qmd
+          - explanation/external-data-in-the-common-space.qmd
+          - explanation/data-downloads-and-caching.qmd
+
+      - text: "Citations"
+        href: citations.qmd
+
+      - text: "API reference"
+        href: reference/api/index.qmd
+
+format:
+  html:
+    theme: cosmo
+    css: styles.css
+    toc: true

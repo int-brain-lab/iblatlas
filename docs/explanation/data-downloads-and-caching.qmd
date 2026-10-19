@@ -1,0 +1,42 @@
+---
+title: "Data downloads and caching"
+---
+
+The IBL atlas downloads its data the first time it is used and keeps it on disk. Later uses
+read the saved copy, so each dataset downloads once.
+
+## What downloads, and how large it is
+
+The atlas itself downloads once per resolution. The additional datasets download only when they
+are first loaded.
+
+| Data | Approximate size |
+|---|---|
+| Atlas at 25 µm | 40 MB |
+| Gene expression (AGEA) | 2.6 GB |
+| MERFISH | 630 MB |
+| Depths | 350 MB |
+| Lipids | 105 MB |
+| Flat maps | 30 MB |
+
+## Where the data comes from
+
+The data comes from two public sources, and neither needs an account or credentials:
+
+- **The Allen Institute**, for the atlas volumes: the Allen Mouse Brain Atlas (2015) with the
+  2017 region annotations.
+- **The IBL public data store** (the `ibl-brain-wide-map-public` S3 bucket), for the flat maps,
+  the depths, the genomics and lipid volumes, and the connectivity tables described in
+  [External data in the common space](external-data-in-the-common-space.qmd).
+
+## Where the data is saved
+
+The data is saved in the cache directory of ONE, the IBL data-access package, which installs
+with the IBL atlas. By default, the atlas files are in:
+
+```
+~/Downloads/ONE/openalyx.internationalbrainlab.org/histology/ATLAS/Needles/Allen
+```
+
+To save them somewhere else, see
+[Save the atlas data somewhere else](../how-to/install.qmd#save-the-atlas-data-somewhere-else).
