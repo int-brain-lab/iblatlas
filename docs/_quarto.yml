@@ -7,7 +7,7 @@ execute:
   # Quarto does not execute .ipynb on render regardless of this setting: it uses the
   # outputs each notebook already carries, so no _freeze/ is produced and building the
   # site downloads nothing. Figures come from committing an executed notebook — see
-  # CONTRIBUTING.md.
+  # README.md.
   freeze: auto
 
 quartodoc:
