@@ -90,33 +90,7 @@ the default atlas cache path is `histology/ATLAS/Needles/Allen`, point towards `
 This documentation deliberately does not recommend one. Ask an experimentalist in your group
 what your lab uses, and record the answer with your coordinates.
 
-### The 5° pitch
-
-The Allen CCF is pitched about 5° nose-down relative to a flat skull — the position where bregma
-and lambda sit at the same DV height. **Every atlas in the package carries this pitch, and none
-of them corrects for it.** `NeedlesAtlas` and `MRITorontoAtlas` are the same volume with
-different scalings, and scaling stretches the brain along each axis without rotating it, so they
-inherit the pitch of the CCF.
-
-![The midline sagittal slice of the Allen volume. The blue line is the atlas horizontal and the
-red line is the flat-skull horizontal, 5° to it, with the angle shaded. Lambda is not defined in
-the package, so the red line is drawn from the stated angle.](images/pitch-overlay.png){fig-alt="A midline sagittal slice of the mouse brain with two lines through bregma: a level blue line, the atlas horizontal, and a red line rising towards the front of the brain, the flat-skull horizontal. A shaded wedge marks the 5 degree angle between them."}
-
-The package supplies `tilt_spherical(theta, phi, tilt_angle=-5)`, which rotates a pair of angles
-between the two frames. It rotates angles only; nothing in the package rotates coordinates. A
-positive `tilt_angle` lifts the mouse's chin. You call it deliberately: it is not applied for
-you.
-
-The pitch matters when an angle or a depth read from the atlas is used outside the atlas:
-
-- an angle from the atlas going to a manipulator that is levelled against a flat skull;
-- a coordinate being compared with a tool that corrects for the pitch, such as Pinpoint.
-
-It does not matter when you stay inside atlas coordinates, for example when assigning points to
-regions or plotting values on slices: the labels and the coordinates share one frame.
-
 [Pinpoint](https://virtualbrainlab.org/pinpoint/in_vivo_alignment.html) is the tool many IBL
 users plan in vivo trajectories with. It offers CCF, Qiu 2018, Dorr 2008 and a legacy IBL Dorr
-transform, and it applies a −5° pitch correction that `iblatlas` does not. Check that an
-`Insertion` and a Pinpoint plan are expressed in the same frame before comparing them. State
-which tool produced a coordinate when you record it.
+transform. Check that an `Insertion` and a Pinpoint plan are expressed in the same frame before
+comparing them. State which tool produced a coordinate when you record it.

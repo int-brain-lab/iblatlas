@@ -14,7 +14,6 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import numpy as np
-from matplotlib.patches import Arc
 
 from iblatlas.atlas import AllenAtlas, MRITorontoAtlas, NeedlesAtlas
 from iblatlas.genomics import agea, merfish
@@ -24,7 +23,6 @@ IMAGES_DIR = Path(__file__).resolve().parents[1] / 'explanation' / 'images'
 LANDING_DIR = Path(__file__).resolve().parents[1] / 'images' / 'landing'
 GUI_SCREENSHOT = Path(__file__).resolve().parents[1] / 'how-to' / 'images' / 'gui-region-highlight.png'
 LANDING_SIZE = (5, 3.75)  # inches; every landing image shares this 4:3 canvas so the cards line up
-TILT_DEG = 5  # the pitch stated on the coordinates page; lambda is not defined in the package
 OUTLINE_COLOURS = {'AllenAtlas': 'k', 'NeedlesAtlas': 'tab:blue', 'MRITorontoAtlas': 'tab:red'}
 # Slices with no missing voxels: Gfap's raw volume is left/right asymmetric here, and Calb1's
 # overall level changes in the processed volume.
@@ -33,48 +31,6 @@ POINTS_AP = -0.0015  # m; the coronal plane of the points card's probe, as in th
 PROBE_AP = -0.002  # m; the coronal plane the probe track lies in
 ATLAS_FACTORIES = {'AllenAtlas': AllenAtlas, 'NeedlesAtlas': NeedlesAtlas,
                    'MRITorontoAtlas': MRITorontoAtlas}
-
-
-def pitch_overlay(res_um: int = 25) -> plt.Figure:
-    """
-    The midline sagittal slice with the atlas horizontal and the flat-skull horizontal at bregma.
-
-    The 5° angle between the two lines is marked with an arc. The package defines bregma but not
-    lambda, so the flat-skull line is drawn from the documented angle (``TILT_DEG``) rather than
-    through two landmarks.
-
-    Parameters
-    ----------
-    res_um : int
-        Atlas resolution in micrometres.
-
-    Returns
-    -------
-    matplotlib.figure.Figure
-        One axis, in micrometres relative to bregma, anterior on the left as in
-        ``BrainAtlas.plot_sslice``.
-    """
-    atlas = AllenAtlas(res_um)
-    fig, ax = plt.subplots(figsize=(8, 4.2), layout='constrained')
-    atlas.plot_sslice(0, ax=ax, cmap='gray')
-    xlim, ylim = ax.get_xlim(), ax.get_ylim()
-    ap = np.array(xlim)
-    ax.plot(ap, 0 * ap, color='tab:blue', lw=2, label='atlas horizontal')
-    ax.plot(ap, ap * np.tan(np.deg2rad(TILT_DEG)), color='tab:red', lw=2,
-            label='flat-skull horizontal (drawn from the angle)')
-    ax.plot(0, 0, 'o', color='yellow', markeredgecolor='k', label='bregma')
-    radius = 3200  # µm, the arc between the two lines, on the anterior side
-    wedge_ap = np.array([0, xlim[0]])  # fill between the lines on the anterior side of bregma
-    ax.fill_between(wedge_ap, 0, wedge_ap * np.tan(np.deg2rad(TILT_DEG)), color='gold', alpha=0.6)
-    ax.add_patch(Arc((0, 0), 2 * radius, 2 * radius, theta1=0, theta2=TILT_DEG, color='k', lw=1.5))
-    ax.text(radius + 200, 700, f'{TILT_DEG}°', fontsize=14, fontweight='bold', ha='center',
-            bbox={'boxstyle': 'round', 'fc': 'white', 'ec': 'none', 'alpha': 0.85})
-    ax.annotate('', xy=(radius, radius * np.tan(np.deg2rad(TILT_DEG / 2))), xytext=(radius + 200, 620),
-                arrowprops={'arrowstyle': '-', 'color': 'k'})
-    ax.set(xlim=xlim, ylim=(ylim[0], 1400), xlabel='AP (µm from bregma)', ylabel='DV (µm from bregma)',
-           title=f'The atlas is pitched about {TILT_DEG}° nose-down relative to a flat skull')
-    ax.legend(loc='lower left', fontsize=8)
-    return fig
 
 
 def scaling_overlay(res_um: int = 25) -> plt.Figure:
@@ -402,10 +358,9 @@ def landing_images(out_dir: Path = LANDING_DIR) -> None:
 
 
 def main(out_dir: Path = IMAGES_DIR) -> None:
-    """Write the four PNGs into ``out_dir``, overwriting any that exist."""
+    """Write the three PNGs into ``out_dir``, overwriting any that exist."""
     out_dir.mkdir(parents=True, exist_ok=True)
-    for name, make in (('pitch-overlay', pitch_overlay), ('scaling-overlay', scaling_overlay),
-                       ('agea-raw-vs-processed', agea_raw_vs_processed),
+    for name, make in (('scaling-overlay', scaling_overlay), ('agea-raw-vs-processed', agea_raw_vs_processed),
                        ('mappings-coronal', mappings_coronal)):
         fig = make()
         fig.savefig(out_dir / f'{name}.png', dpi=150, bbox_inches='tight')

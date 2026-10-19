@@ -79,8 +79,3 @@ Indices and coordinates are two different things:
 `BrainCoordinates` converts between them (`i2xyz`, `xyz2i` and relatives). A 25 µm atlas and a
 10 µm atlas give different indices for the same coordinate, which is the main reason to keep
 data in coordinates and convert late.
-
-## The atlas is pitched
-
-The Allen template is pitched about 5° nose-down relative to a flat skull, and the package does
-not correct for it. See [The 5° pitch](atlas-spaces.qmd#the-5-pitch).

@@ -101,7 +101,6 @@ need to distinguish hemispheres.
 ## Planning tools
 
 [Pinpoint](https://virtualbrainlab.org/pinpoint/in_vivo_alignment.html) is what many IBL users
-plan trajectories with. It applies a −5° pitch correction that `iblatlas` does not. Record which
-tool produced a coordinate, and check that an `Insertion` and a Pinpoint plan are in the same
-frame before comparing them. See
+plan trajectories with. Record which tool produced a coordinate, and check that an `Insertion`
+and a Pinpoint plan are in the same frame before comparing them. See
 [Atlas spaces and transforms](../explanation/atlas-spaces.qmd).

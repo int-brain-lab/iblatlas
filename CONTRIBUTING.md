@@ -102,7 +102,7 @@ PNGs are drawn from atlas data by a script that you run by hand; the site build 
 PYTHONWARNINGS=ignore venv/bin/python docs/figures/make_figures.py
 ```
 
-It overwrites `pitch-overlay.png`, `scaling-overlay.png` and `agea-raw-vs-processed.png`, and
+It overwrites `scaling-overlay.png` and `agea-raw-vs-processed.png`, and
 downloads atlas data on first use. `frames-allen-vs-ibl.svg` is drawn by hand: edit its arrows
 and text directly. The script only refreshes the sagittal template slice embedded in it, as a
 data URI in the `<image id="brain">` element.
