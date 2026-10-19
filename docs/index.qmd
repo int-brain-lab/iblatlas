@@ -74,8 +74,8 @@ How do I show them? Colour regions on slices or flat maps, or draw values per ce
 
 - [Show one value per region: choose a view](how-to/show-one-value-per-region.ipynb)
 - [Show different values in each hemisphere](how-to/show-different-values-in-each-hemisphere.ipynb)
-- [Show values per point or cell on slices](how-to/plot-points-on-slices.ipynb)
-- [Show a 3D volume on slices](how-to/plot-volumes-on-slices.ipynb)
+- [Show values per point or cell](how-to/plot-points-on-slices.ipynb)
+- [Show a 3D volume](how-to/plot-volumes-on-slices.ipynb)
 :::
 :::
 :::

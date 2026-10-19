@@ -138,7 +138,7 @@ website:
           - how-to/get-the-voxels-in-a-region.ipynb
           - how-to/measure-the-volume-of-a-region.ipynb
           - how-to/tell-left-from-right-hemisphere.ipynb
-          - how-to/work-with-cortical-streamlines.ipynb
+          - how-to/find-cortical-depth-of-a-point.ipynb
           - text: "---"
           - text: "I have region names or ids"
           - how-to/remap-region-ids.ipynb
