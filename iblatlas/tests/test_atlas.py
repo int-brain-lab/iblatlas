@@ -396,7 +396,6 @@ class TestAffine(unittest.TestCase):
             bc_pitch.xyz2i(np.array([1000., 0, 0]))
         np.testing.assert_array_equal(bc_pitch.xyz2i(np.array([1000., 0, 0]), mode='clip')[0], 9)
 
-
     def test_qiu2018_atlas(self):
         toronto, qiu = iblatlas.atlas.MRITorontoAtlas(mock=True), iblatlas.atlas.Qiu2018Atlas(mock=True)
         # Bregma is the pivot, the ML axis is untouched, and a positive pitch lifts the anterior side
