@@ -8,7 +8,13 @@ installing it with `pip` into a virtual environment.
 ## Create an environment and install
 
 A virtual environment keeps the packages for one project separate from your other Python
-projects. `venv` is Python's built-in tool for creating one:
+projects. Create one with the tool you use:
+
+::: {.panel-tabset group="installer"}
+
+## venv
+
+`venv` is Python's built-in tool for creating an environment:
 
 ```bash
 cd path/to/your/project        # move to the directory you will work from
@@ -17,8 +23,7 @@ source .venv/bin/activate      # activate it; on Windows: .venv\Scripts\activate
 pip install iblatlas           # install iblatlas into it
 ```
 
-The environment is only active in the terminal where you activated it. Each time you open a new
-terminal, activate it again before using `iblatlas`, otherwise Python will not find it:
+Each time you open a new terminal, activate the environment again:
 
 ```bash
 cd path/to/your/project
@@ -27,8 +32,49 @@ source .venv/bin/activate      # on Windows: .venv\Scripts\activate
 
 To leave the environment, run `deactivate`.
 
-If you prefer [uv](https://docs.astral.sh/uv/) or [conda](https://docs.conda.io/), create the
-environment with their own commands, then run `pip install iblatlas` with it active.
+## uv
+
+[uv](https://docs.astral.sh/uv/) creates the environment and installs into it:
+
+```bash
+cd path/to/your/project        # move to the directory you will work from
+uv venv --python 3.12          # create the environment in a folder called .venv
+source .venv/bin/activate      # activate it; on Windows: .venv\Scripts\activate
+uv pip install iblatlas        # install iblatlas into it
+```
+
+Each time you open a new terminal, activate the environment again:
+
+```bash
+cd path/to/your/project
+source .venv/bin/activate      # on Windows: .venv\Scripts\activate
+```
+
+To leave the environment, run `deactivate`.
+
+## conda
+
+[conda](https://docs.conda.io/) creates a named environment, and `pip` installs `iblatlas` into
+it:
+
+```bash
+conda create -n iblatlas python=3.12    # create an environment called iblatlas
+conda activate iblatlas                 # activate it
+pip install iblatlas                    # install iblatlas into it
+```
+
+Each time you open a new terminal, activate the environment again:
+
+```bash
+conda activate iblatlas
+```
+
+To leave the environment, run `conda deactivate`.
+
+:::
+
+The environment is only active in the terminal where you activated it. If it is not active,
+Python will not find `iblatlas`.
 
 ## Check the installation worked
 
@@ -76,9 +122,27 @@ folders inside it, so that the files are in `<new cache dir>/histology/ATLAS/Nee
 The IBL Atlas GUI is a desktop application for browsing the atlas. It needs extra packages that
 draw its windows (`PyQt5`, `qtpy` and `iblqt`), which you install into the same environment:
 
+::: {.panel-tabset group="installer"}
+
+## venv
+
 ```bash
-pip install "iblatlas[gui]"      # with uv: uv pip install "iblatlas[gui]"
+pip install "iblatlas[gui]"
 ```
+
+## uv
+
+```bash
+uv pip install "iblatlas[gui]"
+```
+
+## conda
+
+```bash
+pip install "iblatlas[gui]"
+```
+
+:::
 
 To open it, activate the environment and run:
 
