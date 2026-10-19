@@ -141,6 +141,7 @@ website:
           - how-to/find-cortical-depth-of-a-point.ipynb
           - text: "---"
           - text: "I have region names or ids"
+          - how-to/convert-region-names-and-ids.ipynb
           - how-to/remap-region-ids.ipynb
           - how-to/navigate-the-region-hierarchy.ipynb
           - how-to/make-regions-plottable-on-swanson.ipynb
@@ -162,6 +163,8 @@ website:
           - text: "---"
           - text: "I want to record from a region"
           - how-to/work-with-probe-insertions.qmd
+          - how-to/show-the-slice-along-a-probe.ipynb
+          - how-to/find-cell-distances-to-a-probe.ipynb
           - text: "---"
           - text: "I want to browse the atlas"
           - how-to/explore-the-atlas-in-the-gui.qmd
