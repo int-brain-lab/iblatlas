@@ -3,8 +3,9 @@ title: "Coordinates and volumes"
 ---
 
 The IBL atlas describes a position in the brain in one of two ways: as a coordinate in metres
-relative to bregma, or as an index into an image volume. This page explains the axes, units and
-origin of each, and how the two differ.
+relative to bregma, or as an index into an image volume. Coordinates are in the IBL frame; for
+how it relates to the Allen CCF, see [Atlas spaces and transforms](atlas-spaces.qmd). This page
+explains the axes, units and origin of coordinates and indices, and how the two differ.
 
 ## The three axes
 

@@ -2,96 +2,56 @@
 title: "Atlas spaces and transforms"
 ---
 
-More than one atlas space is in use, and a coordinate means nothing without its space. A point
-at `(x, y, z)` is a place in the brain only once you know which atlas, which origin, which units
-and which scaling it was recorded in. This page lays out the spaces `iblatlas` works in and how
-they differ. Which atlas to use depends on where your coordinates come from: data registered to
-the Allen CCF after the experiment (ex vivo), or stereotaxic coordinates measured on a live mouse
-(in vivo). To cite an atlas or a scaling, see [Citations](../citations.qmd).
+A coordinate names a place in the brain only together with its space: the atlas, the origin,
+the units and the scaling it was recorded in. This page explains the spaces of the IBL atlas
+and how they relate. To cite an atlas or a scaling, see [Citations](../citations.qmd).
 
 ## The Allen CCF frame and the IBL frame
 
 The Allen Common Coordinate Framework (CCF) is a volume, and the IBL frame is a way of writing
-positions in that same volume. The two differ in where the origin is, what the units are, and
-which way each axis counts.
+positions in that same volume. Every coordinate in the IBL atlas is in the IBL frame. The two
+frames differ in where the origin is, what the units are, and which way each axis counts.
 
 ![The Allen CCF frame beside the IBL frame, on the same sagittal template slice. In the CCF the
 origin is the corner of the volume; in the IBL frame it is bregma.](images/frames-allen-vs-ibl.svg){fig-alt="The same side view of the mouse brain twice, anterior on the left, inside the box that is the atlas volume. In the Allen CCF the origin is the anterior, dorsal, left corner, in micrometres, with AP increasing towards posterior and DV towards ventral. In the IBL frame the origin is bregma, in metres, with AP increasing towards anterior and DV towards dorsal."}
 
-In the package, bregma sits at ML 5739, AP 5400, DV 332 µm in the CCF volume
-(`ALLEN_CCF_LANDMARKS_MLAPDV_UM`), and `AllenAtlas` uses it as the origin of its coordinates. The
-signs and units of the IBL frame are laid out on
-[Coordinates and volumes](coordinates-and-volumes.qmd). To convert points between the two frames,
-see [Convert coordinates from the Allen CCF or a registration tool](../how-to/bring-your-own-coordinates.ipynb).
+Bregma sits at ML 5739, AP 5400, DV 332 µm in the CCF volume. The signs and units of the IBL
+frame are on [Coordinates and volumes](coordinates-and-volumes.qmd).
 
 ## The three atlases
 
-`iblatlas` offers three atlases, but they are not three independent volumes: all three are the
-Allen CCF, two of them with a linear scaling applied.
+Which atlas fits depends on where your coordinates come from.
 
-| Atlas | What it is | Use for | Resolution |
-|---|---|---|---|
-| `AllenAtlas` | The Allen CCF, unscaled | [Ex vivo](#ex-vivo-coordinates-registered-to-the-ccf) coordinates | 10, 25 or 50 µm (default 25) |
-| `NeedlesAtlas` | Allen CCF, scaled from the Dorr 2008 MRI atlas | [In vivo](#in-vivo-stereotaxic-coordinates-on-a-live-mouse) coordinates | as Allen |
-| `MRITorontoAtlas` | Allen CCF, scaled from the Qiu 2018 MRI atlas | [In vivo](#in-vivo-stereotaxic-coordinates-on-a-live-mouse) coordinates | as Allen |
+| Your coordinates | Atlas |
+|---|---|
+| Histology, or a tool that registers data to the Allen CCF | **Allen** |
+| A planned probe insertion, or stereotaxic coordinates on a live mouse | **Needles** or **MRI Toronto** |
 
-Start with `AllenAtlas` unless you have a specific reason not to. The annotations IBL uses are
-the 2017 (CCFv2) version.
+## Coordinates from histology: the Allen atlas
 
-## Ex vivo: coordinates registered to the CCF
+The Allen atlas is the Allen CCF, an average of 1,675 mouse brains imaged by serial two-photon
+tomography. Histology and registration tools place data in the CCF, so their coordinates are in
+the Allen atlas. Its region annotations are the Allen 2017 release.
 
-`AllenAtlas` is the Allen CCF with scaling `(1, 1, 1)`. The CCF is a serial two-photon average
-of fixed, extracted tissue, with its own distortions: it is neither an in vivo frame nor the
-ex vivo MRI frame of `NeedlesAtlas`. Data registered to the CCF after the experiment, such as
-histology or the output of a registration tool, is in this space, so `AllenAtlas` is the atlas
-to use for it.
+## Planning an insertion: the Needles and MRI Toronto atlases
 
-## In vivo: stereotaxic coordinates on a live mouse
+Stereotaxic coordinates are measured from bregma with the brain inside the skull. The Needles
+and MRI Toronto atlases stretch the Allen CCF along each axis to fit an MRI atlas of the brain
+in the skull, so their coordinates are closer to those used in surgery.
 
-Stereotaxic coordinates are measured from bregma on a living mouse, whose brain is not the shape
-of the fixed tissue the CCF was built from. `NeedlesAtlas` and `MRITorontoAtlas` scale the CCF to
-match an MRI atlas of the brain inside the skull. The literature and the code use different
-names for them: "Qiu 2018" is `MRITorontoAtlas`; "Dorr 2008" and "DSURQE" are `NeedlesAtlas`.
-
-| | Source | Acquisition | Subjects | ML | AP | DV |
+| Atlas | Source | Acquisition | Subjects | ML | AP | DV |
 |---|---|---|---|---|---|---|
-| `NeedlesAtlas` | Dorr 2008 DSURQE | post-mortem, brain in skull | 40 C57BL/6J, p84 | 1 | 1.087 | 0.952 |
-| `MRITorontoAtlas` | Qiu 2018 | ***in vivo*** | 12, p65 | 0.952 | 1.031 | 0.885 |
+| **Needles** | Dorr 2008 (DSURQE) | Post-mortem, brain in skull | 40 C57BL/6J, p84 | 1 | 1.087 | 0.952 |
+| **MRI Toronto** | Qiu 2018 | In vivo | 12, p65 | 0.952 | 1.031 | 0.885 |
 
-Three things follow from that table.
-
-**Both are scalings on one volume.** Neither is a separate image or a separate label set. The
-region boundaries and the region ids are identical to the Allen CCF; only the mapping from
-coordinates to voxels changes. Switching atlas does not change what a region *is*.
-
-**There is no in vivo / ex vivo switch.** You cannot ask the package for "the in vivo version"
-of an atlas. The distinction is a property of how each source MRI was acquired, which is then
-baked into that atlas's three scaling factors — and nothing else. Needles was imaged
-post-mortem with the brain still inside the skull; Qiu 2018 imaged living animals.
-
-**They differ most in depth.** The DV factors are 0.952 and 0.885 — roughly a 7%
-difference in predicted depth. At 4 mm that is about 270 µm, which is more than enough to put
-a probe tip in the wrong structure. The ML factors differ too: Needles applies none at all.
+The regions and their labels are the same in all three atlases; the scaling changes only where
+a coordinate falls in the brain.
 
 ![Brain outlines of the Allen, Needles and MRI Toronto atlases on a coronal slice at AP −2 mm and
 the midline sagittal slice, in metres from bregma. The slices are taken at the same coordinate in
 each atlas, so they cut slightly different anatomy; the depth difference is largest.](images/scaling-overlay.png){fig-alt="Two panels of brain outlines in black, blue and red for the Allen, Needles and MRI Toronto atlases. The outlines share the dorsal surface at bregma and move apart towards the ventral side, with the MRI Toronto outline the shallowest."}
 
-Probes planned in one atlas space and then placed in vivo land systematically away from their
-planned targets: International Brain Laboratory et al. (2022), *Reproducibility of in-vivo
-electrophysiological measurements in mice*,
-[doi:10.1101/2022.05.09.491042](https://doi.org/10.1101/2022.05.09.491042).
+## Next
 
-### Which scaling to use
-
-The package expresses no preference and neither docstring advises one. The acquisition argues
-for `MRITorontoAtlas`, since it was imaged in living animals. IBL practice, and the fact that
-the default atlas cache path is `histology/ATLAS/Needles/Allen`, point towards `NeedlesAtlas`.
-
-This documentation deliberately does not recommend one. Ask an experimentalist in your group
-what your lab uses, and record the answer with your coordinates.
-
-[Pinpoint](https://virtualbrainlab.org/pinpoint/in_vivo_alignment.html) is the tool many IBL
-users plan in vivo trajectories with. It offers CCF, Qiu 2018, Dorr 2008 and a legacy IBL Dorr
-transform. Check that an `Insertion` and a Pinpoint plan are expressed in the same frame before
-comparing them. State which tool produced a coordinate when you record it.
+To convert points between the CCF and the IBL frame, see
+[Convert coordinates from the Allen CCF or a registration tool](../how-to/bring-your-own-coordinates.ipynb).
