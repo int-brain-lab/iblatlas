@@ -96,7 +96,7 @@ registered to the same space as your data, so they join to it by a coordinate or
 - [Which genes are expressed in my region?](how-to/load-gene-expression-agea.ipynb)
 - [Which cell types are in my region?](how-to/load-merfish.ipynb)
 - [Which lipids are in my region?](how-to/load-lipids.ipynb)
-- [Load mesoscale connectivity and the cortico-thalamic hierarchy](how-to/load-mesoscale-connectivity.ipynb)
+- [What does my region connect to, and where does it sit in the hierarchy?](how-to/load-mesoscale-connectivity.ipynb)
 - [External data in the common space](explanation/external-data-in-the-common-space.qmd)
 :::
 :::
