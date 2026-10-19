@@ -2,90 +2,41 @@
 title: "Data downloads and caching"
 ---
 
-The first time you create an atlas, `iblatlas` downloads its data, which is about 40 MB at the
-default 25 µm resolution. The extra datasets download only when you load them, and are larger.
+The IBL atlas downloads its data the first time it is used and keeps it on disk. Later uses
+read the saved copy, so each dataset downloads once.
 
-```python
-ba = AllenAtlas()   # first call: downloads about 40 MB. Later calls: read from cache.
-```
+## What downloads, and how large it is
 
-The download happens once per resolution and is cached on disk. Subsequent calls are cheap.
+The atlas itself downloads once per resolution. The additional datasets download only when they
+are first loaded.
 
 | Data | Approximate size |
 |---|---|
-| Atlas at 25 µm (default) | 40 MB |
+| Atlas at 25 µm | 40 MB |
 | Gene expression (AGEA) | 2.6 GB |
 | MERFISH | 630 MB |
 | Depths | 350 MB |
 | Lipids | 105 MB |
 | Flat maps | 30 MB |
 
-## Where the data goes
+## Where the data comes from
 
-The cache directory is derived from ONE's `CACHE_DIR` parameter by
-`BrainAtlas._get_cache_dir`, which appends a fixed subpath:
+The data comes from two public sources, and neither needs an account or credentials:
 
-```
-<ONE CACHE_DIR>/histology/ATLAS/Needles/Allen
-```
-
-`CACHE_DIR` defaults to `~/Downloads/ONE/openalyx.internationalbrainlab.org`.
-
-Note that `Needles` appears in the path regardless of which atlas you instantiate — it is part
-of the historical layout, not a statement about the scaling in use. See
-[Atlas spaces and transforms](atlas-spaces.qmd).
-
-## Files downloaded on demand
-
-| File | What it is |
-|---|---|
-| `annotation_<res_um>.nrrd` | Region **indices** (not ids) per voxel, uint16, at the given isometric spacing |
-| `average_template_<res_um>.nrrd` | The template image volume |
-| `annotation_<res_um>_lut_<LUT_VERSION>.npz` | Lookup table |
-| `swansonpaths.json` | Vectorised Swanson flat map paths |
-| `swanson2allen.npz` | — |
-| `<flatmap_name>_<res_um>.nrrd` | — |
-| `connectivity/allen_mouse_regionalized_connectivity.pqt` | Oh / Knox mesoscale connectivity, regionalized onto 291 Allen summary structures |
-| `connectivity/allen_mouse_hierarchy_scores.pqt` | Harris cortico-thalamic hierarchy scores, 61 cortical and thalamic areas |
-
-Note the annotation volumes store the region **index** — the position in the flattened
-structure tree — not the Allen id. See
-[The brain region hierarchy](brain-region-hierarchy.qmd).
-
-## Two remote sources
-
-- **The Allen Institute**, over HTTP, for the atlas volumes themselves
-  (`_download_atlas_allen`). The data is the Allen Mouse Brain Atlas (2015) with the 2017
-  region annotations.
-- **The `ibl-brain-wide-map-public` S3 bucket**, declared as `S3_BUCKET_IBL`, for the
-  IBL-repackaged resources — the flat maps, the genomics volumes, the connectivity tables and
-  the streamlines described in
+- **The Allen Institute**, for the atlas volumes: the Allen Mouse Brain Atlas (2015) with the
+  2017 region annotations.
+- **The IBL public data store** (the `ibl-brain-wide-map-public` S3 bucket), for the flat maps,
+  the depths, the genomics and lipid volumes, and the connectivity tables described in
   [External data in the common space](external-data-in-the-common-space.qmd).
 
-## Changing where files are saved
+## Where the data is saved
 
-`_get_cache_dir` reads the cache location from ONE, the IBL data-access package that
-`iblatlas` installs and uses for downloading. ONE needs no setup: with its default settings the
-cache is `~/Downloads/ONE/openalyx.internationalbrainlab.org`, and no account, login or
-credentials are involved. The S3 bucket is read without credentials too.
+The data is saved in the cache directory of ONE, the IBL data-access package, which installs
+with the IBL atlas. By default, the atlas files are in:
 
-To save files somewhere else, set the ONE cache directory once, before first use:
-
-```python
-from one.params import setup
-
-setup(silent=True, cache_dir='/path/to/cache')
+```
+~/Downloads/ONE/openalyx.internationalbrainlab.org/histology/ATLAS/Needles/Allen
 ```
 
-The new location starts empty, so the next load downloads the data again, and the copy in your
-Downloads folder is left unused. To avoid downloading again, move or copy the existing
-`histology` folder into the new cache directory so that
-`<new cache dir>/histology/ATLAS/Needles/Allen/` holds the files. `iblatlas` only checks that each
-file exists at that path, so files moved without that folder structure are not found.
-
-## Practical consequences
-
-- **Do not instantiate an atlas in a tight loop.** Build one and pass it in. Most functions
-  that need one accept a `brain_atlas` or `br` argument for exactly this reason.
-- **Resolution costs space.** The 10 µm volume is substantially larger than the 25 µm default;
-  take the default unless you need the detail.
+To save them somewhere else, see
+[Save the atlas data somewhere else](../how-to/install.qmd#save-the-atlas-data-somewhere-else).

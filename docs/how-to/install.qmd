@@ -52,8 +52,24 @@ It needs to be 3.10 or newer. If it is older, install a newer Python from
 
 Installing `iblatlas` does not download the atlas. There is nothing extra to run: the first time
 your code or the GUI loads an atlas, the data downloads and is saved to your Downloads folder,
-and later runs reuse it. For where the files go, how large they are and how to save them
-somewhere else, see [Data downloads and caching](../explanation/data-downloads-and-caching.qmd).
+and later runs reuse it. For where the files go and how large they are, see
+[Data downloads and caching](../explanation/data-downloads-and-caching.qmd).
+
+## Save the atlas data somewhere else
+
+The atlas data is saved in the cache directory of ONE, the IBL data-access package that installs
+with `iblatlas`. To save it somewhere else, set that directory once, before first use:
+
+```python
+from one.params import setup
+
+setup(silent=True, cache_dir='/path/to/cache')
+```
+
+The new location starts empty, so the next load downloads the data again. To reuse data you
+have already downloaded, move the `histology` folder from
+`~/Downloads/ONE/openalyx.internationalbrainlab.org/` into the new cache directory, keeping the
+folders inside it, so that the files are in `<new cache dir>/histology/ATLAS/Needles/Allen/`.
 
 ## The IBL Atlas GUI
 
