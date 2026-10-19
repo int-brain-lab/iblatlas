@@ -11,13 +11,14 @@ import re
 from pathlib import Path
 
 import matplotlib
-matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import numpy as np
 
 from iblatlas.atlas import AllenAtlas, MRITorontoAtlas, NeedlesAtlas
 from iblatlas.genomics import agea, merfish
 from iblatlas.plots import plot_scalar_on_slice, plot_swanson, plot_swanson_vector
+
+matplotlib.use('Agg')
 
 IMAGES_DIR = Path(__file__).resolve().parents[1] / 'explanation' / 'images'
 LANDING_DIR = Path(__file__).resolve().parents[1] / 'images' / 'landing'
