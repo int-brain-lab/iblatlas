@@ -353,6 +353,65 @@ class TestAtlas(unittest.TestCase):
         self.assertEqual(self.ba.surface.shape, self.ba.mask().shape)
 
 
+class TestAffine(unittest.TestCase):
+
+    def test_brain_coordinates_affine(self):
+        # a 10 degrees pitch around the ML (x) axis
+        a = np.deg2rad(10)
+        rot = np.array([[1, 0, 0], [0, np.cos(a), -np.sin(a)], [0, np.sin(a), np.cos(a)]])
+        kwargs = dict(nxyz=(10, 20, 30), xyz0=(-5, -10, -15), dxyz=(1, 2, 3))
+        bc, bc_rot = BrainCoordinates(**kwargs), BrainCoordinates(**kwargs, affine=rot)
+        iii = np.array([[1, 2, 3], [4, 5, 6]])
+        # the rotation is applied to the grid coordinates, around xyz=0
+        np.testing.assert_allclose(bc_rot.i2xyz(iii), bc.i2xyz(iii) @ rot.T)
+        # round trip, and the identity affine is equivalent to no affine
+        np.testing.assert_array_equal(bc_rot.xyz2i(bc_rot.i2xyz(iii)), iii)
+        bc_id = BrainCoordinates(**kwargs, affine=np.eye(3))
+        np.testing.assert_array_equal(bc_id.xyz2i(bc.i2xyz(iii)), iii)
+        # the origin is a fixed point
+        np.testing.assert_allclose(bc_rot.xyz2i(np.zeros(3), round=False), bc.xyz2i(np.zeros(3), round=False))
+
+    def test_brain_coordinates_affine_per_axis(self):
+        a = np.deg2rad(10)
+        pitch = np.array([[1, 0, 0], [0, np.cos(a), -np.sin(a)], [0, np.sin(a), np.cos(a)]])
+        kwargs = dict(nxyz=(10, 20, 30), xyz0=(-5, -10, -15), dxyz=(1, 2, 3))
+        bc, bc_pitch = BrainCoordinates(**kwargs), BrainCoordinates(**kwargs, affine=pitch)
+        # a pitch around x leaves the x axis untouched, but mixes y and z
+        self.assertEqual((bc_pitch.dx, bc_pitch.x0), (bc.dx, bc.x0))
+        np.testing.assert_array_equal(bc_pitch.xscale, bc.xscale)
+        for attr in ('dy', 'dz', 'y0', 'z0', 'dxyz', 'yscale', 'zlim', 'mgrid'):
+            with self.assertRaises(ValueError, msg=attr):
+                getattr(bc_pitch, attr)
+        with self.assertRaises(ValueError):
+            bc_pitch.y2i(0)
+        with self.assertRaises(ValueError):
+            bc_pitch.i2z(0)
+        # a diagonal affine (pure scaling) keeps the per-axis methods working
+        bc_scaled = BrainCoordinates(**kwargs, affine=np.diag([2, 1, 0.5]))
+        np.testing.assert_allclose(bc_scaled.dxyz, [2, 2, 1.5])
+        np.testing.assert_allclose(bc_scaled.xscale, 2 * bc.xscale)
+        self.assertEqual(bc_scaled.x2i(bc_scaled.i2x(4)), 4)
+        # out of volume points still raise or clip in xyz2i
+        with self.assertRaises(ValueError):
+            bc_pitch.xyz2i(np.array([1000., 0, 0]))
+        np.testing.assert_array_equal(bc_pitch.xyz2i(np.array([1000., 0, 0]), mode='clip')[0], 9)
+
+
+    def test_qiu2018_atlas(self):
+        toronto, qiu = iblatlas.atlas.MRITorontoAtlas(mock=True), iblatlas.atlas.Qiu2018Atlas(mock=True)
+        # Bregma is the pivot, the ML axis is untouched, and a positive pitch lifts the anterior side
+        xyz = np.array([[0, 0, 0], [0, 1e-3, 0], [1e-3, 0, 0]])
+        ccf_t, ccf_q = toronto.xyz2ccf(xyz), qiu.xyz2ccf(xyz)
+        np.testing.assert_allclose(ccf_q[0], ccf_t[0])
+        np.testing.assert_allclose(ccf_q[2], ccf_t[2])
+        self.assertGreater(ccf_q[1, 2], ccf_t[1, 2])  # anterior point sits deeper (ccf dv index) in the atlas
+        np.testing.assert_allclose(qiu.ccf2xyz(ccf_q), xyz, atol=1e-9)
+        # same scaling as the Toronto atlas, followed by a 5 degrees rotation around ML by default
+        rot = qiu.bc.matrix @ np.linalg.inv(toronto.bc.matrix)
+        np.testing.assert_allclose(rot[0], [1, 0, 0, 0], atol=1e-12)
+        np.testing.assert_allclose(np.rad2deg(np.arctan2(rot[2, 1], rot[1, 1])), 5)
+
+
 class TestAtlasPlots(unittest.TestCase):
 
     @classmethod
