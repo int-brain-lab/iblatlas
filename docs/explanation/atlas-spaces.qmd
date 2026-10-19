@@ -79,7 +79,8 @@ each atlas, so they cut slightly different anatomy; the depth difference is larg
 
 Probes planned in one atlas space and then placed in vivo land systematically away from their
 planned targets: International Brain Laboratory et al. (2022), *Reproducibility of in-vivo
-electrophysiological measurements in mice*, cited on [Citations](../citations.qmd).
+electrophysiological measurements in mice*,
+[doi:10.1101/2022.05.09.491042](https://doi.org/10.1101/2022.05.09.491042).
 
 ### Which scaling to use
 
