@@ -53,10 +53,6 @@ atlases have the same two scalings and add a pitch.
 
 :::
 
-The Pinpoint names are the names of its transforms in its source code. Pinpoint has no transform
-with the MRI Toronto scaling and no pitch. The regions and their labels are the same in all five
-atlases; the scaling and the pitch change only where a coordinate falls in the brain.
-
 ![Sagittal slices at ML = 0 (left) and coronal slices at AP −2 mm (right) of the Allen, Needles,
 MRI Toronto and Qiu 2018 atlases, with the regions drawn as polygons. The slices are taken at the
 same coordinate in each atlas, so they cut slightly different anatomy, and the pitch of the Qiu 2018
