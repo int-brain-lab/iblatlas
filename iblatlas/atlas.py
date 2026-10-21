@@ -1687,8 +1687,8 @@ def Qiu2018Atlas(*args, pitch=5.0, **kwargs):
     References
     ----------
     .. [1] Birman D, et al. (2023). Pinpoint: trajectory planning for multi-probe electrophysiology
-       and injections in an interactive web-based 3D environment. eLife 12:RP91662.
-       Qiu2018Transform: https://github.com/VirtualBrainLab/Pinpoint
+       and injections in an interactive web-based 3D environment. eLife, reviewed preprint
+       [doi 10.7554/eLife.91662.1]. Qiu2018Transform: https://github.com/VirtualBrainLab/Pinpoint
     .. [2] Qiu, LR, Fernandes, DJ, Szulc-Lerch, KU et al. (2018) Mouse MRI shows brain areas
        relatively larger in males emerge before those larger in females. Nat Commun 9, 2615.
        [doi 10.1038/s41467-018-04921-2]

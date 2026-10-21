@@ -36,13 +36,14 @@ quartodoc:
 
     - title: Atlases
       desc: >-
-        The atlas volumes. NeedlesAtlas and MRITorontoAtlas are factory functions
-        returning a scaled AllenAtlas, not subclasses.
+        The atlas volumes. NeedlesAtlas, MRITorontoAtlas and Qiu2018Atlas are factory functions
+        returning a scaled, and for Qiu2018Atlas pitched, AllenAtlas, not subclasses.
       contents:
         - atlas.BrainAtlas
         - atlas.AllenAtlas
         - atlas.NeedlesAtlas
         - atlas.MRITorontoAtlas
+        - atlas.Qiu2018Atlas
 
     - title: Probe insertions
       desc: Planning and describing probe trajectories in the atlas frame.

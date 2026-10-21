@@ -101,6 +101,7 @@ need to distinguish hemispheres.
 ## Planning tools
 
 [Pinpoint](https://virtualbrainlab.org/pinpoint/in_vivo_alignment.html) is what many IBL users
-plan trajectories with. Record which tool produced a coordinate, and check that an `Insertion`
-and a Pinpoint plan are in the same frame before comparing them. See
+plan trajectories with. Its Qiu 2018 transform is `Qiu2018Atlas`, which includes a 5° pitch (not yet
+usable with `Insertion`, see the atlas spaces page), and its legacy IBL Dorr transform is `NeedlesAtlas`. Record which tool produced a coordinate, and check that
+an `Insertion` and a Pinpoint plan are in the same frame before comparing them. See
 [Atlas spaces and transforms](../explanation/atlas-spaces.qmd).

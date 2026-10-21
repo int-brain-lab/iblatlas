@@ -13,8 +13,11 @@ from pathlib import Path
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
+from contourpy import FillType, contour_generator
+from matplotlib.patches import PathPatch
+from matplotlib.path import Path as MplPath
 
-from iblatlas.atlas import AllenAtlas, MRITorontoAtlas, NeedlesAtlas
+from iblatlas.atlas import AllenAtlas, MRITorontoAtlas, NeedlesAtlas, Qiu2018Atlas
 from iblatlas.genomics import agea, merfish
 from iblatlas.plots import plot_scalar_on_slice, plot_swanson, plot_swanson_vector
 
@@ -24,6 +27,8 @@ IMAGES_DIR = Path(__file__).resolve().parents[1] / 'explanation' / 'images'
 LANDING_DIR = Path(__file__).resolve().parents[1] / 'images' / 'landing'
 GUI_SCREENSHOT = Path(__file__).resolve().parents[1] / 'how-to' / 'images' / 'gui-region-highlight.png'
 LANDING_SIZE = (5, 3.75)  # inches; every landing image shares this 4:3 canvas so the cards line up
+# Three voxels of the sagittal slice, in the Allen CCF (ML, AP, DV in µm from bregma): olfactory bulb, septum, cerebellum
+SAGITTAL_POINTS_UM = np.array([[0, 4000, -4000], [0, 0, -3000], [0, -6000, -3000]])
 OUTLINE_COLOURS = {'AllenAtlas': 'k', 'NeedlesAtlas': 'tab:blue', 'MRITorontoAtlas': 'tab:red'}
 # Slices with no missing voxels: Gfap's raw volume is left/right asymmetric here, and Calb1's
 # overall level changes in the processed volume.
@@ -62,6 +67,83 @@ def scaling_overlay(res_um: int = 25) -> plt.Figure:
     sax.set(title='Sagittal, ML = 0', xlabel='AP (m)', ylabel='DV (m)')
     sax.invert_xaxis()  # anterior on the left, as in plot_sslice
     cax.legend(fontsize=8)
+    return fig
+
+
+def _sagittal_polygons(atlas: AllenAtlas, ml: float = 0.0) -> dict:
+    """
+    Region polygons of a sagittal slice, mapped through the atlas coordinates.
+
+    The polygons are extracted on the voxel grid, then their vertices go through ``bc.i2xyz``, so a
+    rotation in the atlas coordinates is applied to them.
+
+    Parameters
+    ----------
+    atlas : iblatlas.atlas.BrainAtlas
+        The atlas, possibly with a rotation in its coordinates.
+    ml : float
+        ML coordinate of the slice, in metres.
+
+    Returns
+    -------
+    dict
+        Region index: list of (vertices, codes), vertices being (n, 2) arrays of (AP, DV) in mm
+        relative to bregma. Holes are encoded in the codes.
+    """
+    ix = int(atlas.bc.x2i(np.array(ml)))  # a pitch leaves the ML axis alone, so this is valid
+    rindex = atlas.slice(ml, axis=0, volume='rindex')  # (nap, ndv), in the voxel grid frame
+    polygons = {}
+    for r in np.unique(rindex):
+        if atlas.regions.id[r] == 0:  # void
+            continue
+        gen = contour_generator(z=np.pad(rindex == r, 1).astype(float), fill_type=FillType.OuterCode)
+        polygons[r] = []
+        for points, codes in zip(*gen.filled(0.5, 1.5)):
+            idv, iap = (points - 1).T  # contour x is the column (DV), y the row (AP); remove the padding
+            xyz = atlas.bc.i2xyz(np.c_[np.full(iap.size, ix), iap, idv]) * 1e3
+            polygons[r].append((xyz[:, 1:], codes))
+    return polygons
+
+
+def atlas_variants_sagittal(res_um: int = 25) -> plt.Figure:
+    """
+    Sagittal slice at ML = 0 of the Allen, Needles, MRI Toronto and Qiu 2018 atlases, drawn as vectors.
+
+    The three marked voxels are the same CCF voxels in every panel, their coordinates are in the
+    table of the atlas spaces page. All panels share the same limits.
+
+    Parameters
+    ----------
+    res_um : int
+        Atlas resolution in micrometres.
+
+    Returns
+    -------
+    matplotlib.figure.Figure
+        Four axes in mm relative to bregma, anterior on the left.
+    """
+    atlases = {'Allen CCF': (AllenAtlas(res_um), 'unit scaling'),
+               'Needles': (NeedlesAtlas(res_um), 'ML 1 | AP 1.087 | DV 0.952'),
+               'MRI Toronto': (MRITorontoAtlas(res_um), 'ML 0.952 | AP 1.031 | DV 0.885'),
+               'Qiu 2018': (Qiu2018Atlas(res_um), 'Toronto scaling + 5° pitch')}
+    points_ccf = atlases['Allen CCF'][0].xyz2ccf(SAGITTAL_POINTS_UM / 1e6)
+    polygons = {name: _sagittal_polygons(atlas) for name, (atlas, _) in atlases.items()}
+    fig, axes = plt.subplots(2, 2, figsize=(11, 7.5), sharex=True, sharey=True, layout='constrained')
+    for ax, (name, (atlas, subtitle)) in zip(axes.flatten(), atlases.items()):
+        for r, parts in polygons[name].items():
+            path = MplPath.make_compound_path(*[MplPath(vertices, codes) for vertices, codes in parts])
+            ax.add_patch(PathPatch(path, facecolor=atlas.regions.rgba[r] / 255, edgecolor='k', lw=0.1))
+        ax.plot(0, 0, '+', color='k', ms=10, mew=2, zorder=10)  # bregma, the pivot of the rotation
+        xyz = atlas.ccf2xyz(points_ccf) * 1e3
+        ax.plot(xyz[:, 1], xyz[:, 2], 'o', color='k', mfc='w', ms=6, zorder=10)
+        for i, (ap, dv) in enumerate(xyz[:, 1:]):
+            ax.annotate(f'P{i + 1}', (ap, dv), xytext=(5, 5), textcoords='offset points', weight='bold', zorder=10)
+        ax.set(title=f'{name}\n{subtitle}', aspect='equal', xlabel='AP (mm from bregma)', ylabel='DV (mm from bregma)')
+        ax.label_outer()
+    vertices = np.vstack([v for parts in polygons.values() for ps in parts.values() for v, _ in ps])
+    margin = 0.25  # mm
+    axes[0, 0].set_xlim(vertices[:, 0].max() + margin, vertices[:, 0].min() - margin)  # anterior on the left
+    axes[0, 0].set_ylim(vertices[:, 1].min() - margin, vertices[:, 1].max() + margin)
     return fig
 
 
@@ -359,10 +441,10 @@ def landing_images(out_dir: Path = LANDING_DIR) -> None:
 
 
 def main(out_dir: Path = IMAGES_DIR) -> None:
-    """Write the three PNGs into ``out_dir``, overwriting any that exist."""
+    """Write the four PNGs into ``out_dir``, overwriting any that exist."""
     out_dir.mkdir(parents=True, exist_ok=True)
-    for name, make in (('scaling-overlay', scaling_overlay), ('agea-raw-vs-processed', agea_raw_vs_processed),
-                       ('mappings-coronal', mappings_coronal)):
+    for name, make in (('scaling-overlay', scaling_overlay), ('atlas-variants-sagittal', atlas_variants_sagittal),
+                       ('agea-raw-vs-processed', agea_raw_vs_processed), ('mappings-coronal', mappings_coronal)):
         fig = make()
         fig.savefig(out_dir / f'{name}.png', dpi=150, bbox_inches='tight')
         plt.close(fig)
