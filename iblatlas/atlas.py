@@ -1661,6 +1661,24 @@ def MRITorontoAtlas(*args, **kwargs):
     return AllenAtlas(*args, **kwargs)
 
 
+def _pitch_affine(pitch):
+    """
+    The (3, 3) affine of a pitch, a right-handed rotation around the ML axis in (ml, ap, dv) order.
+
+    Parameters
+    ----------
+    pitch : float
+        The pitch angle in degrees, positive lifts the nose, ie. the anterior side of the atlas.
+
+    Returns
+    -------
+    numpy.array
+        The rotation matrix, to pass as the `affine` of an AllenAtlas.
+    """
+    a = np.deg2rad(pitch)
+    return np.array([[1, 0, 0], [0, np.cos(a), -np.sin(a)], [0, np.sin(a), np.cos(a)]])
+
+
 def Qiu2018Atlas(*args, pitch=5.0, **kwargs):
     """
     The Qiu 2018 MRI brain atlas, as defined in Pinpoint [1]_.
@@ -1693,9 +1711,45 @@ def Qiu2018Atlas(*args, pitch=5.0, **kwargs):
        relatively larger in males emerge before those larger in females. Nat Commun 9, 2615.
        [doi 10.1038/s41467-018-04921-2]
     """
-    a = np.deg2rad(pitch)  # right-handed rotation around the ML axis, in ml, ap, dv order
-    kwargs['affine'] = np.array([[1, 0, 0], [0, np.cos(a), -np.sin(a)], [0, np.sin(a), np.cos(a)]])
+    kwargs['affine'] = _pitch_affine(pitch)
     return MRITorontoAtlas(*args, **kwargs)
+
+
+def Dorr2008Atlas(*args, pitch=5.0, **kwargs):
+    """
+    The Dorr 2008 MRI brain atlas, as defined in Pinpoint [1]_.
+
+    Instantiates the NeedlesAtlas (same stretch and squeeze, from the average of 40 post-mortem
+    p84 mice [2]_), then pitches it around the ML axis and Bregma to level the Bregma-Lambda
+    surface. The scaling is applied first, then the rotation. The NeedlesAtlas is the same
+    scaling without the pitch, ie. the legacy IBL Dorr transform of Pinpoint.
+
+    Parameters
+    ----------
+    res_um : {10, 25, 50} int
+        The Atlas resolution in micrometres; one of 10, 25 or 50um.
+    pitch : float
+        The pitch angle in degrees, positive lifts the nose, ie. the anterior side of the atlas
+        (default: 5, as in Pinpoint).
+    **kwargs
+        See AllenAtlas.
+
+    Returns
+    -------
+    AllenAtlas
+        An Allen atlas object with the MRI scaling and pitch applied.
+
+    References
+    ----------
+    .. [1] Birman D, et al. (2023). Pinpoint: trajectory planning for multi-probe electrophysiology
+       and injections in an interactive web-based 3D environment. eLife, reviewed preprint
+       [doi 10.7554/eLife.91662.1]. Dorr2008Transform: https://github.com/VirtualBrainLab/Pinpoint
+    .. [2] Dorr AE, Lerch JP, Spring S, Kabani N, Henkelman RM (2008). High resolution
+       three-dimensional brain atlas using an average magnetic resonance image of 40 adult C57Bl/6J
+       mice. Neuroimage 42(1):60-9. [doi 10.1016/j.neuroimage.2008.03.037]
+    """
+    kwargs['affine'] = _pitch_affine(pitch)
+    return NeedlesAtlas(*args, **kwargs)
 
 
 def _download_atlas_allen(target_file_image):

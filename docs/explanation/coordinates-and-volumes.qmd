@@ -55,9 +55,9 @@ indices in a 10 µm volume and in a 25 µm volume.
 
 `BrainCoordinates` holds one (4, 4) affine `matrix` that maps volume indices to coordinates. For
 the Allen, Needles and MRI Toronto atlases it is diagonal, an origin and a voxel size per axis, so
-each axis converts on its own (`x2i`, `i2x`, `xscale`, `dx`...). `Qiu2018Atlas` adds a rotation
-about the ML axis, which mixes AP and DV: `xyz2i` and `i2xyz` still convert points, but the
+each axis converts on its own (`x2i`, `i2x`, `xscale`, `dx`...). `Dorr2008Atlas` and `Qiu2018Atlas`
+add a rotation about the ML axis, which mixes AP and DV: `xyz2i` and `i2xyz` still convert points, but the
 per-axis methods raise a `ValueError` for an axis that the rotation touches, and so do the slice
 and surface plots and the `Insertion` methods that use the brain surface. The ML axis is untouched
 by a pitch, so it keeps working. See
-[The Qiu 2018 atlas and its 5° pitch](atlas-spaces.qmd#the-qiu-2018-atlas-and-its-5-pitch).
+[The 5° pitch](atlas-spaces.qmd#the-5-pitch-the-dorr-2008-and-qiu-2018-atlases).

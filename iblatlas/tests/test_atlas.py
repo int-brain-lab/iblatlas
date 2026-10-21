@@ -396,19 +396,22 @@ class TestAffine(unittest.TestCase):
             bc_pitch.xyz2i(np.array([1000., 0, 0]))
         np.testing.assert_array_equal(bc_pitch.xyz2i(np.array([1000., 0, 0]), mode='clip')[0], 9)
 
-    def test_qiu2018_atlas(self):
-        toronto, qiu = iblatlas.atlas.MRITorontoAtlas(mock=True), iblatlas.atlas.Qiu2018Atlas(mock=True)
-        # Bregma is the pivot, the ML axis is untouched, and a positive pitch lifts the anterior side
-        xyz = np.array([[0, 0, 0], [0, 1e-3, 0], [1e-3, 0, 0]])
-        ccf_t, ccf_q = toronto.xyz2ccf(xyz), qiu.xyz2ccf(xyz)
-        np.testing.assert_allclose(ccf_q[0], ccf_t[0])
-        np.testing.assert_allclose(ccf_q[2], ccf_t[2])
-        self.assertGreater(ccf_q[1, 2], ccf_t[1, 2])  # anterior point sits deeper (ccf dv index) in the atlas
-        np.testing.assert_allclose(qiu.ccf2xyz(ccf_q), xyz, atol=1e-9)
-        # same scaling as the Toronto atlas, followed by a 5 degrees rotation around ML by default
-        rot = qiu.bc.matrix @ np.linalg.inv(toronto.bc.matrix)
-        np.testing.assert_allclose(rot[0], [1, 0, 0, 0], atol=1e-12)
-        np.testing.assert_allclose(np.rad2deg(np.arctan2(rot[2, 1], rot[1, 1])), 5)
+    def test_pitched_atlases(self):
+        for pitched, scaled in ((iblatlas.atlas.Qiu2018Atlas, iblatlas.atlas.MRITorontoAtlas),
+                                (iblatlas.atlas.Dorr2008Atlas, iblatlas.atlas.NeedlesAtlas)):
+            with self.subTest(pitched.__name__):
+                base, ba = scaled(mock=True), pitched(mock=True)
+                # Bregma is the pivot, the ML axis is untouched, and a positive pitch lifts the anterior side
+                xyz = np.array([[0, 0, 0], [0, 1e-3, 0], [1e-3, 0, 0]])
+                ccf_b, ccf = base.xyz2ccf(xyz), ba.xyz2ccf(xyz)
+                np.testing.assert_allclose(ccf[0], ccf_b[0])
+                np.testing.assert_allclose(ccf[2], ccf_b[2])
+                self.assertGreater(ccf[1, 2], ccf_b[1, 2])  # anterior point sits deeper (ccf dv index) in the atlas
+                np.testing.assert_allclose(ba.ccf2xyz(ccf), xyz, atol=1e-9)
+                # same scaling as the base atlas, followed by a 5 degrees rotation around ML by default
+                rot = ba.bc.matrix @ np.linalg.inv(base.bc.matrix)
+                np.testing.assert_allclose(rot[0], [1, 0, 0, 0], atol=1e-12)
+                np.testing.assert_allclose(np.rad2deg(np.arctan2(rot[2, 1], rot[1, 1])), 5)
 
 
 class TestAtlasPlots(unittest.TestCase):
