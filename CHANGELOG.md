@@ -1,6 +1,10 @@
 ## [Unreleased]
 ### Added
 - `Ephys100` and `EphysCosmos` mappings (and `-lr` versions): optimal cuts of the ontology tree on ephys-atlas features, EphysCosmos separates pons and medulla
+- `Qiu2018Atlas` and `Dorr2008Atlas`: the Toronto and Needles MRI scalings plus a 5° pitch around Bregma to level the Bregma-Lambda surface, as in Pinpoint
+- `affine` argument in `BrainCoordinates`, `BrainAtlas` and `AllenAtlas`: a (3, 3) linear transform (e.g. a rotation) applied around Bregma after the scaling
+### Changed
+- `BrainCoordinates` is now defined by a single (4, 4) `matrix`. `dx`, `x0`... and the per-axis methods (`x2i`, `xscale`, `xlim`...) are unchanged for axis-aligned atlases, and raise a `ValueError` for an axis mixed with others by a rotation
 
 ## [1.3.0]
 ### Fixed
