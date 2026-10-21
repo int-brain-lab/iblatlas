@@ -44,7 +44,7 @@ atlases have the same two scalings and add a pitch.
 
 | Atlas | Source | Acquisition | Subjects | ML | AP | DV | Pitch | Pinpoint name |
 |---|---|---|---|---|---|---|---|---|
-| **Needles** | Dorr 2008 (DSURQE) | Post-mortem, brain in skull | 40 C57BL/6J, p84 | 1 | 1.087 | 0.952 | none | `IBL-Dorr2008` |
+| **Needles** | Dorr 2008 (DSURQE), essentially the Dorr 2008 atlas with no pitch | Post-mortem, brain in skull | 40 C57BL/6J, p84 | 1 | 1.087 | 0.952 | none | `IBL-Dorr2008` |
 | **MRI Toronto** | Qiu 2018 | In vivo | 12, p65 | 0.952 | 1.031 | 0.885 | none | none |
 | **Dorr 2008** | Dorr 2008 (DSURQE), as in Pinpoint | Post-mortem, brain in skull | 40 C57BL/6J, p84 | 1 | 1.087 | 0.952 | 5° | `Dorr2008` |
 | **Qiu 2018** | Qiu 2018, as in Pinpoint | In vivo | 12, p65 | 0.952 | 1.031 | 0.885 | 5° | `Qiu2018` |
