@@ -10,10 +10,11 @@ and how they relate. To cite an atlas or a scaling, see [Citations](../citations
 
 The Allen Common Coordinate Framework (CCF) is a volume, and the IBL frame is a way of writing
 positions in that same volume. Every coordinate in the IBL atlas is in the IBL frame. The two
-frames differ in where the origin is, what the units are, and which way each axis counts.
+frames differ in where the origin is, what the units are, and which way each axis counts
+(@fig-frames).
 
 ![The Allen CCF frame beside the IBL frame, on the same sagittal template slice. In the CCF the
-origin is the corner of the volume; in the IBL frame it is bregma.](images/frames-allen-vs-ibl.svg){fig-alt="The same side view of the mouse brain twice, anterior on the left, inside the box that is the atlas volume. In the Allen CCF the origin is the anterior, dorsal, left corner, in micrometres, with AP increasing towards posterior and DV towards ventral. In the IBL frame the origin is bregma, in metres, with AP increasing towards anterior and DV towards dorsal."}
+origin is the corner of the volume; in the IBL frame it is bregma.](images/frames-allen-vs-ibl.svg){#fig-frames fig-alt="The same side view of the mouse brain twice, anterior on the left, inside the box that is the atlas volume. In the Allen CCF the origin is the anterior, dorsal, left corner, in micrometres, with AP increasing towards posterior and DV towards ventral. In the IBL frame the origin is bregma, in metres, with AP increasing towards anterior and DV towards dorsal."}
 
 Bregma sits at ML 5739, AP 5400, DV 332 µm in the CCF volume. The signs and units of the IBL
 frame are on [Coordinates and volumes](coordinates-and-volumes.qmd).
@@ -41,19 +42,23 @@ and MRI Toronto atlases stretch the Allen CCF along each axis to fit an MRI atla
 in the skull, so their coordinates are closer to those used in surgery. The Dorr 2008 and Qiu 2018
 atlases have the same two scalings and add a pitch.
 
-| Atlas | Source | Acquisition | Subjects | ML | AP | DV | Pitch |
-|---|---|---|---|---|---|---|---|
-| **Needles** | Dorr 2008 (DSURQE) | Post-mortem, brain in skull | 40 C57BL/6J, p84 | 1 | 1.087 | 0.952 | none |
-| **MRI Toronto** | Qiu 2018 | In vivo | 12, p65 | 0.952 | 1.031 | 0.885 | none |
-| **Dorr 2008** | Dorr 2008 (DSURQE), as in Pinpoint | Post-mortem, brain in skull | 40 C57BL/6J, p84 | 1 | 1.087 | 0.952 | 5° |
-| **Qiu 2018** | Qiu 2018, as in Pinpoint | In vivo | 12, p65 | 0.952 | 1.031 | 0.885 | 5° |
+| Atlas | Source | Acquisition | Subjects | ML | AP | DV | Pitch | Pinpoint name |
+|---|---|---|---|---|---|---|---|---|
+| **Needles** | Dorr 2008 (DSURQE) | Post-mortem, brain in skull | 40 C57BL/6J, p84 | 1 | 1.087 | 0.952 | none | `IBL-Dorr2008` |
+| **MRI Toronto** | Qiu 2018 | In vivo | 12, p65 | 0.952 | 1.031 | 0.885 | none | none |
+| **Dorr 2008** | Dorr 2008 (DSURQE), as in Pinpoint | Post-mortem, brain in skull | 40 C57BL/6J, p84 | 1 | 1.087 | 0.952 | 5° | `Dorr2008` |
+| **Qiu 2018** | Qiu 2018, as in Pinpoint | In vivo | 12, p65 | 0.952 | 1.031 | 0.885 | 5° | `Qiu2018` |
 
-The regions and their labels are the same in all five atlases; the scaling and the pitch change
-only where a coordinate falls in the brain.
+The Pinpoint names are the names of its transforms in its source code. Pinpoint has no transform
+with the MRI Toronto scaling and no pitch. The regions and their labels are the same in all five
+atlases; the scaling and the pitch change only where a coordinate falls in the brain.
 
-![Brain outlines of the Allen, Needles and MRI Toronto atlases on a coronal slice at AP −2 mm and
-the midline sagittal slice, in metres from bregma. The slices are taken at the same coordinate in
-each atlas, so they cut slightly different anatomy; the depth difference is largest.](images/scaling-overlay.png){fig-alt="Two panels of brain outlines in black, blue and red for the Allen, Needles and MRI Toronto atlases. The outlines share the dorsal surface at bregma and move apart towards the ventral side, with the MRI Toronto outline the shallowest."}
+![Sagittal slices at ML = 0 (left) and coronal slices at AP −2 mm (right) of the Allen, Needles,
+MRI Toronto and Qiu 2018 atlases, with the regions drawn as polygons. The slices are taken at the
+same coordinate in each atlas, so they cut slightly different anatomy, and the pitch of the Qiu 2018
+atlas cuts the coronal plane obliquely. In each column all panels share the same limits. The cross
+is bregma, and P1 to P3 are the same three CCF voxels in every atlas. The Dorr 2008 atlas is the
+Needles atlas rotated like the Qiu 2018 one and is not drawn.](images/atlas-variants-slices.png){#fig-slices fig-alt="Eight brain slices in two columns and four rows, one row per atlas: Allen, Needles, MRI Toronto and Qiu 2018. The left column shows sagittal slices with anterior on the left and three marked points in the olfactory bulb, the septum and the cerebellum. The right column shows coronal slices. The brains get slightly shallower from Allen to MRI Toronto, and the Qiu 2018 brain is tilted with its posterior end lower."}
 
 ### The 5° pitch: the Dorr 2008 and Qiu 2018 atlases
 
@@ -62,7 +67,7 @@ rotation of 5° about the ML axis, with bregma as the pivot. They follow the Qiu
 transforms of [Pinpoint](https://virtualbrainlab.org/pinpoint/in_vivo_alignment.html), which rotate
 the CCF to level the bregma-lambda surface, pitching it up by 5° (Birman et al. 2023, citing the
 International Brain Laboratory). Pinpoint's legacy IBL Dorr transform is the Needles scaling
-alone, which is `NeedlesAtlas`.
+alone, which is `NeedlesAtlas`. @fig-slices shows the Qiu 2018 atlas beside the unpitched ones.
 
 - The scaling is applied first, then the rotation. Bregma is the pivot, so it stays at `(0, 0, 0)`.
 - A positive `pitch`, in degrees, lifts the anterior side of the atlas: `pitch=5.0` is the
@@ -75,16 +80,10 @@ alone, which is `NeedlesAtlas`.
   because the volume axes no longer line up with the atlas axes: the slice and surface plots
   (`plot_sslice`, `plot_top`, `compute_surface`), `get_labels(radius_um=...)` and the `Insertion`
   methods that use the surface (`Insertion.from_dict`, `get_brain_entry`). To draw a pitched
-  slice, map the region contours through `atlas.bc.i2xyz`, as the figure below does. See
+  slice, look the labels up on a grid of coordinates with `get_labels`, as @fig-slices does. See
   [Coordinates and volumes](coordinates-and-volumes.qmd#atlases-with-a-rotation).
 
-![The midline sagittal slice of the Allen, Needles, MRI Toronto and Qiu 2018 atlases, with
-the regions drawn as polygons and all panels on the same limits. P1 to P3 are the same three
-CCF voxels in every atlas and the cross is bregma. The Qiu 2018 atlas is the MRI Toronto atlas
-rotated about bregma, so its posterior end sits lower. The Dorr 2008 atlas is the Needles atlas
-rotated the same way and is not drawn.](images/atlas-variants-sagittal.png){fig-alt="Four sagittal slices of the mouse brain, anterior on the left, coloured by region: Allen, Needles, MRI Toronto and Qiu 2018. Three marked points sit in the olfactory bulb, the septum and the cerebellum in every panel. The brains get slightly shorter in depth from Allen to MRI Toronto, and the Qiu 2018 brain is tilted with its posterior end lower."}
-
-The three marked voxels, to check a conversion. Each row is one CCF voxel and its position in
+The three voxels marked P1 to P3 in @fig-slices, to check a conversion. Each row is one CCF voxel and its position in
 each atlas, in (ML, AP, DV) µm, relative to bregma for the atlases and from the corner of the
 volume for the CCF.
 
@@ -95,10 +94,10 @@ volume for the CCF.
 | P3 | CENT3 | 5739, 11400, 3332 | 0, -6000, -3000 | 0, -6522, -2856 | 0, -6186, -2655 | 0, -5931, -3184 |
 
 [Pinpoint](https://virtualbrainlab.org/pinpoint/in_vivo_alignment.html) is the tool many IBL
-users plan in vivo trajectories with. It offers CCF, Qiu 2018, Dorr 2008 and a legacy IBL Dorr
-transform. Its Qiu 2018 transform is `Qiu2018Atlas`, its Dorr 2008 transform is `Dorr2008Atlas` and
-its legacy IBL Dorr transform is `NeedlesAtlas`. Check that an `Insertion` and a Pinpoint plan are expressed in the same frame
-before comparing them. State which tool produced a coordinate when you record it.
+users plan in vivo trajectories with. For the Allen atlas it offers four transforms: `Default`
+(no scaling), `Qiu2018`, `Dorr2008` and `IBL-Dorr2008`. The table above gives the matching atlases.
+Check that an `Insertion` and a Pinpoint plan are expressed in the same frame before comparing
+them. State which tool produced a coordinate when you record it.
 
 ## Next
 

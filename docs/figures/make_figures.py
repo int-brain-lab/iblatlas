@@ -27,90 +27,68 @@ IMAGES_DIR = Path(__file__).resolve().parents[1] / 'explanation' / 'images'
 LANDING_DIR = Path(__file__).resolve().parents[1] / 'images' / 'landing'
 GUI_SCREENSHOT = Path(__file__).resolve().parents[1] / 'how-to' / 'images' / 'gui-region-highlight.png'
 LANDING_SIZE = (5, 3.75)  # inches; every landing image shares this 4:3 canvas so the cards line up
-# Three voxels of the sagittal slice, in the Allen CCF (ML, AP, DV in µm from bregma): olfactory bulb, septum, cerebellum
+# Three voxels of the sagittal slices, in the Allen CCF (ML, AP, DV in µm from bregma): olfactory bulb, septum, cerebellum
 SAGITTAL_POINTS_UM = np.array([[0, 4000, -4000], [0, 0, -3000], [0, -6000, -3000]])
-OUTLINE_COLOURS = {'AllenAtlas': 'k', 'NeedlesAtlas': 'tab:blue', 'MRITorontoAtlas': 'tab:red'}
 # Slices with no missing voxels: Gfap's raw volume is left/right asymmetric here, and Calb1's
 # overall level changes in the processed volume.
 AGEA_EXAMPLES = (('Gfap', -0.0016), ('Calb1', -0.0004))
 POINTS_AP = -0.0015  # m; the coronal plane of the points card's probe, as in the tutorial
 PROBE_AP = -0.002  # m; the coronal plane the probe track lies in
-ATLAS_FACTORIES = {'AllenAtlas': AllenAtlas, 'NeedlesAtlas': NeedlesAtlas,
-                   'MRITorontoAtlas': MRITorontoAtlas}
 
 
-def scaling_overlay(res_um: int = 25) -> plt.Figure:
+def _slice_polygons(atlas: AllenAtlas, axis: int, coordinate: float, limits: tuple) -> dict:
     """
-    Coronal and sagittal brain outlines of the Allen, Needles and MRI Toronto atlases, overlaid.
+    Region polygons of a plane, sampled in the IBL frame so that a rotated atlas is cut along the plane.
 
-    Parameters
-    ----------
-    res_um : int
-        Atlas resolution in micrometres.
-
-    Returns
-    -------
-    matplotlib.figure.Figure
-        Two axes (coronal, sagittal) in metres relative to bregma.
-    """
-    fig, (cax, sax) = plt.subplots(1, 2, figsize=(10, 4), layout='constrained')
-    for name, factory in ATLAS_FACTORIES.items():
-        atlas = factory(res_um)
-        for ax, axis, coord in ((cax, 1, -0.0020), (sax, 0, 0.0)):
-            brain = atlas.slice(coord, axis=axis, volume='rindex').T != 0  # rows = DV, as imshow
-            extent = atlas.extent(axis) * 1e-6
-            ax.contour(brain.astype(float), levels=[0.5], colors=OUTLINE_COLOURS[name],
-                       extent=extent, origin='upper')
-        sax.plot([], [], color=OUTLINE_COLOURS[name], label=name)
-        cax.plot([], [], color=OUTLINE_COLOURS[name], label=name)
-    cax.set(title='Coronal, AP = -2 mm', xlabel='ML (m)', ylabel='DV (m)')
-    sax.set(title='Sagittal, ML = 0', xlabel='AP (m)', ylabel='DV (m)')
-    sax.invert_xaxis()  # anterior on the left, as in plot_sslice
-    cax.legend(fontsize=8)
-    return fig
-
-
-def _sagittal_polygons(atlas: AllenAtlas, ml: float = 0.0) -> dict:
-    """
-    Region polygons of a sagittal slice, mapped through the atlas coordinates.
-
-    The polygons are extracted on the voxel grid, then their vertices go through ``bc.i2xyz``, so a
-    rotation in the atlas coordinates is applied to them.
+    The labels are looked up on a grid of coordinates with ``get_labels``, which goes through the
+    rotation of the atlas, then the region contours are extracted from that grid.
 
     Parameters
     ----------
     atlas : iblatlas.atlas.BrainAtlas
         The atlas, possibly with a rotation in its coordinates.
-    ml : float
-        ML coordinate of the slice, in metres.
+    axis : int
+        0 for a sagittal plane at ML = ``coordinate``, 1 for a coronal plane at AP = ``coordinate``.
+    coordinate : float
+        Coordinate of the plane, in metres relative to bregma.
+    limits : tuple
+        ((min, max) of the horizontal axis, (min, max) of DV), in mm. The horizontal axis is AP for a
+        sagittal plane and ML for a coronal plane.
 
     Returns
     -------
     dict
-        Region index: list of (vertices, codes), vertices being (n, 2) arrays of (AP, DV) in mm
+        Region id: list of (vertices, codes), vertices being (n, 2) arrays of (horizontal, DV) in mm
         relative to bregma. Holes are encoded in the codes.
     """
-    ix = int(atlas.bc.x2i(np.array(ml)))  # a pitch leaves the ML axis alone, so this is valid
-    rindex = atlas.slice(ml, axis=0, volume='rindex')  # (nap, ndv), in the voxel grid frame
+    step = atlas.res_um / 1e3  # mm
+    horizontal, dv = (np.arange(lo, hi, step) for lo, hi in limits)
+    uu, vv = np.meshgrid(horizontal, dv, indexing='ij')
+    xyz = np.full(uu.shape + (3,), coordinate)
+    xyz[..., 1 - axis], xyz[..., 2] = uu * 1e-3, vv * 1e-3
+    xyz = xyz.reshape(-1, 3)
+    iii = atlas.bc.xyz2i(xyz, mode='wrap')  # indices left as they are when outside the volume
+    inside = np.all((iii >= 0) & (iii < atlas.bc.nxyz), axis=1)
+    ids = np.zeros(len(xyz), dtype=int)
+    ids[inside] = atlas.get_labels(xyz[inside])
+    ids = ids.reshape(uu.shape)
     polygons = {}
-    for r in np.unique(rindex):
-        if atlas.regions.id[r] == 0:  # void
-            continue
-        gen = contour_generator(z=np.pad(rindex == r, 1).astype(float), fill_type=FillType.OuterCode)
-        polygons[r] = []
+    for rid in np.unique(ids[ids != 0]):  # 0 is the void
+        gen = contour_generator(z=np.pad(ids == rid, 1).astype(float), fill_type=FillType.OuterCode)
+        polygons[rid] = []
         for points, codes in zip(*gen.filled(0.5, 1.5)):
-            idv, iap = (points - 1).T  # contour x is the column (DV), y the row (AP); remove the padding
-            xyz = atlas.bc.i2xyz(np.c_[np.full(iap.size, ix), iap, idv]) * 1e3
-            polygons[r].append((xyz[:, 1:], codes))
+            col, row = (points - 1).T  # contour x is the column (DV), y the row; remove the padding
+            polygons[rid].append((np.c_[horizontal[0] + row * step, dv[0] + col * step], codes))
     return polygons
 
 
-def atlas_variants_sagittal(res_um: int = 25) -> plt.Figure:
+def atlas_variants_slices(res_um: int = 25) -> plt.Figure:
     """
-    Sagittal slice at ML = 0 of the Allen, Needles, MRI Toronto and Qiu 2018 atlases, drawn as vectors.
+    Sagittal (ML = 0) and coronal (AP = -2 mm) slices of the Allen, Needles, MRI Toronto and Qiu 2018 atlases.
 
-    The three marked voxels are the same CCF voxels in every panel, their coordinates are in the
-    table of the atlas spaces page. All panels share the same limits.
+    The regions are drawn as vectors. The three marked voxels are the same CCF voxels in every
+    sagittal panel, their coordinates are in the table of the atlas spaces page. In each column all
+    the panels share the same limits.
 
     Parameters
     ----------
@@ -120,30 +98,46 @@ def atlas_variants_sagittal(res_um: int = 25) -> plt.Figure:
     Returns
     -------
     matplotlib.figure.Figure
-        Four axes in mm relative to bregma, anterior on the left.
+        Eight axes, one row per atlas, the sagittal slice on the left and the coronal one on the
+        right, in mm relative to bregma.
     """
     atlases = {'Allen CCF': (AllenAtlas(res_um), 'unit scaling'),
                'Needles': (NeedlesAtlas(res_um), 'ML 1 | AP 1.087 | DV 0.952'),
                'MRI Toronto': (MRITorontoAtlas(res_um), 'ML 0.952 | AP 1.031 | DV 0.885'),
                'Qiu 2018': (Qiu2018Atlas(res_um), 'Toronto scaling + 5° pitch')}
+    # (title, axis of the plane, coordinate in m, sampled (horizontal, DV) limits in mm, x label)
+    planes = (('Sagittal, ML = 0', 0, 0.0, ((-10, 6.5), (-8.5, 1.5)), 'AP (mm from bregma)'),
+              ('Coronal, AP = -2 mm', 1, -0.002, ((-6.5, 6.5), (-8.5, 1.5)), 'ML (mm from bregma)'))
+    polygons = [[_slice_polygons(atlas, axis, coord, limits) for _, axis, coord, limits, _ in planes]
+                for atlas, _ in atlases.values()]
     points_ccf = atlases['Allen CCF'][0].xyz2ccf(SAGITTAL_POINTS_UM / 1e6)
-    polygons = {name: _sagittal_polygons(atlas) for name, (atlas, _) in atlases.items()}
-    fig, axes = plt.subplots(2, 2, figsize=(11, 7.5), sharex=True, sharey=True, layout='constrained')
-    for ax, (name, (atlas, subtitle)) in zip(axes.flatten(), atlases.items()):
-        for r, parts in polygons[name].items():
-            path = MplPath.make_compound_path(*[MplPath(vertices, codes) for vertices, codes in parts])
-            ax.add_patch(PathPatch(path, facecolor=atlas.regions.rgba[r] / 255, edgecolor='k', lw=0.1))
-        ax.plot(0, 0, '+', color='k', ms=10, mew=2, zorder=10)  # bregma, the pivot of the rotation
-        xyz = atlas.ccf2xyz(points_ccf) * 1e3
-        ax.plot(xyz[:, 1], xyz[:, 2], 'o', color='k', mfc='w', ms=6, zorder=10)
-        for i, (ap, dv) in enumerate(xyz[:, 1:]):
-            ax.annotate(f'P{i + 1}', (ap, dv), xytext=(5, 5), textcoords='offset points', weight='bold', zorder=10)
-        ax.set(title=f'{name}\n{subtitle}', aspect='equal', xlabel='AP (mm from bregma)', ylabel='DV (mm from bregma)')
-        ax.label_outer()
-    vertices = np.vstack([v for parts in polygons.values() for ps in parts.values() for v, _ in ps])
     margin = 0.25  # mm
-    axes[0, 0].set_xlim(vertices[:, 0].max() + margin, vertices[:, 0].min() - margin)  # anterior on the left
-    axes[0, 0].set_ylim(vertices[:, 1].min() - margin, vertices[:, 1].max() + margin)
+    xlims, ylims = [], []
+    for col in range(len(planes)):  # limits containing all the atlases plus a margin, shared by a column
+        vertices = np.vstack([v for row in polygons for parts in row[col].values() for v, _ in parts])
+        xlims.append((vertices[:, 0].min() - margin, vertices[:, 0].max() + margin))
+        ylims.append((vertices[:, 1].min() - margin, vertices[:, 1].max() + margin))
+    ylim = (min(lo for lo, _ in ylims), max(hi for _, hi in ylims))
+    fig, axes = plt.subplots(len(atlases), len(planes), figsize=(9, 10.2), sharex='col', sharey=True, layout='constrained',
+                             gridspec_kw={'width_ratios': [hi - lo for lo, hi in xlims]})
+    for i, (name, (atlas, subtitle)) in enumerate(atlases.items()):
+        for j, (title, _, _, _, xlabel) in enumerate(planes):
+            ax = axes[i, j]
+            for rid, parts in polygons[i][j].items():
+                path = MplPath.make_compound_path(*[MplPath(vertices, codes) for vertices, codes in parts])
+                color = atlas.regions.rgba[np.flatnonzero(atlas.regions.id == rid)[0]] / 255
+                ax.add_patch(PathPatch(path, facecolor=color, edgecolor='k', lw=0.1))
+            ax.plot(0, 0, '+', color='k', ms=10, mew=2, zorder=10)  # bregma, the pivot of the rotation
+            if j == 0:  # the same CCF voxels in this atlas
+                xyz = atlas.ccf2xyz(points_ccf) * 1e3
+                ax.plot(xyz[:, 1], xyz[:, 2], 'o', color='k', mfc='w', ms=6, zorder=10)
+                for k, (ap, dv) in enumerate(xyz[:, 1:]):
+                    ax.annotate(f'P{k + 1}', (ap, dv), xytext=(5, 5), textcoords='offset points', weight='bold', zorder=10)
+                ax.set_ylabel(f'{name}\n{subtitle}\nDV (mm from bregma)')
+            ax.set(aspect='equal', xlabel=xlabel if i == len(atlases) - 1 else '', title=title if i == 0 else '')
+    axes[0, 0].set_xlim(xlims[0][1], xlims[0][0])  # sagittal: anterior on the left
+    axes[0, 1].set_xlim(*xlims[1])
+    axes[0, 0].set_ylim(*ylim)
     return fig
 
 
@@ -441,9 +435,9 @@ def landing_images(out_dir: Path = LANDING_DIR) -> None:
 
 
 def main(out_dir: Path = IMAGES_DIR) -> None:
-    """Write the four PNGs into ``out_dir``, overwriting any that exist."""
+    """Write the three PNGs into ``out_dir``, overwriting any that exist."""
     out_dir.mkdir(parents=True, exist_ok=True)
-    for name, make in (('scaling-overlay', scaling_overlay), ('atlas-variants-sagittal', atlas_variants_sagittal),
+    for name, make in (('atlas-variants-slices', atlas_variants_slices),
                        ('agea-raw-vs-processed', agea_raw_vs_processed), ('mappings-coronal', mappings_coronal)):
         fig = make()
         fig.savefig(out_dir / f'{name}.png', dpi=150, bbox_inches='tight')
