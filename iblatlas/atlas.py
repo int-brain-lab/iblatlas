@@ -179,9 +179,15 @@ class BrainCoordinates:
         Coordinates of the element volume[0, 0, 0] in the coordinate space.
     dxyz : array_like, float
         Spatial interval of the volume along the 3 dimensions.
+    affine : array_like, optional
+        A (3, 3) linear transform, e.g. a rotation, applied around xyz = 0 (Bregma for atlases)
+        to the regular grid defined by xyz0 and dxyz. The per-axis methods (x2i, xscale, xlim...)
+        and the dx, x0... attributes raise a ValueError for an axis mixed with others by the transform.
 
     Attributes
     ----------
+    matrix : numpy.array
+        The (4, 4) affine matrix mapping volume indices to Cartesian coordinates, xyz = A @ i + t.
     xyz0 : numpy.array
         The Cartesian coordinates of the element volume[0, 0, 0], i.e. the origin.
     x0 : int
@@ -192,12 +198,29 @@ class BrainCoordinates:
         The z-axis origin coordinate of the element volume.
     """
 
-    def __init__(self, nxyz, xyz0=(0, 0, 0), dxyz=(1, 1, 1)):
+    def __init__(self, nxyz, xyz0=(0, 0, 0), dxyz=(1, 1, 1), affine=None):
         if np.isscalar(dxyz):
             dxyz = [dxyz] * 3
-        self.x0, self.y0, self.z0 = list(xyz0)
-        self.dx, self.dy, self.dz = list(dxyz)
+        affine = np.eye(3) if affine is None else np.asarray(affine, dtype=float)
+        # xyz = affine @ (i * dxyz + xyz0)
+        self.matrix = np.eye(4)
+        self.matrix[:3, :3] = affine * np.asarray(dxyz, dtype=float)
+        self.matrix[:3, 3] = affine @ np.asarray(xyz0, dtype=float)
         self.nx, self.ny, self.nz = list(nxyz)
+
+    def _axis(self, k):
+        """Return the (interval, origin) of axis k, if the affine transform does not mix it with others."""
+        others = np.arange(3) != k
+        if np.any(self.matrix[k, :3][others]) or np.any(self.matrix[:3, k][others]):
+            raise ValueError(f'Axis {k} is mixed with other axes by the affine transform: use xyz2i and i2xyz.')
+        return self.matrix[k, k], self.matrix[k, 3]
+
+    dx = property(lambda self: self._axis(0)[0], doc='Spatial interval along x.')
+    dy = property(lambda self: self._axis(1)[0], doc='Spatial interval along y.')
+    dz = property(lambda self: self._axis(2)[0], doc='Spatial interval along z.')
+    x0 = property(lambda self: self._axis(0)[1], doc='Origin coordinate along x.')
+    y0 = property(lambda self: self._axis(1)[1], doc='Origin coordinate along y.')
+    z0 = property(lambda self: self._axis(2)[1], doc='Origin coordinate along z.')
 
     @property
     def dxyz(self):
@@ -373,13 +396,15 @@ class BrainCoordinates:
             At least one coordinate lies outside of the atlas volume. Change 'mode' input to 'wrap'
             to keep these values unchanged, or 'clip' to return the nearest valid indices.
         """
-        xyz = np.array(xyz)
-        dt = int if round else float
-        out = np.zeros_like(xyz, dtype=dt)
-        out[..., 0] = self.x2i(xyz[..., 0], round=round, mode=mode)
-        out[..., 1] = self.y2i(xyz[..., 1], round=round, mode=mode)
-        out[..., 2] = self.z2i(xyz[..., 2], round=round, mode=mode)
-        return out
+        xyz = np.array(xyz, dtype=float)
+        rhs = (xyz - self.matrix[:3, 3]).reshape(-1, 3).T
+        iii = self._round(np.linalg.solve(self.matrix[:3, :3], rhs).T.reshape(xyz.shape), round=round)
+        if np.any(iii < 0) or np.any(iii >= self.nxyz):
+            if mode == 'clip':
+                iii = np.clip(iii, 0, self.nxyz - 1)
+            elif mode == 'raise':
+                raise ValueError("At least one coordinate lies outside of the atlas volume.")
+        return iii
 
     """Methods indices to distance"""
     def i2x(self, ind):
@@ -446,11 +471,7 @@ class BrainCoordinates:
         """
 
         iii = np.array(iii, dtype=float)
-        out = np.zeros_like(iii)
-        out[..., 0] = self.i2x(iii[..., 0])
-        out[..., 1] = self.i2y(iii[..., 1])
-        out[..., 2] = self.i2z(iii[..., 2])
-        return out
+        return iii @ self.matrix[:3, :3].T + self.matrix[:3, 3]
 
     """Methods bounds"""
     @property
@@ -516,7 +537,7 @@ class BrainAtlas:
     volumes = None
 
     def __init__(self, image, label, dxyz, regions, iorigin=[0, 0, 0],
-                 dims2xyz=[0, 1, 2], xyz2dims=[0, 1, 2]):
+                 dims2xyz=[0, 1, 2], xyz2dims=[0, 1, 2], affine=None):
         """
         self.image: image volume (ap, ml, dv)
         self.label: label volume (ap, ml, dv)
@@ -536,7 +557,7 @@ class BrainAtlas:
         # create the coordinate transform object that maps volume indices to real world coordinates
         nxyz = np.array(self.image.shape)[self.dims2xyz]
         bc = BrainCoordinates(nxyz=nxyz, xyz0=(0, 0, 0), dxyz=dxyz)
-        self.bc = BrainCoordinates(nxyz=nxyz, xyz0=-bc.i2xyz(iorigin), dxyz=dxyz)
+        self.bc = BrainCoordinates(nxyz=nxyz, xyz0=-bc.i2xyz(iorigin), dxyz=dxyz, affine=affine)
 
         self.surface = None
         self.boundary = None
@@ -1374,7 +1395,7 @@ class AllenAtlas(BrainAtlas):
     """
     label = None
 
-    def __init__(self, res_um=25, scaling=(1, 1, 1), mock=False, hist_path=None):
+    def __init__(self, res_um=25, scaling=(1, 1, 1), mock=False, hist_path=None, affine=None):
         """
         Instantiates an atlas.BrainAtlas corresponding to the Allen CCF at the given resolution
         using the IBL Bregma and coordinate system.
@@ -1385,6 +1406,9 @@ class AllenAtlas(BrainAtlas):
             The Atlas resolution in micrometres; one of 10, 25 or 50um.
         scaling : float, numpy.array
             Scale factor along ml, ap, dv for squeeze and stretch (default: [1, 1, 1]).
+        affine : numpy.array
+            Optional (3, 3) linear transform (e.g. a rotation) applied around Bregma, after the
+            scaling, to the coordinates of xyz2ccf, ccf2xyz and the label lookups (default: None).
         mock : bool
             For testing purposes, return atlas object with image comprising zeros.
         hist_path : str, pathlib.Path
@@ -1452,7 +1476,7 @@ class AllenAtlas(BrainAtlas):
             label = self._read_volume(file_label_remap)
             image = self._read_volume(hist_path)
 
-        super().__init__(image, label, dxyz, regions, ibregma, dims2xyz=dims2xyz, xyz2dims=xyz2dims)
+        super().__init__(image, label, dxyz, regions, ibregma, dims2xyz=dims2xyz, xyz2dims=xyz2dims, affine=affine)
 
     @staticmethod
     def _read_volume(file_volume: Path):
@@ -1635,6 +1659,97 @@ def MRITorontoAtlas(*args, **kwargs):
     AP_SCALE = 1.031  # multiplicative factor on AP dimension
     kwargs['scaling'] = np.array([ML_SCALE, AP_SCALE, DV_SCALE])
     return AllenAtlas(*args, **kwargs)
+
+
+def _pitch_affine(pitch):
+    """
+    The (3, 3) affine of a pitch, a right-handed rotation around the ML axis in (ml, ap, dv) order.
+
+    Parameters
+    ----------
+    pitch : float
+        The pitch angle in degrees, positive lifts the nose, ie. the anterior side of the atlas.
+
+    Returns
+    -------
+    numpy.array
+        The rotation matrix, to pass as the `affine` of an AllenAtlas.
+    """
+    a = np.deg2rad(pitch)
+    return np.array([[1, 0, 0], [0, np.cos(a), -np.sin(a)], [0, np.sin(a), np.cos(a)]])
+
+
+def Qiu2018Atlas(*args, pitch=5.0, **kwargs):
+    """
+    The Qiu 2018 MRI brain atlas, as defined in Pinpoint [1]_.
+
+    Instantiates the MRITorontoAtlas (same stretch and squeeze, from the average of 12 live p65
+    mice [2]_), then pitches it around the ML axis and Bregma to level the Bregma-Lambda surface.
+    The scaling is applied first, then the rotation.
+
+    Parameters
+    ----------
+    res_um : {10, 25, 50} int
+        The Atlas resolution in micrometres; one of 10, 25 or 50um.
+    pitch : float
+        The pitch angle in degrees, positive lifts the nose, ie. the anterior side of the atlas
+        (default: 5, as in Pinpoint).
+    **kwargs
+        See AllenAtlas.
+
+    Returns
+    -------
+    AllenAtlas
+        An Allen atlas object with the MRI scaling and pitch applied.
+
+    References
+    ----------
+    .. [1] Birman D, et al. (2023). Pinpoint: trajectory planning for multi-probe electrophysiology
+       and injections in an interactive web-based 3D environment. eLife, reviewed preprint
+       [doi 10.7554/eLife.91662.1]. Qiu2018Transform: https://github.com/VirtualBrainLab/Pinpoint
+    .. [2] Qiu, LR, Fernandes, DJ, Szulc-Lerch, KU et al. (2018) Mouse MRI shows brain areas
+       relatively larger in males emerge before those larger in females. Nat Commun 9, 2615.
+       [doi 10.1038/s41467-018-04921-2]
+    """
+    kwargs['affine'] = _pitch_affine(pitch)
+    return MRITorontoAtlas(*args, **kwargs)
+
+
+def Dorr2008Atlas(*args, pitch=5.0, **kwargs):
+    """
+    The Dorr 2008 MRI brain atlas, as defined in Pinpoint [1]_.
+
+    Instantiates the NeedlesAtlas (same stretch and squeeze, from the average of 40 post-mortem
+    p84 mice [2]_), then pitches it around the ML axis and Bregma to level the Bregma-Lambda
+    surface. The scaling is applied first, then the rotation. The NeedlesAtlas is the same
+    scaling without the pitch, ie. the legacy IBL Dorr transform of Pinpoint.
+
+    Parameters
+    ----------
+    res_um : {10, 25, 50} int
+        The Atlas resolution in micrometres; one of 10, 25 or 50um.
+    pitch : float
+        The pitch angle in degrees, positive lifts the nose, ie. the anterior side of the atlas
+        (default: 5, as in Pinpoint).
+    **kwargs
+        See AllenAtlas.
+
+    Returns
+    -------
+    AllenAtlas
+        An Allen atlas object with the MRI scaling and pitch applied.
+
+    References
+    ----------
+    .. [1] Birman D, et al. (2023). Pinpoint: trajectory planning for multi-probe electrophysiology
+       and injections in an interactive web-based 3D environment. eLife, reviewed preprint
+       [doi 10.7554/eLife.91662.1]. Dorr2008Transform: https://github.com/VirtualBrainLab/Pinpoint
+    .. [2] Dorr AE, Lerch JP, Spring S, Kabani N, Henkelman RM (2008). High resolution
+       three-dimensional brain atlas using an average magnetic resonance image of 40 adult C57Bl/6J
+       mice. Neuroimage 42(1):60-9. [doi 10.1016/j.neuroimage.2008.03.037]
+    """
+    kwargs['affine'] = _pitch_affine(pitch)
+    return NeedlesAtlas(*args, **kwargs)
 
 
 def _download_atlas_allen(target_file_image):
