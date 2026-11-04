@@ -608,7 +608,7 @@ class BrainAtlas(abc.ABC):
     @staticmethod
     def _lateralize(label, imidline):
         """
-        Lateralize a label volume: the regions of the left hemisphere have primary keys opposite to the normal ones.
+        Lateralize a label volume: the regions of the left hemisphere have negative primary keys.
 
         Parameters
         ----------
@@ -1518,8 +1518,7 @@ class AllenAtlas(BrainAtlas):
             if not file_label_remap.exists():
                 label = self._read_volume(file_label).astype(dtype=np.int32)
                 _logger.info("Computing brain atlas annotations lookup table")
-                # lateralize atlas: for this the regions of the left hemisphere have primary
-                # keys opposite to to the normal ones
+                # lateralize atlas: the regions of the left hemisphere have negative primary keys
                 label = self._lateralize(label, self.imidline)
                 # the 10 um atlas is too big to fit in memory so work by chunks instead
                 if res_um == 10:
@@ -1933,8 +1932,7 @@ class FranklinPaxinosAtlas(BrainAtlas):
             if not file_label_remap.exists():
                 label = self._read_volume(file_label).astype(dtype=np.int32)
                 _logger.info("computing brain atlas annotations lookup table")
-                # lateralize atlas: for this the regions of the left hemisphere have primary
-                # keys opposite to to the normal ones
+                # lateralize atlas: the regions of the left hemisphere have negative primary keys
                 label = self._lateralize(label, self.imidline)
                 _, im = ismember(label, regions.id)
                 label = np.reshape(im.astype(np.uint16), label.shape)
