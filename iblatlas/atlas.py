@@ -23,7 +23,15 @@ ALLEN_CCF_MIDLINE_ML_UM = 5695
 """float: The ML coordinate, relative to the Allen CCF origin (volume index times resolution), of the
 plane about which the Allen CCF is mirror-symmetric. This is the same at every resolution, and 44 um
 medial of bregma. The ML index of the midline in a volume of resolution `res_um` is
-`ALLEN_CCF_MIDLINE_ML_UM / res_um`."""
+`ALLEN_CCF_MIDLINE_ML_UM / res_um`.
+
+This value was measured on the Allen volumes, it is not a landmark of the atlas. It is the ML plane
+that maximizes the overlap of the volume with its mirror image (brain mask and template correlation,
+sub-voxel search along ML). At the native 10 um resolution the volume (1140 voxels along ML) is exactly
+symmetric about the plane between voxels 569 and 570, ie. 569.5 * 10 = 5695 um. The 25 and 50 um volumes
+are decimated from it and agree within a few um, the precision of their voxel grid. The 5700 um often quoted
+is the same plane in the voxel-edge convention, while the indices here are voxel centres. See
+https://github.com/int-brain-lab/iblatlas/issues/41."""
 
 PAXINOS_CCF_LANDMARKS_MLAPDV_UM = {'bregma': np.array([5700, 4300 + 160, 330])}
 """dict: The ML AP DV voxel coordinates of brain landmarks in the Franklin & Paxinos atlas."""
