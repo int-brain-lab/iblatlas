@@ -1,4 +1,6 @@
 ## [Unreleased]
+### Fixed
+- `AllenAtlas` lateralization: the left and right labels were split at bregma instead of the midline, so 3 columns (10 um) and 1 column (25 um) next to the midline carried the left sign. The cached label lookup file is now `annotation_<res>_lut_v02.npz`, and is recomputed on first use
 ### Added
 - `Ephys100` and `EphysCosmos` mappings (and `-lr` versions): optimal cuts of the ontology tree on ephys-atlas features, EphysCosmos separates pons and medulla
 - `Qiu2018Atlas` and `Dorr2008Atlas`: the Toronto and Needles MRI scalings plus a 5° pitch around Bregma to level the Bregma-Lambda surface, as in Pinpoint

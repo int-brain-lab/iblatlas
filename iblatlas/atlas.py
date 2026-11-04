@@ -598,6 +598,27 @@ class BrainAtlas(abc.ABC):
         return float(self.bc.i2xyz(np.r_[self.imidline, self._iorigin[1:]])[0])
 
     @staticmethod
+    def _lateralize(label, imidline):
+        """
+        Lateralize a label volume: the regions of the left hemisphere have primary keys opposite to the normal ones.
+
+        Parameters
+        ----------
+        label : numpy.array
+            The (ap, ml, dv) label volume of region ids.
+        imidline : float
+            The fractional ML index of the midline: the columns on the midline or to its right are
+            the right hemisphere, the columns left of the midline are negated.
+
+        Returns
+        -------
+        numpy.array
+            The label volume, with the ids of the left hemisphere negated.
+        """
+        right = np.arange(label.shape[1]) >= imidline
+        return label * np.where(right, 1, -1).astype(label.dtype)[np.newaxis, :, np.newaxis]
+
+    @staticmethod
     def _get_cache_dir():
         """
         ./histology/ATLAS/Needles/Allen
@@ -1460,7 +1481,8 @@ class AllenAtlas(BrainAtlas):
         >>> target_dir = one.cache_dir / AllenAtlas.atlas_rel_path
         ... ba = AllenAtlas(hist_path=target_dir)
         """
-        LUT_VERSION = 'v01'  # version 01 is the lateralized version
+        # version 01 is the lateralized version, split at bregma; version 02 is split at the midline
+        LUT_VERSION = 'v02'
         regions = BrainRegions()
         xyz2dims = np.array([1, 0, 2])  # this is the c-contiguous ordering
         dims2xyz = np.array([1, 0, 2])
@@ -1490,10 +1512,7 @@ class AllenAtlas(BrainAtlas):
                 _logger.info("Computing brain atlas annotations lookup table")
                 # lateralize atlas: for this the regions of the left hemisphere have primary
                 # keys opposite to to the normal ones
-                lateral = np.zeros(label.shape[xyz2dims[0]])
-                lateral[int(np.floor(ibregma[0]))] = 1
-                lateral = np.sign(np.cumsum(lateral)[np.newaxis, :, np.newaxis] - 0.5)
-                label = label * lateral.astype(np.int32)
+                label = self._lateralize(label, self.imidline)
                 # the 10 um atlas is too big to fit in memory so work by chunks instead
                 if res_um == 10:
                     first, ncols = (0, 10)
@@ -1908,10 +1927,7 @@ class FranklinPaxinosAtlas(BrainAtlas):
                 _logger.info("computing brain atlas annotations lookup table")
                 # lateralize atlas: for this the regions of the left hemisphere have primary
                 # keys opposite to to the normal ones
-                lateral = np.zeros(label.shape[xyz2dims[0]])
-                lateral[int(np.floor(ibregma[0]))] = 1
-                lateral = np.sign(np.cumsum(lateral)[np.newaxis, :, np.newaxis] - 0.5)
-                label = label * lateral.astype(np.int32)
+                label = self._lateralize(label, self.imidline)
                 _, im = ismember(label, regions.id)
                 label = np.reshape(im.astype(np.uint16), label.shape)
                 np.savez_compressed(file_label_remap, label)
