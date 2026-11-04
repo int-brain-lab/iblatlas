@@ -19,6 +19,10 @@ origin is the corner of the volume; in the IBL frame it is bregma.](images/frame
 Bregma sits at ML 5739, AP 5400, DV 332 µm in the CCF volume. The signs and units of the IBL
 frame are on [Coordinates and volumes](coordinates-and-volumes.qmd).
 
+The CCF is mirror-symmetric about ML 5695 µm, 44 µm medial of bregma, at every resolution.
+To mirror points between hemispheres, reflect about `atlas.midline_x` (in metres, relative to the
+origin of the atlas frame, which is bregma for the Allen atlases but not for every atlas), not about x = 0.
+
 ## The five atlases
 
 Which atlas fits depends on where your coordinates come from.

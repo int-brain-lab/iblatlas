@@ -15,6 +15,14 @@ _logger = logging.getLogger(__name__)
 _, NML, NDV, NAP = DIM_EXP = (4345, 58, 41, 67)  # nexperiments, nml, ndv, nap
 
 
+class AGEAAtlas(atlas.BrainAtlas):
+    """The Allen CCF at the 200 um resolution of the AGEA / MERFISH grids, with the Allen midline."""
+
+    @property
+    def imidline(self):
+        return atlas.ALLEN_CCF_MIDLINE_ML_UM / 200
+
+
 def load_atlas(folder_cache=None):
     """
     Builds the brain atlas matching the AGEA / MERFISH 200 um grid.
@@ -32,14 +40,14 @@ def load_atlas(folder_cache=None):
         file_path = folder_cache.joinpath(filename)
         if not file_path.exists():
             aws.s3_download_file(f'atlas/agea/{filename}', file_path)
-    return atlas.BrainAtlas(
+    return AGEAAtlas(
         image=np.load(folder_cache.joinpath('image.npy')),
         label=np.load(folder_cache.joinpath('label.npy')),
         dxyz=200 / 1e6 * np.array([1, -1, -1]),
         regions=atlas.BrainRegions(),
         iorigin=atlas.ALLEN_CCF_LANDMARKS_MLAPDV_UM['bregma'] / 200 + np.array([0, 0, 0]),
         dims2xyz=[0, 2, 1],
-        xyz2dims=[0, 2, 1]
+        xyz2dims=[0, 2, 1],
     )
 
 

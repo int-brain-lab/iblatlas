@@ -1,6 +1,7 @@
 """
 Classes for manipulating brain atlases, insertions, and coordinates.
 """
+import abc
 from pathlib import Path, PurePosixPath
 from dataclasses import dataclass
 import logging
@@ -18,8 +19,17 @@ from iblatlas.regions import BrainRegions, FranklinPaxinosRegions
 ALLEN_CCF_LANDMARKS_MLAPDV_UM = {'bregma': np.array([5739, 5400, 332])}
 """dict: The ML AP DV voxel coordinates of brain landmarks in the Allen atlas."""
 
+ALLEN_CCF_MIDLINE_ML_UM = 5695
+"""float: The ML coordinate, relative to the Allen CCF origin (volume index times resolution), of the
+plane about which the Allen CCF is mirror-symmetric. This is the same at every resolution, and 44 um
+medial of bregma. The ML index of the midline in a volume of resolution `res_um` is
+`ALLEN_CCF_MIDLINE_ML_UM / res_um`."""
+
 PAXINOS_CCF_LANDMARKS_MLAPDV_UM = {'bregma': np.array([5700, 4300 + 160, 330])}
 """dict: The ML AP DV voxel coordinates of brain landmarks in the Franklin & Paxinos atlas."""
+
+PAXINOS_CCF_MIDLINE_ML_UM = 5700
+"""float: The ML coordinate of the midline of the Franklin & Paxinos atlas, which is at bregma."""
 
 S3_BUCKET_IBL = 'ibl-brain-wide-map-public'
 """str: The name of the public IBL S3 bucket containing atlas data."""
@@ -521,11 +531,13 @@ class BrainCoordinates:
         return np.meshgrid(self.xscale, self.yscale, self.zscale)
 
 
-class BrainAtlas:
+class BrainAtlas(abc.ABC):
     """
     Objects that holds image, labels and coordinate transforms for a brain Atlas.
     Currently this is designed for the AllenCCF at several resolutions,
     yet this class can be used for other atlases arises.
+
+    This is an abstract class: child classes must define the `imidline` property.
     """
 
     """numpy.array: A 3D image volume."""
@@ -539,6 +551,7 @@ class BrainAtlas:
     def __init__(self, image, label, dxyz, regions, iorigin=[0, 0, 0],
                  dims2xyz=[0, 1, 2], xyz2dims=[0, 1, 2], affine=None):
         """
+        self.midline_x: ml coordinate (m) of the midline plane relative to the origin
         self.image: image volume (ap, ml, dv)
         self.label: label volume (ap, ml, dv)
         self.bc: atlas.BrainCoordinate object
@@ -561,6 +574,28 @@ class BrainAtlas:
 
         self.surface = None
         self.boundary = None
+        self._iorigin = np.asarray(iorigin, dtype=float)
+
+    @property
+    @abc.abstractmethod
+    def imidline(self):
+        """
+        float: The fractional ML index of the volume of the midline, the plane about which the atlas
+        is mirror-symmetric. Child classes must define it, from the midline of their volume and their resolution.
+        """
+
+    @property
+    def midline_x(self):
+        """
+        float: The ML coordinate (m) of the midline, the plane about which the atlas is mirror-symmetric.
+
+        Every atlas must define its midline, see the abstract property `imidline`.
+        The coordinate is relative to the origin of the atlas coordinate system (x = 0 in `bc`), which is
+        bregma for the Allen and Paxinos atlases but not necessarily for others. Mirror a point about the
+        midline with `x' = 2 * midline_x - x`. It follows the resolution, scaling and affine of the atlas
+        (for an affine mixing the ML axis, this is the midline at the AP and DV of the origin).
+        """
+        return float(self.bc.i2xyz(np.r_[self.imidline, self._iorigin[1:]])[0])
 
     @staticmethod
     def _get_cache_dir():
@@ -1395,6 +1430,11 @@ class AllenAtlas(BrainAtlas):
     """
     label = None
 
+    @property
+    def imidline(self):
+        """float: The fractional ML index of the midline, ALLEN_CCF_MIDLINE_ML_UM whatever the resolution."""
+        return ALLEN_CCF_MIDLINE_ML_UM / self.res_um
+
     def __init__(self, res_um=25, scaling=(1, 1, 1), mock=False, hist_path=None, affine=None):
         """
         Instantiates an atlas.BrainAtlas corresponding to the Allen CCF at the given resolution
@@ -1794,6 +1834,11 @@ class FranklinPaxinosAtlas(BrainAtlas):
 
     """pathlib.PurePosixPath: The default relative path of the atlas file."""
     atlas_rel_path = PurePosixPath('histology', 'ATLAS', 'Needles', 'FranklinPaxinos')
+
+    @property
+    def imidline(self):
+        """float: The fractional ML index of the midline, PAXINOS_CCF_MIDLINE_ML_UM whatever the resolution."""
+        return PAXINOS_CCF_MIDLINE_ML_UM / self.res_um[0]
 
     def __init__(self, res_um=(10, 100, 10), scaling=(1, 1, 1), mock=False, hist_path=None):
         """The Franklin & Paxinos brain atlas.

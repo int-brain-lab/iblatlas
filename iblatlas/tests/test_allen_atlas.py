@@ -48,6 +48,19 @@ class TestAtlasSlicesConversion(unittest.TestCase):
         inds = ba._lookup_inds(np.stack((ix, iy, np.maximum(izb + 1, 0)), axis=-1))
         self.assertTrue(np.all(ba.label.flat[inds][~np.isnan(ba.bottom)] == 0))
 
+    def test_midline_symmetry(self):
+        """The brain mask is mirror-symmetric about the midline, much more than about bregma."""
+        ba = self.ba
+        mask = ba.label != 0  # (ap, ml, dv)
+
+        def jaccard(x_mirror):
+            ix = ba.bc.x2i(2 * x_mirror - ba.bc.xscale, mode='wrap')
+            ok = (ix >= 0) & (ix < ba.bc.nx)
+            a, b = mask[:, ok], mask[:, ix[ok]]
+            return np.sum(a & b) / np.sum(a | b)
+        self.assertGreater(jaccard(ba.midline_x), 0.98)
+        self.assertGreater(jaccard(ba.midline_x), jaccard(0.) + 0.02)
+
     def test_lookups(self):
         ba = self.ba
         # test the probabilistic indices lookup
