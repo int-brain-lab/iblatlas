@@ -1,6 +1,7 @@
 """
 Classes for manipulating brain atlases, insertions, and coordinates.
 """
+import abc
 from pathlib import Path, PurePosixPath
 from dataclasses import dataclass
 import logging
@@ -18,8 +19,25 @@ from iblatlas.regions import BrainRegions, FranklinPaxinosRegions
 ALLEN_CCF_LANDMARKS_MLAPDV_UM = {'bregma': np.array([5739, 5400, 332])}
 """dict: The ML AP DV voxel coordinates of brain landmarks in the Allen atlas."""
 
+ALLEN_CCF_MIDLINE_ML_UM = 5695
+"""float: The ML coordinate, relative to the Allen CCF origin (volume index times resolution), of the
+plane about which the Allen CCF is mirror-symmetric. This is the same at every resolution, and 44 um
+medial of bregma. The ML index of the midline in a volume of resolution `res_um` is
+`ALLEN_CCF_MIDLINE_ML_UM / res_um`.
+
+This value was measured on the Allen volumes, it is not a landmark of the atlas. It is the ML plane
+that maximizes the overlap of the volume with its mirror image (brain mask and template correlation,
+sub-voxel search along ML). At the native 10 um resolution the volume (1140 voxels along ML) is exactly
+symmetric about the plane between voxels 569 and 570, ie. 569.5 * 10 = 5695 um. The 25 and 50 um volumes
+are resampled from it and agree within a few um, the precision of their voxel grid. The 5700 um often quoted
+is the same plane in the voxel-edge convention, while the indices here are voxel centres. See
+https://github.com/int-brain-lab/iblatlas/issues/41."""
+
 PAXINOS_CCF_LANDMARKS_MLAPDV_UM = {'bregma': np.array([5700, 4300 + 160, 330])}
 """dict: The ML AP DV voxel coordinates of brain landmarks in the Franklin & Paxinos atlas."""
+
+PAXINOS_CCF_MIDLINE_ML_UM = 5700
+"""float: The ML coordinate of the midline of the Franklin & Paxinos atlas, which is at bregma."""
 
 S3_BUCKET_IBL = 'ibl-brain-wide-map-public'
 """str: The name of the public IBL S3 bucket containing atlas data."""
@@ -521,11 +539,13 @@ class BrainCoordinates:
         return np.meshgrid(self.xscale, self.yscale, self.zscale)
 
 
-class BrainAtlas:
+class BrainAtlas(abc.ABC):
     """
     Objects that holds image, labels and coordinate transforms for a brain Atlas.
     Currently this is designed for the AllenCCF at several resolutions,
     yet this class can be used for other atlases arises.
+
+    This is an abstract class: child classes must define the `imidline` property.
     """
 
     """numpy.array: A 3D image volume."""
@@ -539,6 +559,7 @@ class BrainAtlas:
     def __init__(self, image, label, dxyz, regions, iorigin=[0, 0, 0],
                  dims2xyz=[0, 1, 2], xyz2dims=[0, 1, 2], affine=None):
         """
+        self.midline_x: ml coordinate (m) of the midline plane relative to the origin
         self.image: image volume (ap, ml, dv)
         self.label: label volume (ap, ml, dv)
         self.bc: atlas.BrainCoordinate object
@@ -561,6 +582,49 @@ class BrainAtlas:
 
         self.surface = None
         self.boundary = None
+        self._iorigin = np.asarray(iorigin, dtype=float)
+
+    @property
+    @abc.abstractmethod
+    def imidline(self):
+        """
+        float: The fractional ML index of the volume of the midline, the plane about which the atlas
+        is mirror-symmetric. Child classes must define it, from the midline of their volume and their resolution.
+        """
+
+    @property
+    def midline_x(self):
+        """
+        float: The ML coordinate (m) of the midline, the plane about which the atlas is mirror-symmetric.
+
+        Every atlas must define its midline, see the abstract property `imidline`.
+        The coordinate is relative to the origin of the atlas coordinate system (x = 0 in `bc`), which is
+        bregma for the Allen and Paxinos atlases but not necessarily for others. Mirror a point about the
+        midline with `x' = 2 * midline_x - x`. It follows the resolution, scaling and affine of the atlas
+        (for an affine mixing the ML axis, this is the midline at the AP and DV of the origin).
+        """
+        return float(self.bc.i2xyz(np.r_[self.imidline, self._iorigin[1:]])[0])
+
+    @staticmethod
+    def _lateralize(label, imidline):
+        """
+        Lateralize a label volume: the regions of the left hemisphere have negative primary keys.
+
+        Parameters
+        ----------
+        label : numpy.array
+            The (ap, ml, dv) label volume of region ids.
+        imidline : float
+            The fractional ML index of the midline: the columns on the midline or to its right are
+            the right hemisphere, the columns left of the midline are negated.
+
+        Returns
+        -------
+        numpy.array
+            The label volume, with the ids of the left hemisphere negated.
+        """
+        right = np.arange(label.shape[1]) >= imidline
+        return label * np.where(right, 1, -1).astype(label.dtype)[np.newaxis, :, np.newaxis]
 
     @staticmethod
     def _get_cache_dir():
@@ -1395,6 +1459,11 @@ class AllenAtlas(BrainAtlas):
     """
     label = None
 
+    @property
+    def imidline(self):
+        """float: The fractional ML index of the midline, ALLEN_CCF_MIDLINE_ML_UM whatever the resolution."""
+        return ALLEN_CCF_MIDLINE_ML_UM / self.res_um
+
     def __init__(self, res_um=25, scaling=(1, 1, 1), mock=False, hist_path=None, affine=None):
         """
         Instantiates an atlas.BrainAtlas corresponding to the Allen CCF at the given resolution
@@ -1420,7 +1489,8 @@ class AllenAtlas(BrainAtlas):
         >>> target_dir = one.cache_dir / AllenAtlas.atlas_rel_path
         ... ba = AllenAtlas(hist_path=target_dir)
         """
-        LUT_VERSION = 'v01'  # version 01 is the lateralized version
+        # version 01 is the lateralized version, split at bregma; version 02 is split at the midline
+        LUT_VERSION = 'v02'
         regions = BrainRegions()
         xyz2dims = np.array([1, 0, 2])  # this is the c-contiguous ordering
         dims2xyz = np.array([1, 0, 2])
@@ -1448,12 +1518,8 @@ class AllenAtlas(BrainAtlas):
             if not file_label_remap.exists():
                 label = self._read_volume(file_label).astype(dtype=np.int32)
                 _logger.info("Computing brain atlas annotations lookup table")
-                # lateralize atlas: for this the regions of the left hemisphere have primary
-                # keys opposite to to the normal ones
-                lateral = np.zeros(label.shape[xyz2dims[0]])
-                lateral[int(np.floor(ibregma[0]))] = 1
-                lateral = np.sign(np.cumsum(lateral)[np.newaxis, :, np.newaxis] - 0.5)
-                label = label * lateral.astype(np.int32)
+                # lateralize atlas: the regions of the left hemisphere have negative primary keys
+                label = self._lateralize(label, self.imidline)
                 # the 10 um atlas is too big to fit in memory so work by chunks instead
                 if res_um == 10:
                     first, ncols = (0, 10)
@@ -1795,6 +1861,11 @@ class FranklinPaxinosAtlas(BrainAtlas):
     """pathlib.PurePosixPath: The default relative path of the atlas file."""
     atlas_rel_path = PurePosixPath('histology', 'ATLAS', 'Needles', 'FranklinPaxinos')
 
+    @property
+    def imidline(self):
+        """float: The fractional ML index of the midline, PAXINOS_CCF_MIDLINE_ML_UM whatever the resolution."""
+        return PAXINOS_CCF_MIDLINE_ML_UM / self.res_um[0]
+
     def __init__(self, res_um=(10, 100, 10), scaling=(1, 1, 1), mock=False, hist_path=None):
         """The Franklin & Paxinos brain atlas.
 
@@ -1861,12 +1932,8 @@ class FranklinPaxinosAtlas(BrainAtlas):
             if not file_label_remap.exists():
                 label = self._read_volume(file_label).astype(dtype=np.int32)
                 _logger.info("computing brain atlas annotations lookup table")
-                # lateralize atlas: for this the regions of the left hemisphere have primary
-                # keys opposite to to the normal ones
-                lateral = np.zeros(label.shape[xyz2dims[0]])
-                lateral[int(np.floor(ibregma[0]))] = 1
-                lateral = np.sign(np.cumsum(lateral)[np.newaxis, :, np.newaxis] - 0.5)
-                label = label * lateral.astype(np.int32)
+                # lateralize atlas: the regions of the left hemisphere have negative primary keys
+                label = self._lateralize(label, self.imidline)
                 _, im = ismember(label, regions.id)
                 label = np.reshape(im.astype(np.uint16), label.shape)
                 np.savez_compressed(file_label_remap, label)

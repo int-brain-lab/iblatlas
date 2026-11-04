@@ -7,7 +7,7 @@ from textwrap import dedent
 import numpy as np
 import matplotlib.pyplot as plt
 
-from iblatlas.atlas import AllenAtlas, BrainRegions
+from iblatlas.atlas import AllenAtlas, BrainAtlas, BrainRegions
 from iblatlas.flatmaps import FlatMap
 from iblatlas.plots import plot_swanson, annotate_swanson
 from iblatlas.genomics import agea
@@ -47,6 +47,37 @@ class TestAtlasSlicesConversion(unittest.TestCase):
         # one sample below, it's all zeros
         inds = ba._lookup_inds(np.stack((ix, iy, np.maximum(izb + 1, 0)), axis=-1))
         self.assertTrue(np.all(ba.label.flat[inds][~np.isnan(ba.bottom)] == 0))
+
+    def test_midline_symmetry(self):
+        """The brain mask is mirror-symmetric about the midline, much more than about bregma."""
+        ba = self.ba
+        mask = ba.label != 0  # (ap, ml, dv)
+
+        def jaccard(x_mirror):
+            ix = ba.bc.x2i(2 * x_mirror - ba.bc.xscale, mode='wrap')
+            ok = (ix >= 0) & (ix < ba.bc.nx)
+            a, b = mask[:, ok], mask[:, ix[ok]]
+            return np.sum(a & b) / np.sum(a | b)
+        self.assertGreater(jaccard(ba.midline_x), 0.98)
+        self.assertGreater(jaccard(ba.midline_x), jaccard(0.) + 0.02)
+
+    def test_lateralization(self):
+        """Left hemisphere regions have negative ids: the columns are split at the midline, not at bregma."""
+        ba = self.ba
+        ids = ba.regions.id[ba.label]  # (ap, ml, dv)
+        imid = int(np.ceil(ba.imidline))  # 228 at 25 um: first column on the right of the midline
+        self.assertAlmostEqual(ba.imidline, 227.8)
+        self.assertFalse(np.any(ids[:, :imid] > 0))
+        self.assertFalse(np.any(ids[:, imid:] < 0))
+        self.assertTrue(np.any(ids[:, imid - 1] < 0) and np.any(ids[:, imid] > 0))
+
+    def test_lateralize_columns(self):
+        """The midline is fractional (Allen 10, 25 um) or on a voxel centre (Paxinos): this voxel is on the right."""
+        label = np.ones((2, 6, 2), dtype=np.int32)
+        for imidline, first_right in ((2.5, 3), (2.2, 3), (3.0, 3), (3.1, 4)):
+            lat = BrainAtlas._lateralize(label, imidline)
+            np.testing.assert_array_equal(np.sign(lat[0, :, 0]), np.where(np.arange(6) >= first_right, 1, -1))
+        self.assertEqual(lat.dtype, label.dtype)
 
     def test_lookups(self):
         ba = self.ba

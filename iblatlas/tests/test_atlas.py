@@ -9,6 +9,7 @@ from iblatlas.atlas import (BrainCoordinates, Trajectory, BrainAtlas,
                             Insertion, ALLEN_CCF_LANDMARKS_MLAPDV_UM, AllenAtlas, get_bc)
 from iblatlas.streamlines.utils import xyz_to_depth
 from iblatlas.regions import BrainRegions, FranklinPaxinosRegions
+from iblatlas.genomics.agea import AGEAAtlas
 from iblatlas.plots import prepare_lr_data, reorder_data
 from iblutil.numerical import ismember
 
@@ -413,6 +414,38 @@ class TestAffine(unittest.TestCase):
                 np.testing.assert_allclose(rot[0], [1, 0, 0, 0], atol=1e-12)
                 np.testing.assert_allclose(np.rad2deg(np.arctan2(rot[2, 1], rot[1, 1])), 5)
 
+    def test_midline(self):
+        """The midline is 5695 um in CCF coordinates at all resolutions, ie. 44 um medial of bregma."""
+        expected = (iblatlas.atlas.ALLEN_CCF_MIDLINE_ML_UM - ALLEN_CCF_LANDMARKS_MLAPDV_UM['bregma'][0]) * 1e-6
+        np.testing.assert_allclose(expected, -44e-6)
+        self.assertEqual(iblatlas.atlas.ALLEN_CCF_MIDLINE_ML_UM, 5695)
+        for res_um in (10, 25, 50):
+            with self.subTest(res_um=res_um):
+                ba = AllenAtlas(res_um=res_um, mock=True)
+                np.testing.assert_allclose(ba.midline_x, expected)
+                # the midline is where the CCF ML coordinate is 5695 um
+                ccf = ba.xyz2ccf(np.array([[ba.midline_x, 0, 0]]), mode='wrap')
+                np.testing.assert_allclose(ccf[0, 0], 5695)
+        # the midline scales with the atlas ML scaling, and is not moved by a pitch around the ML axis
+        scaled = AllenAtlas(mock=True, scaling=(1.1, 1, 1))
+        np.testing.assert_allclose(scaled.midline_x, expected * 1.1)
+        np.testing.assert_allclose(iblatlas.atlas.Dorr2008Atlas(mock=True).midline_x,
+                                   iblatlas.atlas.NeedlesAtlas(mock=True).midline_x)
+        # the midline is required for every atlas: BrainAtlas is abstract
+        args = np.zeros((2, 2, 2)), np.zeros((2, 2, 2)), 1e-6, None
+        with self.assertRaises(TypeError):
+            BrainAtlas(*args)
+
+        class _Atlas(BrainAtlas):
+            imidline = 1
+
+        self.assertEqual(_Atlas(*args).midline_x, 1e-6)
+        # the AGEA 200 um grid is the Allen CCF, with the same midline in CCF coordinates
+        self.assertEqual(AGEAAtlas.res_um, 200)
+        self.assertAlmostEqual(AGEAAtlas(*args).imidline, 5695 / 200)
+        # the Paxinos atlas is symmetric about its bregma origin
+        self.assertAlmostEqual(iblatlas.atlas.FranklinPaxinosAtlas(mock=True).midline_x, 0)
+
 
 class TestAtlasPlots(unittest.TestCase):
 
@@ -496,14 +529,14 @@ class TestAtlasSlicesConversion(unittest.TestCase):
 
     def test_slice_axes(self):
         nx, nz, ny = (58, 41, 67)
-        ba_gene_atlas_like = BrainAtlas(
+        ba_gene_atlas_like = AGEAAtlas(
             image=np.random.randn(nx, nz, ny),
             label=np.ones((nx, nz, ny)),
             dxyz=200 / 1e6,
             regions=BrainRegions(),
             iorigin=[0, 0, 0],
             dims2xyz=[0, 2, 1],
-            xyz2dims=[0, 2, 1]
+            xyz2dims=[0, 2, 1],
         )
         for k, ba in {'allen': self.ba, 'gene_expression': ba_gene_atlas_like}.items():
             with self.subTest(ba=k):

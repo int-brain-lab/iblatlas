@@ -14,6 +14,7 @@ import pandas as pd
 import scipy.stats
 
 from iblatlas import atlas
+from iblatlas.genomics import agea
 
 DIM_EXP = (4345, 58, 41, 67)  # nexperiments, nml, ndv, nap
 #  path_agea_cache = atlas.AllenAtlas._get_cache_dir().joinpath('agea')
@@ -22,14 +23,14 @@ df_genes = pd.read_parquet(Path(path_agea_cache).joinpath('gene-expression.pqt')
 gexp_all = np.memmap(Path(path_agea_cache).joinpath('gene-expression.bin'), dtype=np.float16, mode='r', offset=0, shape=DIM_EXP)
 
 # create a brain atlas object with the gene expression volume geometry
-bg = atlas.BrainAtlas(
+bg = agea.AGEAAtlas(
     image=gexp_all[0],
     label=gexp_all[0] != -1,
     dxyz=200 / 1e6 * np.array([1, -1, -1]),
     regions=atlas.BrainRegions(),
     iorigin=atlas.ALLEN_CCF_LANDMARKS_MLAPDV_UM['bregma'] / 200 + np.array([0, 0, 0]),
     dims2xyz=[0, 2, 1],
-    xyz2dims=[0, 2, 1]
+    xyz2dims=[0, 2, 1],
 )
 # instantiate the allen atlas at 25um resolution and compute the transform to the agea volume
 ba = atlas.AllenAtlas(res_um=25)
