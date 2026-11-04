@@ -23,6 +23,30 @@ The CCF is mirror-symmetric about ML 5695 µm, 44 µm medial of bregma, at every
 To mirror points between hemispheres, reflect about `atlas.midline_x` (in metres, relative to the
 origin of the atlas frame, which is bregma for the Allen atlases but not for every atlas), not about x = 0.
 
+@tbl-midline shows how that plane was found. Each volume was mirrored about a range of ML positions
+and the two sides compared, with the Jaccard overlap of the brain masks and the correlation of the
+template intensities (1 is a perfect mirror image). The positions are in CCF µm, the volume index
+times the resolution, as in `xyz2ccf`. At 10 µm the volume is exactly symmetric about 5695 µm, the
+plane between voxels 569 and 570, and the score drops steadily on both sides of it. The 25 and 50 µm
+volumes are resampled from it and peak within 5 µm of it, the precision of their voxel grid. Bregma
+at 5739 µm is a clearly worse mirror plane than the midline.
+
+| ML mirror plane (µm) | 10 µm: overlap / correlation | 25 µm: overlap / correlation | 50 µm: overlap / correlation |
+|---:|:---:|:---:|:---:|
+| 5639 (bregma − 100) | 0.952 / 0.776 | 0.954 / 0.780 | 0.952 / 0.796 |
+| 5675 | 0.982 / 0.930 | 0.984 / 0.934 | 0.982 / 0.928 |
+| 5685 | 0.991 / 0.975 | 0.993 / 0.981 | 0.987 / 0.977 |
+| 5690 | 0.995 / 0.992 | **0.995** / 0.993 | 0.990 / 0.990 |
+| **5695** | **1.000 / 1.000** | 0.994 / **0.997** | 0.993 / **0.995** |
+| 5700 | 0.995 / 0.992 | 0.993 / 0.991 | **0.995** / 0.992 |
+| 5705 | 0.991 / 0.975 | 0.989 / 0.979 | 0.991 / 0.985 |
+| 5715 | 0.982 / 0.930 | 0.980 / 0.936 | 0.982 / 0.947 |
+| 5739 (IBL bregma) | 0.962 / 0.823 | 0.960 / 0.829 | 0.961 / 0.843 |
+
+: Similarity of the two sides of the Allen volumes mirrored about different ML positions. The best
+score of each column is in bold. The 10 µm volumes were decimated by 4 along AP and DV to fit in
+memory. {#tbl-midline}
+
 ## The five atlases
 
 Which atlas fits depends on where your coordinates come from.
