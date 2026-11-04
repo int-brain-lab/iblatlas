@@ -29,7 +29,7 @@ This value was measured on the Allen volumes, it is not a landmark of the atlas.
 that maximizes the overlap of the volume with its mirror image (brain mask and template correlation,
 sub-voxel search along ML). At the native 10 um resolution the volume (1140 voxels along ML) is exactly
 symmetric about the plane between voxels 569 and 570, ie. 569.5 * 10 = 5695 um. The 25 and 50 um volumes
-are decimated from it and agree within a few um, the precision of their voxel grid. The 5700 um often quoted
+are resampled from it and agree within a few um, the precision of their voxel grid. The 5700 um often quoted
 is the same plane in the voxel-edge convention, while the indices here are voxel centres. See
 https://github.com/int-brain-lab/iblatlas/issues/41."""
 
