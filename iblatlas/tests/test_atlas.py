@@ -441,6 +441,7 @@ class TestAffine(unittest.TestCase):
 
         self.assertEqual(_Atlas(*args).midline_x, 1e-6)
         # the AGEA 200 um grid is the Allen CCF, with the same midline in CCF coordinates
+        self.assertEqual(AGEAAtlas.res_um, 200)
         self.assertAlmostEqual(AGEAAtlas(*args).imidline, 5695 / 200)
         # the Paxinos atlas is symmetric about its bregma origin
         self.assertAlmostEqual(iblatlas.atlas.FranklinPaxinosAtlas(mock=True).midline_x, 0)
