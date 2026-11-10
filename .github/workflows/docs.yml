@@ -1,0 +1,72 @@
+name: docs
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:  # For manual triggering
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Keyed on the ref so a pull request build never cancels a deploy running on main.
+concurrency:
+  group: pages-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Quarto
+        uses: quarto-dev/quarto-actions/setup@v2
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          enable-cache: true
+          cache-dependency-glob: |
+            requirements.txt
+            docs/requirements.txt
+
+      # The same commands as docs/README.md, so the runner and a laptop build the site
+      # the same way.
+      - name: Install dependencies
+        run: |
+          uv venv --python 3.12 venv
+          uv pip install --python venv/bin/python -e . -r docs/requirements.txt
+
+      # Mandatory before the render: docs/reference/api/ and docs/objects.json are
+      # generated, and docs/.gitignore keeps them out of the repository, so a fresh
+      # clone has no API reference pages at all.
+      - name: Build API reference
+        run: venv/bin/quartodoc build --config docs/_quarto.yml
+
+      - name: Render site
+        run: |
+          source venv/bin/activate
+          quarto render docs/
+
+      - name: Upload pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs/_site
+
+  # Pull requests run the build above but stop here, so a broken site is caught before
+  # it is published.
+  deploy:
+    if: github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
