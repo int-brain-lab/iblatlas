@@ -20,6 +20,16 @@ Open `docs/_site/index.html`. Run `quartodoc build` before `quarto render`: it g
 API pages under `docs/reference/api/`. Keep the `griffe<2` pin in `docs/requirements.txt`, as
 quartodoc 0.11.1 crashes with griffe 2.
 
+## Publishing
+
+The site is published at [int-brain-lab.github.io/iblatlas](https://int-brain-lab.github.io/iblatlas/) by
+`.github/workflows/docs.yml`, on every push to `main`. The workflow runs the same commands as above on a
+GitHub runner and uploads `docs/_site/` to GitHub Pages. A pull request builds the site but does not publish
+it, so a broken build shows up before it reaches the live site.
+
+Quarto does not execute the notebooks, so the deploy downloads no atlas data and never refreshes a figure.
+Updating figures is a local job — see "Notebook figures" below.
+
 ## Adding a page
 
 Put the page in `docs/tutorials/`, `docs/how-to/` or `docs/explanation/` (the Concepts menu),
