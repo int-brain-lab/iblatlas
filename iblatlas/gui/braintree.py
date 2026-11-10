@@ -10,9 +10,9 @@ from qtpy.QtWidgets import QTreeView, QWidget, QVBoxLayout, QLineEdit
 from qtpy.QtGui import QStandardItemModel, QStandardItem, QBrush, QColor
 from qtpy.QtCore import Qt, QSortFilterProxyModel, QRegExp, Signal, Slot
 import numpy as np
+from iblqt.tools import get_or_create_app
 from iblutil.numerical import ismember
 from iblatlas.atlas import BrainRegions
-from ibllib.misc import qt  # FIXME: remove ibllib dependency
 
 
 class BrainTree(QWidget):
@@ -126,7 +126,7 @@ class BrainTree(QWidget):
 
 
 if __name__ == '__main__':
-    app = qt.create_app()
+    app = get_or_create_app()
     av = BrainTree()
     av.show()
     sys.exit(app.exec_())
