@@ -6,9 +6,8 @@ The tools are mainly using the Allen CCF although some other atlases can be used
 of more complex visualization tools such as `pyqt`.**
 
 ## Documentation
-[Full package documentation](https://int-brain-lab.github.io/iblenv/_autosummary/iblatlas.html#module-iblatlas)
-
-[Notebooks and examples](https://int-brain-lab.github.io/iblenv/notebooks_external/atlas_working_with_ibllib_atlas.html)
+[int-brain-lab.github.io/iblatlas](https://int-brain-lab.github.io/iblatlas/) — tutorials, how-to guides,
+concepts and the API reference. Built from `docs/`; see `docs/README.md` to work on it.
 
 ## Installation
 `uv pip install iblatlas`
