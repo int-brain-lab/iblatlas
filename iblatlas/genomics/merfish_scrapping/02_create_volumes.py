@@ -19,9 +19,8 @@ Output:
 - Memory-mapped numpy array containing the interpolated volumes
 - Numpy array containing the labels for the volumes
 
-Note: This script may require significant computational resources and time to run, especially for the subclasses
+Note: all cell types are interpolated from a single triangulation, it takes a few minutes per level
 """
-import joblib
 from pathlib import Path
 import tqdm
 
@@ -206,46 +205,36 @@ memmap = np.lib.format.open_memmap(
 )
 
 
-def interpolate_volume(i, iclass):
-    """
-    Interpolate sparse voxel counts for one cell-type label onto the full bilateral 3-D grid.
-
-    Strategy:
-    - The cells were folded onto the right hemisphere about the midline and both hemispheres
-      were pooled per voxel before normalisation, so each voxel appears once in `df_vol`.
-      Note that `griddata` keeps a single value for duplicated points: mirroring the points
-      here instead would silently drop one hemisphere.
-    - Linear scattered-data interpolation fills the right hemisphere; the left hemisphere
-      is then produced by mirroring the result about the midline.
-    """
-    # Build a meshgrid covering the right hemisphere only (x from the midline to nx)
-    xxx, yyy, zzz = np.meshgrid(
-        np.arange(IX_RIGHT, ba.bc.nx),
-        np.arange(ba.bc.ny),
-        np.arange(ba.bc.nz),
-        indexing="ij",
-    )
-    values = df_vol.loc[:, iclass].to_numpy()
-    points = df_vol.loc[:, ["ix", "iy", "iz"]].to_numpy().astype(float)
-
-    volume_interp = scipy.interpolate.griddata(
-        points, values, (xxx, yyy, zzz), method="linear", fill_value=0, rescale=False
-    )
-    volume_interp = np.moveaxis(volume_interp, ba.xyz2dims, np.arange(3))
-
-    # Mirror the right hemisphere about the midline: the left ML column i takes the right column
-    # nearest to 2 * imidline - i, then concatenate into a full bilateral volume
-    ix_mirror = np.round(2 * ba.imidline - np.arange(IX_RIGHT)).astype(int)
-    ix_mirror = np.clip(ix_mirror, IX_RIGHT, ba.bc.nx - 1) - IX_RIGHT
+# Interpolate the sparse voxel counts of all cell types onto the full bilateral 3-D grid.
+# - The cells were folded onto the right hemisphere about the midline and both hemispheres
+#   were pooled per voxel before normalisation, so each voxel appears once in `df_vol`.
+#   Note that the Delaunay triangulation keeps a single value for duplicated points: mirroring
+#   the points here instead would silently drop one hemisphere.
+# - Linear scattered-data interpolation fills the right hemisphere; the left hemisphere
+#   is then produced by mirroring the result about the midline.
+# - All types share the same points, so the triangulation is computed once and all types are
+#   interpolated in a single call (values of shape (n_points, n_types)).
+# Grid covering the right hemisphere only (x from the midline to nx)
+xxx, yyy, zzz = np.meshgrid(
+    np.arange(IX_RIGHT, ba.bc.nx),
+    np.arange(ba.bc.ny),
+    np.arange(ba.bc.nz),
+    indexing="ij",
+)
+points = df_vol.loc[:, ["ix", "iy", "iz"]].to_numpy().astype(float)
+interpolator = scipy.interpolate.LinearNDInterpolator(
+    points, df_vol.loc[:, classes].to_numpy().astype(float), fill_value=0, rescale=False
+)
+volumes_interp = interpolator(xxx, yyy, zzz)  # (nx_right, ny, nz, n_types)
+# Mirror the right hemisphere about the midline: the left ML column i takes the right column
+# nearest to 2 * imidline - i
+ix_mirror = np.round(2 * ba.imidline - np.arange(IX_RIGHT)).astype(int)
+ix_mirror = np.clip(ix_mirror, IX_RIGHT, ba.bc.nx - 1) - IX_RIGHT
+for i in tqdm.tqdm(range(classes.size)):
+    volume_interp = np.moveaxis(volumes_interp[..., i], ba.xyz2dims, np.arange(3))
     volume_left = np.take(volume_interp, ix_mirror, axis=ba.xyz2dims[0])
     memmap[i] = np.concatenate((volume_left, volume_interp), axis=ba.xyz2dims[0])
-
-
-# here it was taking too long for the 338 subclasses so I use multiprocessing to speed it up
-jobs = []
-for i, iclass in enumerate(classes):
-    jobs.append(joblib.delayed(interpolate_volume)(i, iclass))
-list(tqdm.tqdm(joblib.Parallel(return_as="generator", n_jobs=8)(jobs)))
+memmap.flush()
 
 
 # %% Eventually copy the results to s3
