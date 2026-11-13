@@ -1,10 +1,6 @@
 ## [Unreleased]
 ### Fixed
-- MERFISH volumes (`merfish_scrapping/02_create_volumes.py`): the left-hemisphere points were mirrored onto the right
-  before `griddata`, which keeps a single value for duplicated points, so one hemisphere of the coronal donors was
-  dropped in nearly every voxel. The cells are now folded about the midline (`BrainAtlas.midline_x`, not bregma)
-  and both hemispheres are pooled per voxel before interpolation; the volume is mirrored about the midline.
-  The volumes need to be regenerated
+- MERFISH volumes (`merfish_scrapping/02_create_volumes.py`): one hemisphere of the coronal donors was dropped in nearly every voxel (mirrored points are duplicates for `griddata`), the cells are now folded at the midline (`BrainAtlas.midline_x`) and both hemispheres pooled before interpolation, all types are interpolated from a single triangulation (minutes instead of hours); the volumes need to be regenerated
 
 ## [1.3.1]
 ### Fixed
