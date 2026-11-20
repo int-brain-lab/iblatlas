@@ -1,3 +1,7 @@
+## [Unreleased]
+### Fixed
+- MERFISH volumes (`merfish_scrapping/02_create_volumes.py`): one hemisphere of the coronal donors was dropped in nearly every voxel (mirrored points are duplicates for `griddata`), the cells are now folded at the midline (`BrainAtlas.midline_x`) and both hemispheres pooled before interpolation, all types are interpolated from a single triangulation (minutes instead of hours); the volumes need to be regenerated
+
 ## [1.3.1]
 ### Fixed
 - `AllenAtlas` lateralization: the left and right labels were split at bregma instead of the midline, so 3 columns (10 um) and 1 column (25 um) next to the midline carried the left sign. The cached label lookup file is now `annotation_<res>_lut_v02.npz`, and is recomputed on first use
